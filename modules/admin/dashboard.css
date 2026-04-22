@@ -1,43 +1,15 @@
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 24px;
+/* modules/admin/dashboard.css — Admin Dashboard Specific Styles */
+
+/* The dashboard inherits everything from layout.css.
+   Add any page-specific overrides here. */
+
+.stat-grid {
+    grid-template-columns: repeat(5, 1fr);
 }
 
-.dashboard-card {
-    background: #ffffff;
-    border-radius: 14px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    padding: 20px;
+@media (max-width: 1200px) {
+    .stat-grid { grid-template-columns: repeat(3, 1fr); }
 }
-
-.dashboard-card h4 {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 8px;
-}
-
-.dashboard-card .value {
-    font-size: 30px;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 4px;
-}
-
-.dashboard-card p {
-    font-size: 13px;
-    color: #6b7280;
-}
-
-@media (max-width: 1100px) {
-    .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 640px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
+@media (max-width: 760px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }

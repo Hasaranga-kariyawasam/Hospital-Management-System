@@ -1,19 +1,16 @@
 <?php
+// includes/role_check.php
+// Usage: $requiredRoles = ['admin', 'reception']; include 'role_check.php';
 declare(strict_types=1);
 
-function requireRole(array $allowedRoles): void
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+require_once __DIR__ . '/session_check.php';
 
-    if (!isset($_SESSION['role'])) {
-        header('Location: /hospital-system/login.php');
-        exit();
-    }
+if (!isset($requiredRoles) || !is_array($requiredRoles)) {
+    $requiredRoles = [];
+}
 
-    if (!in_array($_SESSION['role'], $allowedRoles, true)) {
-        http_response_code(403);
-        die('Access denied.');
-    }
+if (!empty($requiredRoles) && !in_array($_SESSION['role'] ?? '', $requiredRoles, true)) {
+    http_response_code(403);
+    die('<p style="font-family:sans-serif;padding:40px;color:#dc2626">
+        <strong>Access Denied</strong> — You do not have permission to view this page.</p>');
 }

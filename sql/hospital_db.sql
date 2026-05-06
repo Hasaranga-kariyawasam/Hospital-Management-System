@@ -264,5 +264,36 @@ VALUES (
     'active'
 );
 
+-- Ambulance fleet table
+CREATE TABLE IF NOT EXISTS ambulances (
+    ambulance_id   INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_no     VARCHAR(20)  NOT NULL,
+    driver_name    VARCHAR(100) NOT NULL,
+    driver_phone   VARCHAR(15)  NOT NULL,
+    status         ENUM('available', 'dispatched', 'maintenance') DEFAULT 'available',
+    last_location  VARCHAR(255)
+) ENGINE=InnoDB;
 
-i create all of the sql table i want only loging resigtaion parts only other partys done by other members remove all sql table and stecher and use siple tables strcher not complax laout only create loging and registaion parts and main web site
+-- Emergency requests table (no foreign keys - safe standalone version)
+CREATE TABLE IF NOT EXISTS emergency_requests (
+    request_id      INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_no       VARCHAR(20)  NOT NULL UNIQUE,
+    patient_id      INT          DEFAULT NULL,
+    requester_name  VARCHAR(100) NOT NULL,
+    phone           VARCHAR(15)  NOT NULL,
+    gps_lat         DECIMAL(10,8) DEFAULT NULL,
+    gps_lng         DECIMAL(11,8) DEFAULT NULL,
+    description     TEXT,
+    status          ENUM('pending','dispatched','en_route','arrived','closed') DEFAULT 'pending',
+    ambulance_id    INT          DEFAULT NULL,
+    dispatcher_id   INT          DEFAULT NULL,
+    dispatched_at   DATETIME     DEFAULT NULL,
+    created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Sample ambulance data
+INSERT INTO ambulances (vehicle_no, driver_name, driver_phone, status) VALUES
+('AMB-001', 'Kamal Perera',   '0771234567', 'available'),
+('AMB-002', 'Sunil Fernando', '0779876543', 'available'),
+('AMB-003', 'Nimal Silva',    '0761122334', 'maintenance');
+

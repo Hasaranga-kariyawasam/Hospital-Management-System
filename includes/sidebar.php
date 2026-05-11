@@ -79,7 +79,3 @@ $role = $_SESSION['role'] ?? 'guest';
     <?php endif; ?>
 
 </aside>
-
-<a href="../modules/emergency/emergency_request.php">🚨 Emergency</a>
-<a href="../modules/emergency/emergency_dispatcher.php">📡 Dispatcher</a>
-<a href="../modules/emergency/ambulances.php">🚑 Fleet</a>

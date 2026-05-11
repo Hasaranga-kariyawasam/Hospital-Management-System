@@ -147,7 +147,7 @@
                 <p>Access the Hospital Management System for clinical and administrative work.</p>
                 <span class="portal-link">Staff Login →</span>
             </a>
-            <a href="tel:+94112345678" class="portal-card portal-emergency">
+            <a href="/Web/Hospital-Management-System/ambulances/emergency_request.php" class="portal-card portal-emergency">
                 <div class="portal-icon">🚑</div>
                 <h3>Emergency</h3>
                 <p>Life-threatening emergency? Call us immediately or request an ambulance online.</p>
@@ -435,4 +435,5 @@ setInterval(() => {
 </script>
 
 </body>
+<?php include __DIR__ . '/modules/emergency/emergency_contacts.php'; ?>
 </html>

@@ -9,7 +9,7 @@ USE hospital_db;
 
 -- ── users (central identity for all roles) ──────────────────
 CREATE TABLE IF NOT EXISTS users (
-    user_id       INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+    user_id       VARCHAR(10) UNSIGNED     NOT NULL AUTO_INCREMENT,
     full_name     VARCHAR(120)     NOT NULL,
     email         VARCHAR(180)     NOT NULL UNIQUE,
     password_hash VARCHAR(255)     NOT NULL,
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- ── patients (extended profile for patient users) ────────────
 CREATE TABLE IF NOT EXISTS patients (
-    patient_id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    user_id           INT UNSIGNED  NOT NULL,
+    patient_id        VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id           VARCHAR(10) UNSIGNED  NOT NULL,
     nic               VARCHAR(20)   NOT NULL UNIQUE,
     dob               DATE          NOT NULL,
     gender            ENUM('male','female','other') NOT NULL,
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS patients (
 
 -- ── doctors (extended profile for doctor users) ─────────────
 CREATE TABLE IF NOT EXISTS doctors (
-    doctor_id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    user_id          INT UNSIGNED  NOT NULL,
+    doctor_id        VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id          VARCHAR(10) UNSIGNED  NOT NULL,
     specialization   VARCHAR(120)  NOT NULL,
     qualifications   TEXT          NULL,
     license_number   VARCHAR(60)   NULL,
@@ -56,16 +56,16 @@ CREATE TABLE IF NOT EXISTS doctors (
 
 -- ── appointments ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id       INT UNSIGNED  NOT NULL,
-    doctor_id        INT UNSIGNED  NOT NULL,
+    appointment_id   VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    patient_id       VARCHAR(10) UNSIGNED  NOT NULL,
+    doctor_id        VARCHAR(10) UNSIGNED  NOT NULL,
     appt_date        DATE          NOT NULL,
     appt_time        TIME          NOT NULL,
     source           ENUM('online','opd') NOT NULL DEFAULT 'online',
     status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
     ref_number       VARCHAR(20)   NOT NULL UNIQUE,
     notes            TEXT          NULL,
-    booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
+    booked_by        VARCHAR(10) UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
     created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (appointment_id),
     INDEX idx_appt_date   (appt_date),
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS appointments (
 
 -- ── rooms ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rooms (
-    room_id       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    room_id       VARCHAR(10)INT UNSIGNED  NOT NULL AUTO_INCREMENT,
     room_number   VARCHAR(10)   NOT NULL UNIQUE,
     room_type     ENUM('semi_private','private','children','icu') NOT NULL,
     floor         TINYINT UNSIGNED NOT NULL DEFAULT 1,
@@ -89,11 +89,11 @@ CREATE TABLE IF NOT EXISTS rooms (
 
 -- ── admissions ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admissions (
-    admission_id       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id         INT UNSIGNED  NOT NULL,
-    room_id            INT UNSIGNED  NOT NULL,
-    doctor_id          INT UNSIGNED  NOT NULL,
-    admitted_by        INT UNSIGNED  NOT NULL COMMENT 'reception user_id',
+    admission_id       VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    patient_id         VARCHAR(10) UNSIGNED  NOT NULL,
+    room_id            VARCHAR(10) UNSIGNED  NOT NULL,
+    doctor_id          VARCHAR(10) UNSIGNED  NOT NULL,
+    admitted_by        VARCHAR(10) UNSIGNED  NOT NULL COMMENT 'reception user_id',
     admission_date     DATE          NOT NULL,
     discharge_date     DATE          NULL,
     dietary_notes      TEXT          NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS admissions (
 -- ── billing_invoices ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS billing_invoices (
     invoice_id     INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-    patient_id     INT UNSIGNED   NOT NULL,
+    patient_id     VARCHAR(10) UNSIGNED   NOT NULL,
     total_amount   DECIMAL(10,2)  NOT NULL DEFAULT 0.00,
     paid_amount    DECIMAL(10,2)  NOT NULL DEFAULT 0.00,
     balance        DECIMAL(10,2)  GENERATED ALWAYS AS (total_amount - paid_amount) STORED,
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS billing_invoices (
 -- ── billing_items ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS billing_items (
     item_id       INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-    invoice_id    INT UNSIGNED   NOT NULL,
+    invoice_id    VARCHAR(10) UNSIGNED   NOT NULL,
     description   VARCHAR(180)   NOT NULL,
     category      ENUM('consultation','room','theatre','pharmacy','lab','misc') NOT NULL DEFAULT 'misc',
     unit_price    DECIMAL(8,2)   NOT NULL,
@@ -133,13 +133,13 @@ CREATE TABLE IF NOT EXISTS billing_items (
 
 -- ── payments ─────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS payments (
-    payment_id     INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-    invoice_id     INT UNSIGNED   NOT NULL,
+    payment_id     VARCHAR(10) UNSIGNED   NOT NULL AUTO_INCREMENT,
+    invoice_id     VARCHAR(10) UNSIGNED   NOT NULL,
     amount         DECIMAL(10,2)  NOT NULL,
     payment_type   ENUM('full','advance') NOT NULL DEFAULT 'full',
     payment_method ENUM('cash','card','insurance','bank_transfer') NOT NULL DEFAULT 'cash',
     receipt_number VARCHAR(20)    NOT NULL UNIQUE,
-    received_by    INT UNSIGNED   NOT NULL COMMENT 'reception user_id',
+    received_by    VARCHAR(10) UNSIGNED   NOT NULL COMMENT 'reception user_id',
     paid_at        TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (payment_id),
     FOREIGN KEY fk_pay_inv (invoice_id) REFERENCES billing_invoices(invoice_id)
@@ -161,13 +161,13 @@ CREATE TABLE IF NOT EXISTS pharmacy_drugs (
 -- ── prescriptions ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS prescriptions (
     prescription_id  INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    appointment_id   INT UNSIGNED  NOT NULL,
-    drug_id          INT UNSIGNED  NOT NULL,
+    appointment_id   VARCHAR(10) UNSIGNED  NOT NULL,
+    drug_id          VARCHAR(10) UNSIGNED  NOT NULL,
     dosage           VARCHAR(80)   NOT NULL,
     frequency        VARCHAR(80)   NOT NULL,
     duration_days    SMALLINT      NOT NULL DEFAULT 7,
     status           ENUM('pending','dispensed') NOT NULL DEFAULT 'pending',
-    dispensed_by     INT UNSIGNED  NULL COMMENT 'pharmacist user_id',
+    dispensed_by     VARCHAR(10) UNSIGNED  NULL COMMENT 'pharmacist user_id',
     dispensed_at     TIMESTAMP     NULL,
     PRIMARY KEY (prescription_id),
     FOREIGN KEY fk_rx_appt (appointment_id) REFERENCES appointments(appointment_id),
@@ -176,8 +176,8 @@ CREATE TABLE IF NOT EXISTS prescriptions (
 
 -- ── emergency_requests ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS emergency_requests (
-    request_id      INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id      INT UNSIGNED  NULL COMMENT 'NULL if caller is not registered',
+    request_id      VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    patient_id      VARCHAR(10) UNSIGNED  NULL COMMENT 'NULL if caller is not registered',
     caller_name     VARCHAR(120)  NOT NULL,
     caller_phone    VARCHAR(20)   NOT NULL,
     location_desc   TEXT          NOT NULL,
@@ -185,15 +185,15 @@ CREATE TABLE IF NOT EXISTS emergency_requests (
     gps_lng         DECIMAL(10,7) NULL,
     status          ENUM('pending','dispatched','en_route','arrived') NOT NULL DEFAULT 'pending',
     ticket_number   VARCHAR(20)   NOT NULL UNIQUE,
-    assigned_ambulance INT UNSIGNED NULL,
-    dispatcher_id   INT UNSIGNED  NULL,
+    assigned_ambulance VARCHAR(10) UNSIGNED NULL,
+    dispatcher_id   VARCHAR(10) UNSIGNED  NULL,
     created_at      TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (request_id)
 ) ENGINE=InnoDB;
 
 -- ── ambulances ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ambulances (
-    ambulance_id    INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    ambulance_id    VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
     vehicle_number  VARCHAR(20)   NOT NULL UNIQUE,
     driver_name     VARCHAR(120)  NOT NULL,
     driver_phone    VARCHAR(20)   NOT NULL,
@@ -203,10 +203,10 @@ CREATE TABLE IF NOT EXISTS ambulances (
 
 -- ── theatre_operations ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS theatre_operations (
-    operation_id      INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id        INT UNSIGNED  NOT NULL,
-    surgeon_id        INT UNSIGNED  NOT NULL COMMENT 'doctor user reference',
-    anaesthetist_id   INT UNSIGNED  NULL,
+    operation_id      VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    patient_id        VARCHAR(10) UNSIGNED  NOT NULL,
+    surgeon_id        VARCHAR(10) UNSIGNED  NOT NULL COMMENT 'doctor user reference',
+    anaesthetist_id   VARCHAR(10) UNSIGNED  NULL,
     operation_type    VARCHAR(120)  NOT NULL,
     theatre_number    TINYINT       NOT NULL,
     scheduled_at      DATETIME      NOT NULL,
@@ -219,8 +219,8 @@ CREATE TABLE IF NOT EXISTS theatre_operations (
 
 -- ── doctor_schedules ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS doctor_schedules (
-    schedule_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    doctor_id     INT UNSIGNED  NOT NULL,
+    schedule_id   VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    doctor_id     VARCHAR(10) UNSIGNED  NOT NULL,
     day_of_week   TINYINT       NOT NULL COMMENT '0=Sun … 6=Sat',
     start_time    TIME          NOT NULL,
     end_time      TIME          NOT NULL,
@@ -231,8 +231,8 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
 
 -- ── treatment_records ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS treatment_records (
-    record_id      INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    appointment_id INT UNSIGNED  NOT NULL UNIQUE,
+    record_id      VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    appointment_id VARCHAR(10) UNSIGNED  NOT NULL UNIQUE,
     diagnosis      TEXT          NOT NULL,
     clinical_notes TEXT          NULL,
     follow_up_date DATE          NULL,
@@ -243,13 +243,13 @@ CREATE TABLE IF NOT EXISTS treatment_records (
 
 -- ── newborn_records ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS newborn_records (
-    newborn_id    INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    mother_id     INT UNSIGNED  NOT NULL COMMENT 'patients.patient_id',
-    operation_id  INT UNSIGNED  NULL,
+    newborn_id    VARCHAR(10) UNSIGNED  NOT NULL AUTO_INCREMENT,
+    mother_id     VARCHAR(10) UNSIGNED  NOT NULL COMMENT 'patients.patient_id',
+    operation_id  VARCHAR(10) UNSIGNED  NULL,
     date_of_birth DATE          NOT NULL,
     weight_kg     DECIMAL(4,2)  NULL,
     health_status VARCHAR(80)   NULL,
-    assigned_room INT UNSIGNED  NULL,
+    assigned_room VARCHAR(10) UNSIGNED  NULL,
     PRIMARY KEY (newborn_id),
     FOREIGN KEY fk_nb_mother (mother_id) REFERENCES patients(patient_id)
 ) ENGINE=InnoDB;

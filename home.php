@@ -33,34 +33,254 @@
             <li><a href="#services">Services</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
-        <a href="emergency.php" class="emergency-nav-btn">
-    🚑      Emergency
-        </a>
-
         <div class="pub-nav-actions">
+            <a href="emergency.php" class="emergency-nav-btn">
+                <span class="emergency-pulse-nav"></span>
+                Emergency
+            </a>
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-outline">Staff Login</a>
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-solid">Patient Portal</a>
         </div>
     </div>
 </nav>
 <!-- Emergency Button Near Staff Login -->
+<!-- Emergency Button Near Staff Login -->
 <style>
-    .emergency-nav-btn{
-        background: #ff2d2d;
-        color: white;
-        padding: 12px 22px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 600;
-        margin-right: 12px;
-        transition: 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    .pub-nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
     }
 
-    .emergency-nav-btn:hover{
-        background: #d90000;
+    .emergency-nav-btn {
+        background: #ff2d2d;
         color: white;
-        transform: translateY(-2px);
+        padding: 10px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1;
+        animation: emergencyGlow 2s infinite;
+        transform-origin: center center;
+    }
+
+    /* 🔥 CURSOR ළඟට ආවම BUTTON එක අතට එන MAGIC ANIMATION */
+    .emergency-nav-btn:hover {
+        background: #ff4444;
+        color: white;
+        transform: scale(1.1) translateY(-3px);
+        box-shadow: 
+            0 10px 30px rgba(255, 45, 45, 0.6),
+            0 0 0 15px rgba(255, 45, 45, 0.1),
+            0 0 0 30px rgba(255, 45, 45, 0.05);
+        animation: emergencyGlowHover 1s infinite, shake 0.5s ease-in-out;
+        letter-spacing: 1px;
+        font-size: 15px;
+        padding: 12px 28px;
+        z-index: 100;
+    }
+
+    /* Click කරන moment එක */
+    .emergency-nav-btn:active {
+        transform: scale(0.95) translateY(0);
+        box-shadow: 0 2px 10px rgba(255, 45, 45, 0.4);
+        transition: all 0.1s ease;
+    }
+
+    .emergency-pulse-nav {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: pulseDot 1s infinite;
+    }
+
+    /* Hover වෙනකොට dot එක වේගවත් වෙනවා */
+    .emergency-nav-btn:hover .emergency-pulse-nav {
+        animation: pulseDotFast 0.5s infinite;
+        width: 12px;
+        height: 12px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Ripple effect - button එකෙන් waves එනවා */
+    .emergency-nav-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .emergency-nav-btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Outer glow ring */
+    .emergency-nav-btn::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: all 0.4s ease;
+    }
+
+    .emergency-nav-btn:hover::after {
+        border-color: rgba(255, 255, 255, 0.5);
+        animation: borderPulse 1s infinite;
+    }
+
+    @keyframes emergencyGlow {
+        0%, 100% {
+            box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        }
+        50% {
+            box-shadow: 0 4px 25px rgba(255, 45, 45, 0.5);
+        }
+    }
+
+    @keyframes emergencyGlowHover {
+        0%, 100% {
+            box-shadow: 
+                0 10px 30px rgba(255, 45, 45, 0.6),
+                0 0 0 15px rgba(255, 45, 45, 0.1),
+                0 0 0 30px rgba(255, 45, 45, 0.05);
+        }
+        50% {
+            box-shadow: 
+                0 15px 40px rgba(255, 45, 45, 0.8),
+                0 0 0 25px rgba(255, 45, 45, 0.15),
+                0 0 0 45px rgba(255, 45, 45, 0.08);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: scale(1.1) translateY(-3px) rotate(0deg); }
+        25% { transform: scale(1.1) translateY(-3px) rotate(-1deg); }
+        75% { transform: scale(1.1) translateY(-3px) rotate(1deg); }
+    }
+
+    @keyframes pulseDot {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.3;
+            transform: scale(1.8);
+        }
+    }
+
+    @keyframes pulseDotFast {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(2);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 1.5);
+        }
+    }
+
+    @keyframes borderPulse {
+        0%, 100% {
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(255, 45, 45, 0.5);
+        }
+        50% {
+            border-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px rgba(255, 45, 45, 0.8);
+        }
+    }
+
+    /* Magnet effect - cursor එක button එකට closer වෙනවා */
+    .emergency-nav-btn {
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    /* Floating particles effect background */
+    .pub-nav-actions {
+        position: relative;
+    }
+
+    .pub-nav-actions::before {
+        content: '';
+        position: absolute;
+        right: 80px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: radial-gradient(circle, rgba(255,45,45,0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        opacity: 0;
+        transition: all 0.5s ease;
+        pointer-events: none;
+    }
+
+    .emergency-nav-btn:hover ~ .pub-nav-actions::before,
+    .pub-nav-actions:hover::before {
+        opacity: 1;
+        animation: particleFloat 1s infinite;
+    }
+
+    @keyframes particleFloat {
+        0%, 100% {
+            transform: translateY(-50%) scale(1);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-60%) scale(1.5);
+            opacity: 0.6;
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .pub-nav-actions {
+            gap: 8px;
+        }
+        
+        .emergency-nav-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .emergency-nav-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .emergency-nav-btn:hover {
+            transform: scale(1.02) translateY(-1px);
+            box-shadow: 0 8px 20px rgba(255, 45, 45, 0.5);
+        }
     }
 </style>
 <!-- ═══════════════════════════════════════════

@@ -305,11 +305,11 @@ VALUES
 
 INSERT INTO appointments (appointment_id, patient_id, doctor_id, appt_date, appt_time, source, status, ref_number, notes) 
 VALUES 
-('APT-001', 'PAT-001', 'DOC-001', '2023-11-01', '09:00:00', 'online', 'confirmed', 'REF1001', 'Patient has high blood pressure'),
-('APT-002', 'PAT-002', 'DOC-002', '2023-11-01', '10:30:00', 'opd', 'pending', 'REF1002', 'Routine checkup for child'),
-('APT-003', 'PAT-003', 'DOC-003', '2023-11-02', '14:00:00', 'online', 'confirmed', 'REF1003', 'Frequent headaches'),
-('APT-004', 'PAT-004', 'DOC-004', '2023-11-02', '16:15:00', 'online', 'completed', 'REF1004', 'Skin allergy follow-up'),
-('APT-005', 'PAT-005', 'DOC-005', '2023-11-03', '08:45:00', 'opd', 'cancelled', 'REF1005', 'Patient requested cancellation');
+('APT-001', 'PAT-001', 'DOC-001', '2026-05-01', '09:00:00', 'online', 'confirmed', 'REF1001', 'Patient has high blood pressure'),
+('APT-002', 'PAT-002', 'DOC-002', '2026-05-13', '10:30:00', 'opd', 'pending', 'REF1002', 'Routine checkup for child'),
+('APT-003', 'PAT-003', 'DOC-003', '2026-06-02', '14:00:00', 'online', 'confirmed', 'REF1003', 'Frequent headaches'),
+('APT-004', 'PAT-004', 'DOC-004', '2026-05-20', '16:15:00', 'online', 'completed', 'REF1004', 'Skin allergy follow-up'),
+('APT-005', 'PAT-005', 'DOC-005', '2026-05-23', '08:45:00', 'opd', 'cancelled', 'REF1005', 'Patient requested cancellation');
 
 
 

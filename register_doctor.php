@@ -18,7 +18,7 @@ $message = '';
 $error   = '';
 $errors  = [];
 
-// ── STEP 2: Save doctor profile ──────────────────────────────────────────────
+// ── STEP 2: Save doctor profile ───────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POST['step'] === 2) {
     $userId = (int)($_SESSION['reg_user_id'] ?? 0);
     if (!$userId) {
@@ -26,20 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POS
         exit();
     }
 
-    $specialization   = trim($_POST['specialization']    ?? '');
-    $qualifications   = trim($_POST['qualifications']    ?? '');
-    $licenseNumber    = trim($_POST['license_number']    ?? '');
-    $consultationFee  = trim($_POST['consultation_fee']  ?? '0');
+    $specialization  = trim($_POST['specialization']   ?? '');
+    $qualifications  = trim($_POST['qualifications']   ?? '');
+    $licenseNumber   = trim($_POST['license_number']   ?? '');
+    $consultationFee = trim($_POST['consultation_fee'] ?? '0');
 
     if ($specialization === '') {
         $error = 'Specialization is required.';
         $step  = 2;
     } else {
-        // Check license number uniqueness (if provided)
         if ($licenseNumber !== '') {
-            $check = $pdo->prepare("SELECT doctor_id FROM doctors WHERE license_number = ?");
-            $check->execute([$licenseNumber]);
-            if ($check->fetch()) {
+            $chk = $pdo->prepare("SELECT doctor_id FROM doctors WHERE license_number = ?");
+            $chk->execute([$licenseNumber]);
+            if ($chk->fetch()) {
                 $error = 'This medical license number is already registered.';
                 $step  = 2;
             }
@@ -47,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POS
 
         if ($step !== 2) {
             $fee = is_numeric($consultationFee) ? (float)$consultationFee : 0.00;
-
             $ins = $pdo->prepare("
                 INSERT INTO doctors (user_id, specialization, qualifications, license_number, consultation_fee)
                 VALUES (?, ?, ?, ?, ?)
@@ -59,10 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POS
                 $licenseNumber  !== '' ? $licenseNumber  : null,
                 $fee,
             ]);
-
-            unset($_SESSION['reg_user_id']);
+            $savedName = $_SESSION['reg_full_name'] ?? '';
+            unset($_SESSION['reg_user_id'], $_SESSION['reg_full_name']);
             $message = 'success';
-            $step    = 'done';
         }
     }
 }
@@ -74,26 +71,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POS
     $password = $_POST['password']             ?? '';
     $confirm  = $_POST['confirm_password']     ?? '';
 
-    if ($fullName === '' || $email === '' || $password === '') {
+    if ($fullName === '' || $email === '' || $password === '')
         $errors[] = 'All fields are required.';
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL))
         $errors[] = 'Invalid email address.';
-    }
-    if (strlen($password) < 8) {
+    if (strlen($password) < 8)
         $errors[] = 'Password must be at least 8 characters.';
-    }
-    if ($password !== $confirm) {
+    if ($password !== $confirm)
         $errors[] = 'Passwords do not match.';
-    }
 
     if (empty($errors)) {
-        $check = $pdo->prepare("SELECT user_id FROM users WHERE email = ?");
-        $check->execute([$email]);
-        if ($check->fetch()) {
+        $chk = $pdo->prepare("SELECT user_id FROM users WHERE email = ?");
+        $chk->execute([$email]);
+        if ($chk->fetch()) {
             $errors[] = 'An account with this email already exists.';
         } else {
-            // Doctor accounts start inactive — admin must activate
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $ins  = $pdo->prepare("
                 INSERT INTO users (full_name, email, password_hash, role, status)
@@ -125,7 +117,7 @@ include __DIR__ . '/includes/header.php';
                 <li>Manage your appointment schedule online</li>
                 <li>Access patient medical records and history</li>
                 <li>Write and issue prescriptions digitally</li>
-                <li>Submit and review lab & diagnostic orders</li>
+                <li>Submit and review lab &amp; diagnostic orders</li>
                 <li>Your account requires admin approval before login</li>
             </ul>
         </div>
@@ -135,14 +127,14 @@ include __DIR__ . '/includes/header.php';
     <div class="auth-panel-right">
         <div class="auth-form-box" style="max-width:520px">
 
-            <?php if ($step === 'done'): ?>
+            <?php if ($message === 'success'): ?>
                 <!-- ── Success ── -->
                 <div style="text-align:center;padding:20px 0">
                     <div style="font-size:4rem;margin-bottom:16px">⏳</div>
                     <h2 style="margin-bottom:10px">Registration Submitted!</h2>
                     <p class="auth-subhead" style="margin-bottom:18px">
-                        Welcome, Dr. <?php echo htmlspecialchars($_SESSION['reg_full_name'] ?? ''); ?>!
-                        Your account has been submitted for review.
+                        Welcome, Dr. <?php echo htmlspecialchars($savedName ?? ''); ?>!
+                        Your account has been submitted for administrator review.
                     </p>
                     <div class="alert alert-info">
                         ℹ️ Your account is currently <strong>inactive</strong>. An administrator must approve it before you can log in. Please contact the hospital IT department if you need urgent access.
@@ -166,14 +158,17 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
 
-                <h2>Professional Profile</h2>
-                <p class="auth-subhead">Enter your medical credentials and specialization.</p>
+                <h2>🩺 Doctor Profile</h2>
+                <p class="auth-subhead">
+                    Hi <strong>Dr. <?php echo htmlspecialchars($_SESSION['reg_full_name'] ?? ''); ?></strong>!
+                    Now enter your medical credentials.
+                </p>
 
                 <?php if ($error): ?>
                     <div class="alert alert-error">⚠️ <?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
 
-                <form method="POST" id="profileForm" novalidate>
+                <form method="POST" novalidate>
                     <input type="hidden" name="step" value="2">
 
                     <div class="form-group">
@@ -193,7 +188,7 @@ include __DIR__ . '/includes/header.php';
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Medical License Number</label>
+                            <label class="form-label">Medical License No. (SLMC)</label>
                             <input type="text" name="license_number" class="form-control"
                                 placeholder="e.g. SLMC-2024-001"
                                 value="<?php echo htmlspecialchars($_POST['license_number'] ?? ''); ?>">
@@ -289,7 +284,7 @@ include __DIR__ . '/includes/header.php';
                 </form>
 
                 <div class="auth-links">
-                    Registering as a patient? <a href="/Web/Hospital-Management-System/register_patient.php">Patient Registration</a>
+                    Staff member? <a href="/Web/Hospital-Management-System/register_staff.php">Staff Registration</a>
                     &nbsp;|&nbsp;
                     <a href="/Web/Hospital-Management-System/login.php">Already have an account?</a>
                 </div>
@@ -301,56 +296,46 @@ include __DIR__ . '/includes/header.php';
 
 <script>
 // Toggle password visibility
-const toggleBtn = document.getElementById('togglePwd');
-if (toggleBtn) {
-    toggleBtn.addEventListener('click', function () {
-        const p = document.getElementById('pwd');
-        const isText = p.type === 'text';
-        p.type = isText ? 'password' : 'text';
-        this.textContent = isText ? '👁' : '🙈';
-    });
-}
+document.getElementById('togglePwd')?.addEventListener('click', function () {
+    const p = document.getElementById('pwd');
+    const isText = p.type === 'text';
+    p.type = isText ? 'password' : 'text';
+    this.textContent = isText ? '👁' : '🙈';
+});
 
 // Password strength meter
-const pwdInput = document.getElementById('pwd');
-const bar      = document.getElementById('strengthBar');
-const label    = document.getElementById('strengthLabel');
-if (pwdInput) {
-    pwdInput.addEventListener('input', function () {
-        const v = this.value;
-        let score = 0;
-        if (v.length >= 8)          score++;
-        if (/[A-Z]/.test(v))        score++;
-        if (/[0-9]/.test(v))        score++;
-        if (/[^A-Za-z0-9]/.test(v)) score++;
-
-        const levels = [
-            {pct:'0%',   col:'transparent', txt:''},
-            {pct:'25%',  col:'#dc2626',     txt:'Weak'},
-            {pct:'50%',  col:'#d97706',     txt:'Fair'},
-            {pct:'75%',  col:'#2563eb',     txt:'Good'},
-            {pct:'100%', col:'#059669',     txt:'Strong'},
-        ];
-        const lvl = levels[score] || levels[0];
-        bar.style.width      = lvl.pct;
-        bar.style.background = lvl.col;
-        label.textContent    = lvl.txt;
-        label.style.color    = lvl.col;
-    });
-}
+document.getElementById('pwd')?.addEventListener('input', function () {
+    const v = this.value;
+    let score = 0;
+    if (v.length >= 8)          score++;
+    if (/[A-Z]/.test(v))        score++;
+    if (/[0-9]/.test(v))        score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const levels = [
+        {pct:'0%',   col:'transparent', txt:''},
+        {pct:'25%',  col:'#dc2626',     txt:'Weak'},
+        {pct:'50%',  col:'#d97706',     txt:'Fair'},
+        {pct:'75%',  col:'#2563eb',     txt:'Good'},
+        {pct:'100%', col:'#059669',     txt:'Strong'},
+    ];
+    const bar = document.getElementById('strengthBar');
+    const lbl = document.getElementById('strengthLabel');
+    const lvl = levels[score] || levels[0];
+    bar.style.width      = lvl.pct;
+    bar.style.background = lvl.col;
+    lbl.textContent      = lvl.txt;
+    lbl.style.color      = lvl.col;
+});
 
 // Validate password match on submit
-const form = document.getElementById('accountForm');
-if (form) {
-    form.addEventListener('submit', function (e) {
-        const p1 = document.getElementById('pwd')?.value;
-        const p2 = document.getElementById('cpwd')?.value;
-        if (p1 && p2 && p1 !== p2) {
-            e.preventDefault();
-            alert('Passwords do not match. Please check and try again.');
-        }
-    });
-}
+document.getElementById('accountForm')?.addEventListener('submit', function (e) {
+    const p1 = document.getElementById('pwd')?.value;
+    const p2 = document.getElementById('cpwd')?.value;
+    if (p1 && p2 && p1 !== p2) {
+        e.preventDefault();
+        alert('Passwords do not match. Please check and try again.');
+    }
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

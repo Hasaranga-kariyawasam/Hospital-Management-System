@@ -33,6 +33,9 @@
             <li><a href="#services">Services</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
+        <a href="emergency.php" class="emergency-nav-btn">
+    🚑      Emergency
+        </a>
 
         <div class="pub-nav-actions">
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-outline">Staff Login</a>
@@ -40,7 +43,26 @@
         </div>
     </div>
 </nav>
+<!-- Emergency Button Near Staff Login -->
+<style>
+    .emergency-nav-btn{
+        background: #ff2d2d;
+        color: white;
+        padding: 12px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 12px;
+        transition: 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
 
+    .emergency-nav-btn:hover{
+        background: #d90000;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
 <!-- ═══════════════════════════════════════════
      HERO
 ════════════════════════════════════════════ -->

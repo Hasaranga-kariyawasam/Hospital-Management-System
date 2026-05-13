@@ -97,324 +97,309 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && (int)$_POS
     }
 }
 
-// Output modern glass CSS
-echo <<<CSS
+include __DIR__ . '/includes/header.php';
+?>
+
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
         font-family: 'DM Sans', 'Segoe UI', sans-serif;
         min-height: 100vh;
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #0d9488 70%, #0f172a 100%);
-        background-size: 400% 400%;
-        animation: gradientShift 20s ease infinite;
+        background: #f0f4f8;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 20px;
-        overflow-y: auto;
     }
     
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        25% { background-position: 100% 0%; }
-        50% { background-position: 100% 100%; }
-        75% { background-position: 0% 100%; }
-    }
-    
-    .bg-orb {
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.15;
-        pointer-events: none;
-        z-index: 0;
-    }
-    .bg-orb-1 {
-        width: 500px; height: 500px;
-        background: #0d9488;
-        top: -200px; right: -200px;
-        animation: float1 15s ease-in-out infinite;
-    }
-    .bg-orb-2 {
-        width: 400px; height: 400px;
-        background: #3b82f6;
-        bottom: -150px; left: -150px;
-        animation: float2 18s ease-in-out infinite;
-    }
-    .bg-orb-3 {
-        width: 350px; height: 350px;
-        background: #06b6d4;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        animation: float3 12s ease-in-out infinite;
-    }
-    
-    @keyframes float1 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        33% { transform: translate(50px, 30px) scale(1.1); }
-        66% { transform: translate(-30px, -20px) scale(0.9); }
-    }
-    @keyframes float2 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(-40px, -30px) scale(1.15); }
-    }
-    @keyframes float3 {
-        0%, 100% { transform: translate(-50%, -50%) scale(1); }
-        50% { transform: translate(-50%, -50%) scale(1.2); }
-    }
-    
-    .auth-container {
-        position: relative;
-        z-index: 1;
+    .auth-wrapper {
         width: 100%;
         max-width: 1100px;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 32px;
+        background: white;
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 
-            0 32px 64px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     }
     
-    .auth-brand {
-        background: linear-gradient(135deg, rgba(13, 148, 136, 0.2) 0%, rgba(15, 23, 42, 0.3) 100%);
+    .auth-brand-panel {
+        background: linear-gradient(150deg, #1e3a5f 0%, #1a56db 40%, #1e40af 100%);
         padding: 60px 48px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         position: relative;
         overflow: hidden;
-    }
-    .auth-brand::before {
-        content: '';
-        position: absolute;
-        top: -50%; right: -50%;
-        width: 200%; height: 200%;
-        background: radial-gradient(circle at 30% 70%, rgba(13, 148, 136, 0.15) 0%, transparent 50%);
-        animation: brandGlow 8s ease-in-out infinite;
-    }
-    @keyframes brandGlow {
-        0%, 100% { transform: rotate(0deg); }
-        50% { transform: rotate(180deg); }
+        color: white;
     }
     
-    .brand-logo {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        border-radius: 24px;
+    .auth-brand-panel::before {
+        content: '';
+        position: absolute;
+        top: -100px; right: -100px;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .auth-brand-panel::after {
+        content: '';
+        position: absolute;
+        bottom: -80px; left: -60px;
+        width: 250px; height: 250px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .brand-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 40px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .brand-logo-circle {
+        width: 64px; height: 64px;
+        background: white;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
-        color: white;
-        margin-bottom: 32px;
-        box-shadow: 0 16px 32px rgba(13, 148, 136, 0.3);
-        position: relative;
-        z-index: 1;
+        color: #1a56db;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .brand-name-block h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .brand-name-block p {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        letter-spacing: 0.5px;
     }
     
     .brand-title {
         font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: 700;
-        color: white;
         line-height: 1.2;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         position: relative;
         z-index: 1;
     }
-    .brand-title span {
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
+    
     .brand-desc {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 1rem;
-        line-height: 1.8;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        opacity: 0.85;
         margin-bottom: 36px;
         position: relative;
         z-index: 1;
     }
     
-    .brand-features {
+    .brand-feature-list {
         list-style: none;
         position: relative;
         z-index: 1;
     }
-    .brand-features li {
-        color: rgba(255, 255, 255, 0.85);
-        padding: 8px 0;
-        font-size: 0.95rem;
+    
+    .brand-feature-list li {
+        padding: 6px 0;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
         gap: 12px;
+        opacity: 0.9;
     }
-    .brand-features li i {
-        color: #0d9488;
-        font-size: 1.1rem;
+    
+    .brand-feature-list li i {
+        color: #60a5fa;
+        font-size: 0.9rem;
+        width: 18px;
+        text-align: center;
     }
     
     .auth-form-panel {
-        padding: 60px 48px;
+        padding: 60px 56px;
         display: flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.03);
+        align-items: flex-start;
+        background: white;
         max-height: 90vh;
         overflow-y: auto;
     }
-    .form-inner {
+    
+    .form-container {
         width: 100%;
-        max-width: 460px;
+        max-width: 420px;
         margin: 0 auto;
     }
     
     .form-header {
-        margin-bottom: 30px;
-    }
-    .form-header h2 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2rem;
-        color: white;
-        margin-bottom: 8px;
-        font-weight: 700;
-    }
-    .form-header p {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.95rem;
+        margin-bottom: 28px;
     }
     
-    /* Steps indicator */
-    .steps {
+    .form-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        color: #1e293b;
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+    
+    .form-header p {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+    
+    /* Steps */
+    .steps-container {
         display: flex;
         align-items: center;
-        gap: 0;
-        margin-bottom: 32px;
+        margin-bottom: 28px;
     }
+    
     .step-item {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
-    .step-num {
-        width: 36px;
-        height: 36px;
+    
+    .step-circle {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    .step-num.active {
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
+        font-size: 0.8rem;
+        font-weight: 600; }
+    
+    .step-circle.active {
+        background: #1a56db;
         color: white;
-        box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+        box-shadow: 0 2px 8px rgba(26, 86, 219, 0.3);
     }
-    .step-num.done {
-        background: rgba(34, 197, 94, 0.3);
-        color: #4ade80;
-        border: 2px solid rgba(34, 197, 94, 0.5);
+    
+    .step-circle.done {
+        background: #059669;
+        color: white;
     }
-    .step-num.pending {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.4);
-        border: 2px solid rgba(255, 255, 255, 0.12);
+    
+    .step-circle.pending {
+        background: #f1f5f9;
+        color: #94a3b8;
+        border: 2px solid #e2e8f0;
     }
+    
     .step-line {
         flex: 1;
         height: 2px;
-        background: rgba(255, 255, 255, 0.12);
-        margin: 0 16px;
-        border-radius: 1px;
+        background: #e2e8f0;
+        margin: 0 12px;
     }
+    
     .step-line.done {
-        background: rgba(34, 197, 94, 0.5);
+        background: #059669;
     }
-    .step-label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.6);
+    
+    .step-label-text {
+        font-size: 0.78rem;
+        color: #64748b;
         white-space: nowrap;
     }
     
-    .alert-error {
-        background: rgba(239, 68, 68, 0.15);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #fca5a5;
+    /* Alerts */
+    .alert {
         padding: 14px 18px;
-        border-radius: 14px;
+        border-radius: 12px;
         margin-bottom: 20px;
         font-size: 0.9rem;
         display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .alert-success {
-        background: rgba(34, 197, 94, 0.15);
-        border: 1px solid rgba(34, 197, 94, 0.3);
-        color: #86efac;
-        padding: 14px 18px;
-        border-radius: 14px;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 10px;
     }
     
+    .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+    }
+    
+    .alert-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #059669;
+    }
+    
+    .alert-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1a56db;
+    }
+    
+    /* Form */
     .form-group {
         margin-bottom: 18px;
     }
+    
     .form-label {
         display: block;
-        color: rgba(255, 255, 255, 0.8);
+        color: #374151;
         font-size: 0.85rem;
         font-weight: 600;
         margin-bottom: 8px;
-        letter-spacing: 0.3px;
     }
-    .form-control {
+    
+    .form-label .required {
+        color: #dc2626;
+    }
+    
+    .form-input {
         width: 100%;
-        padding: 14px 18px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1.5px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        color: white;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        color: #1e293b;
         font-size: 0.95rem;
         font-family: inherit;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         outline: none;
     }
-    .form-control:focus {
-        border-color: #0d9488;
-        background: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
+    
+    .form-input:focus {
+        border-color: #1a56db;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.08);
     }
-    .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.3);
+    
+    .form-input::placeholder {
+        color: #94a3b8;
     }
-    select.form-control {
+    
+    select.form-input {
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 16px center;
         padding-right: 40px;
     }
-    textarea.form-control {
+    
+    textarea.form-input {
         resize: vertical;
         min-height: 80px;
     }
+    
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -426,127 +411,150 @@ echo <<<CSS
         display: flex;
         align-items: center;
     }
-    .input-group .form-control {
+    
+    .input-group .form-input {
         padding-right: 50px;
     }
-    .input-toggle {
+    
+    .input-toggle-btn {
         position: absolute;
         right: 6px;
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.5);
+        color: #94a3b8;
         padding: 10px;
         cursor: pointer;
         font-size: 1.1rem;
-        transition: color 0.3s;
-    }
-    .input-toggle:hover {
-        color: white;
+        transition: color 0.2s;
     }
     
-    .strength-bar-container {
+    .input-toggle-btn:hover {
+        color: #1e293b;
+    }
+    
+    /* Password Strength */
+    .strength-meter {
         height: 4px;
-        background: rgba(255, 255, 255, 0.1);
+        background: #e2e8f0;
         border-radius: 4px;
         overflow: hidden;
         margin-bottom: 6px;
     }
-    .strength-bar {
+    
+    .strength-fill {
         height: 100%;
         width: 0;
         border-radius: 4px;
         transition: width 0.3s, background 0.3s;
     }
-    .strength-label {
+    
+    .strength-text {
         font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.5);
+        color: #64748b;
+    }
+    
+    /* Buttons */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-family: inherit;
     }
     
     .btn-primary {
         width: 100%;
-        padding: 16px;
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        border: none;
-        border-radius: 16px;
+        background: #1a56db;
         color: white;
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.4s ease;
-        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 32px rgba(13, 148, 136, 0.5);
+        box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+        margin-top: 8px;
     }
     
-    .auth-links {
+    .btn-primary:hover {
+        background: #1e40af;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(26, 86, 219, 0.35);
+    }
+    
+    .back-link {
         text-align: center;
         margin-top: 24px;
     }
-    .auth-links a {
-        color: rgba(255, 255, 255, 0.5);
+    
+    .back-link a {
+        color: #64748b;
         text-decoration: none;
         font-size: 0.9rem;
-        transition: color 0.3s;
-    }
-    .auth-links a:hover {
-        color: #0d9488;
+        transition: color 0.2s;
     }
     
-    .success-icon {
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(135deg, rgba(13, 148, 136, 0.3), rgba(6, 182, 212, 0.3));
+    .back-link a:hover {
+        color: #1a56db;
+    }
+    
+    .success-icon-circle {
+        width: 80px;
+        height: 80px;
+        background: #f0fdf4;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 24px;
-        font-size: 3rem;
-        color: #4ade80;
+        margin: 0 auto 20px;
+        font-size: 2.5rem;
+        color: #059669;
     }
     
     @media (max-width: 768px) {
-        .auth-container {
+        .auth-wrapper {
             grid-template-columns: 1fr;
-            max-width: 500px;
+            max-width: 480px;
         }
-        .auth-brand {
-            padding: 36px 32px;
+        
+        .auth-brand-panel {
+            padding: 40px 32px;
         }
+        
         .auth-form-panel {
-            padding: 36px 32px;
+            padding: 40px 32px;
         }
+        
         .brand-title {
-            font-size: 2rem;
+            font-size: 1.6rem;
         }
+        
         .form-row {
             grid-template-columns: 1fr;
         }
     }
 </style>
-CSS;
-?>
 
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
-<div class="bg-orb bg-orb-3"></div>
-
-<div class="auth-container">
+<div class="auth-wrapper">
     <!-- Left Brand Panel -->
-    <div class="auth-brand">
-        <div class="brand-logo">M</div>
-        <h1 class="brand-title">Patient<br><span>Registration</span></h1>
+    <div class="auth-brand-panel">
+        <div class="brand-logo-section">
+            <div class="brand-logo-circle">M</div>
+            <div class="brand-name-block">
+                <h3>MediCare</h3>
+                                <p>General Hospital</p>
+            </div>
+        </div>
+        
+        <h1 class="brand-title">Patient Registration</h1>
+        
         <p class="brand-desc">
             Create your MediCare patient account to book appointments, view your medical history, request ambulances, and manage your bills — all from one place.
         </p>
-        <ul class="brand-features">
+        
+        <ul class="brand-feature-list">
             <li><i class="fas fa-calendar-check"></i> Book appointments online</li>
             <li><i class="fas fa-file-medical"></i> View medical records & prescriptions</li>
             <li><i class="fas fa-file-invoice"></i> Download billing invoices</li>
@@ -557,35 +565,35 @@ CSS;
 
     <!-- Right Form Panel -->
     <div class="auth-form-panel">
-        <div class="form-inner">
+        <div class="form-container">
 
             <?php if ($step === 'done'): ?>
                 <!-- Success -->
                 <div style="text-align:center;">
-                    <div class="success-icon">
+                    <div class="success-icon-circle">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <h2 style="color:white;font-family:'Playfair Display',serif;margin-bottom:12px;">You're Registered!</h2>
-                    <p style="color:rgba(255,255,255,0.7);margin-bottom:28px;line-height:1.6;">
+                    <h2 style="font-family:'Playfair Display',serif;color:#1e293b;margin-bottom:12px;">You're Registered!</h2>
+                    <p style="color:#64748b;margin-bottom:28px;line-height:1.6;">
                         Welcome to MediCare, <?php echo htmlspecialchars($_SESSION['reg_full_name'] ?? ''); ?>!<br>
                         Your patient account is ready.
                     </p>
-                    <a href="/Web/Hospital-Management-System/login.php" class="btn-primary">
+                    <a href="/Web/Hospital-Management-System/login.php" class="btn btn-primary">
                         <i class="fas fa-sign-in-alt"></i> Sign In to Your Portal
                     </a>
                 </div>
 
             <?php elseif ($step === 2): ?>
                 <!-- Step 2: Medical Profile -->
-                <div class="steps">
+                <div class="steps-container">
                     <div class="step-item">
-                        <div class="step-num done"><i class="fas fa-check"></i></div>
-                        <span class="step-label">Account</span>
+                        <div class="step-circle done"><i class="fas fa-check"></i></div>
+                        <span class="step-label-text">Account</span>
                     </div>
                     <div class="step-line done"></div>
                     <div class="step-item">
-                        <div class="step-num active">2</div>
-                        <span class="step-label">Profile</span>
+                        <div class="step-circle active">2</div>
+                        <span class="step-label-text">Profile</span>
                     </div>
                 </div>
 
@@ -595,30 +603,30 @@ CSS;
                 </div>
 
                 <?php if ($error): ?>
-                    <div class="alert-error">
+                    <div class="alert alert-error">
                         <i class="fas fa-exclamation-triangle"></i>
                         <?php echo htmlspecialchars($error); ?>
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" id="profileForm" novalidate>
+                <form method="POST" novalidate>
                     <input type="hidden" name="step" value="2">
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">NIC Number <span style="color:#ef4444">*</span></label>
-                            <input type="text" name="nic" class="form-control" placeholder="e.g. 199012345678" required>
+                            <label class="form-label">NIC Number <span class="required">*</span></label>
+                            <input type="text" name="nic" class="form-input" placeholder="e.g. 199012345678" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Date of Birth <span style="color:#ef4444">*</span></label>
-                            <input type="date" name="dob" class="form-control" required>
+                            <label class="form-label">Date of Birth <span class="required">*</span></label>
+                            <input type="date" name="dob" class="form-input" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Gender <span style="color:#ef4444">*</span></label>
-                            <select name="gender" class="form-control" required>
+                            <label class="form-label">Gender <span class="required">*</span></label>
+                            <select name="gender" class="form-input" required>
                                 <option value="">Select</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -627,7 +635,7 @@ CSS;
                         </div>
                         <div class="form-group">
                             <label class="form-label">Blood Type</label>
-                            <select name="blood_type" class="form-control">
+                            <select name="blood_type" class="form-input">
                                 <option value="">Unknown</option>
                                 <option>A+</option><option>A−</option>
                                 <option>B+</option><option>B−</option>
@@ -638,36 +646,36 @@ CSS;
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Phone Number <span style="color:#ef4444">*</span></label>
-                        <input type="tel" name="phone" class="form-control" placeholder="+94 77 123 4567" required>
+                        <label class="form-label">Phone Number <span class="required">*</span></label>
+                        <input type="tel" name="phone" class="form-input" placeholder="+94 77 123 4567" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Home Address</label>
-                        <textarea name="address" class="form-control" rows="2" placeholder="Street, City, Province"></textarea>
+                        <textarea name="address" class="form-input" rows="2" placeholder="Street, City, Province"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Emergency Contact</label>
-                        <input type="text" name="emergency_contact" class="form-control" placeholder="Name & phone of a family member">
+                        <input type="text" name="emergency_contact" class="form-input" placeholder="Name & phone of a family member">
                     </div>
 
-                    <button type="submit" class="btn-primary" style="margin-top:8px">
+                    <button type="submit" class="btn btn-primary">
                         Complete Registration <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
 
             <?php else: ?>
                 <!-- Step 1: Account -->
-                <div class="steps">
+                <div class="steps-container">
                     <div class="step-item">
-                        <div class="step-num active">1</div>
-                        <span class="step-label">Account</span>
+                        <div class="step-circle active">1</div>
+                        <span class="step-label-text">Account</span>
                     </div>
                     <div class="step-line"></div>
                     <div class="step-item">
-                        <div class="step-num pending">2</div>
-                        <span class="step-label">Profile</span>
+                        <div class="step-circle pending">2</div>
+                        <span class="step-label-text">Profile</span>
                     </div>
                 </div>
 
@@ -677,8 +685,8 @@ CSS;
                 </div>
 
                 <?php if (!empty($errors)): ?>
-                    <div class="alert-error">
-                        <div style="display:flex;flex-direction:column;gap:6px;">
+                    <div class="alert alert-error">
+                        <div style="display:flex;flex-direction:column;gap:4px;">
                             <?php foreach ($errors as $e): ?>
                                 <div><i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($e); ?></div>
                             <?php endforeach; ?>
@@ -690,16 +698,16 @@ CSS;
                     <input type="hidden" name="step" value="1">
 
                     <div class="form-group">
-                        <label class="form-label">Full Name <span style="color:#ef4444">*</span></label>
-                        <input type="text" name="full_name" class="form-control"
+                        <label class="form-label">Full Name <span class="required">*</span></label>
+                        <input type="text" name="full_name" class="form-input"
                             placeholder="As on your NIC"
                             value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>"
                             required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Email Address <span style="color:#ef4444">*</span></label>
-                        <input type="email" name="email" class="form-control"
+                        <label class="form-label">Email Address <span class="required">*</span></label>
+                        <input type="email" name="email" class="form-input"
                             placeholder="your@email.com"
                             value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
                             required>
@@ -707,31 +715,31 @@ CSS;
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Password <span style="color:#ef4444">*</span></label>
+                            <label class="form-label">Password <span class="required">*</span></label>
                             <div class="input-group">
-                                <input type="password" name="password" id="pwd" class="form-control" placeholder="Min. 8 characters" required>
-                                <button type="button" class="input-toggle" id="togglePwd"><i class="fas fa-eye"></i></button>
+                                <input type="password" name="password" id="pwd" class="form-input" placeholder="Min. 8 characters" required>
+                                <button type="button" class="input-toggle-btn" id="togglePwd"><i class="fas fa-eye"></i></button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Confirm Password <span style="color:#ef4444">*</span></label>
-                            <input type="password" name="confirm_password" id="cpwd" class="form-control" placeholder="Repeat password" required>
+                            <label class="form-label">Confirm Password <span class="required">*</span></label>
+                            <input type="password" name="confirm_password" id="cpwd" class="form-input" placeholder="Repeat password" required>
                         </div>
                     </div>
 
                     <div style="margin-bottom:16px">
-                        <div class="strength-bar-container">
-                            <div id="strengthBar" class="strength-bar"></div>
+                        <div class="strength-meter">
+                            <div id="strengthBar" class="strength-fill"></div>
                         </div>
-                        <div id="strengthLabel" class="strength-label"></div>
+                        <div id="strengthLabel" class="strength-text"></div>
                     </div>
 
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         Continue to Profile <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
 
-                <div class="auth-links">
+                <div class="back-link">
                     Already have an account? <a href="/Web/Hospital-Management-System/login.php">Sign In</a>
                     &nbsp;|&nbsp;
                     <a href="/Web/Hospital-Management-System/home.php"><i class="fas fa-arrow-left"></i> Back to Website</a>
@@ -757,8 +765,6 @@ if (toggleBtn) {
 
 // Password strength
 const pwdInput = document.getElementById('pwd');
-const bar      = document.getElementById('strengthBar');
-const label    = document.getElementById('strengthLabel');
 if (pwdInput) {
     pwdInput.addEventListener('input', function () {
         const v = this.value;
@@ -770,16 +776,16 @@ if (pwdInput) {
 
         const levels = [
             {pct:'0%',   col:'transparent', txt:''},
-            {pct:'25%',  col:'#ef4444',     txt:'Weak'},
-            {pct:'50%',  col:'#f59e0b',     txt:'Fair'},
-            {pct:'75%',  col:'#3b82f6',     txt:'Good'},
-            {pct:'100%', col:'#10b981',     txt:'Strong'},
+            {pct:'25%',  col:'#dc2626',     txt:'Weak'},
+            {pct:'50%',  col:'#d97706',     txt:'Fair'},
+            {pct:'75%',  col:'#2563eb',     txt:'Good'},
+            {pct:'100%', col:'#059669',     txt:'Strong'},
         ];
         const lvl = levels[score] || levels[0];
-        bar.style.width      = lvl.pct;
-        bar.style.background = lvl.col;
-        label.textContent    = lvl.txt;
-        label.style.color    = lvl.col;
+        document.getElementById('strengthBar').style.width = lvl.pct;
+        document.getElementById('strengthBar').style.background = lvl.col;
+        document.getElementById('strengthLabel').textContent = lvl.txt;
+        document.getElementById('strengthLabel').style.color = lvl.col;
     });
 }
 
@@ -796,3 +802,5 @@ if (form) {
     });
 }
 </script>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>

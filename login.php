@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'reception'  => "$base/modules/appointments/opd_walkin.php",
                 'pharmacist' => "$base/modules/pharmacy/pharmacy_queue.php",
                 'patient'    => "$base/modules/appointments/my_appointments.php",
-                'dispatcher' => "$base/modules/emergncy/dispatcher_dashboard.php",
+                'dispatcher' => "$base/modules/emergency/dispatcher_dashboard.php",
                 'driver'     => "$base/modules/emergency/driver_job.php",
             ];
             header('Location: ' . ($redirectMap[$user['role']] ?? "$base/index.php"));
@@ -58,270 +58,235 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Modern Glass CSS
-$modernCSS = <<<CSS
+include __DIR__ . '/includes/header.php';
+?>
+
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    /* ── Hospital Matching Login Styles ── */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
         font-family: 'DM Sans', 'Segoe UI', sans-serif;
         min-height: 100vh;
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 30%, #0d9488 70%, #0f172a 100%);
-        background-size: 400% 400%;
-        animation: gradientShift 20s ease infinite;
+        background: #f0f4f8;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 20px;
-        overflow-y: auto;
     }
     
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        25% { background-position: 100% 0%; }
-        50% { background-position: 100% 100%; }
-        75% { background-position: 0% 100%; }
-    }
-    
-    /* Floating orbs */
-    .bg-orb {
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.15;
-        pointer-events: none;
-        z-index: 0;
-    }
-    .bg-orb-1 {
-        width: 500px; height: 500px;
-        background: #0d9488;
-        top: -200px; right: -200px;
-        animation: float1 15s ease-in-out infinite;
-    }
-    .bg-orb-2 {
-        width: 400px; height: 400px;
-        background: #3b82f6;
-        bottom: -150px; left: -150px;
-        animation: float2 18s ease-in-out infinite;
-    }
-    .bg-orb-3 {
-        width: 350px; height: 350px;
-        background: #06b6d4;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        animation: float3 12s ease-in-out infinite;
-    }
-    
-    @keyframes float1 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        33% { transform: translate(50px, 30px) scale(1.1); }
-        66% { transform: translate(-30px, -20px) scale(0.9); }
-    }
-    @keyframes float2 {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(-40px, -30px) scale(1.15); }
-    }
-    @keyframes float3 {
-        0%, 100% { transform: translate(-50%, -50%) scale(1); }
-        50% { transform: translate(-50%, -50%) scale(1.2); }
-    }
-    
-    /* Main container */
-    .auth-container {
-        position: relative;
-        z-index: 1;
+    .auth-wrapper {
         width: 100%;
         max-width: 1100px;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 32px;
+        background: white;
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 
-            0 32px 64px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     }
     
-    /* Left brand panel */
-    .auth-brand {
-        background: linear-gradient(135deg, rgba(13, 148, 136, 0.2) 0%, rgba(15, 23, 42, 0.3) 100%);
+    /* Left Panel - Brand */
+    .auth-brand-panel {
+        background: linear-gradient(150deg, #1e3a5f 0%, #1a56db 40%, #1e40af 100%);
         padding: 60px 48px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         position: relative;
         overflow: hidden;
+        color: white;
     }
     
-    .auth-brand::before {
+    .auth-brand-panel::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle at 30% 70%, rgba(13, 148, 136, 0.15) 0%, transparent 50%);
-        animation: brandGlow 8s ease-in-out infinite;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
     }
     
-    @keyframes brandGlow {
-        0%, 100% { transform: rotate(0deg); }
-        50% { transform: rotate(180deg); }
+    .auth-brand-panel::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        left: -60px;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.03);
     }
     
-    .brand-logo {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        border-radius: 24px;
+    .brand-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 40px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .brand-logo-circle {
+        width: 64px;
+        height: 64px;
+        background: white;
+        border-radius: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
-        color: white;
-        margin-bottom: 32px;
-        box-shadow: 0 16px 32px rgba(13, 148, 136, 0.3);
-        position: relative;
-        z-index: 1;
+        color: #1a56db;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .brand-name-block h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .brand-name-block p {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        letter-spacing: 0.5px;
     }
     
     .brand-title {
         font-family: 'Playfair Display', serif;
-        font-size: 2.8rem;
+        font-size: 2.2rem;
         font-weight: 700;
-        color: white;
         line-height: 1.2;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         position: relative;
         z-index: 1;
     }
     
-    .brand-title span {
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
     .brand-desc {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 1rem;
-        line-height: 1.8;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        opacity: 0.85;
         margin-bottom: 36px;
         position: relative;
         z-index: 1;
     }
     
-    .brand-features {
+    .brand-feature-list {
         list-style: none;
         position: relative;
         z-index: 1;
     }
     
-    .brand-features li {
-        color: rgba(255, 255, 255, 0.85);
-        padding: 10px 0;
-        font-size: 0.95rem;
+    .brand-feature-list li {
+        padding: 6px 0;
+        font-size: 0.9rem;
         display: flex;
         align-items: center;
         gap: 12px;
+        opacity: 0.9;
     }
     
-    .brand-features li i {
-        color: #0d9488;
-        font-size: 1.1rem;
+    .brand-feature-list li i {
+        color: #60a5fa;
+        font-size: 0.9rem;
+        width: 18px;
+        text-align: center;
     }
     
-    /* Right form panel */
+    /* Right Panel - Form */
     .auth-form-panel {
-        padding: 60px 48px;
+        padding: 60px 56px;
         display: flex;
         align-items: center;
-        background: rgba(255, 255, 255, 0.03);
+        background: white;
     }
     
-    .form-inner {
+    .form-container {
         width: 100%;
-        max-width: 420px;
+        max-width: 400px;
         margin: 0 auto;
     }
     
     .form-header {
-        margin-bottom: 36px;
+        margin-bottom: 32px;
     }
     
     .form-header h2 {
         font-family: 'Playfair Display', serif;
-        font-size: 2rem;
-        color: white;
-        margin-bottom: 8px;
+        font-size: 1.8rem;
+        color: #1e293b;
+        margin-bottom: 6px;
         font-weight: 700;
     }
     
     .form-header p {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.95rem;
+        color: #64748b;
+        font-size: 0.9rem;
     }
     
     /* Alert */
-    .alert-error {
-        background: rgba(239, 68, 68, 0.15);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        color: #fca5a5;
+    .alert {
         padding: 14px 18px;
-        border-radius: 14px;
+        border-radius: 12px;
         margin-bottom: 24px;
         font-size: 0.9rem;
         display: flex;
         align-items: center;
         gap: 10px;
-        backdrop-filter: blur(10px);
+    }
+    .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
     }
     
-    /* Form groups */
+    /* Form Elements */
     .form-group {
         margin-bottom: 20px;
     }
     
     .form-label {
         display: block;
-        color: rgba(255, 255, 255, 0.8);
+        color: #374151;
         font-size: 0.85rem;
         font-weight: 600;
         margin-bottom: 8px;
-        letter-spacing: 0.3px;
     }
     
-    .form-control {
+    .form-label .required {
+        color: #dc2626;
+    }
+    
+    .form-input {
         width: 100%;
-        padding: 14px 18px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1.5px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        color: white;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        color: #1e293b;
         font-size: 0.95rem;
         font-family: inherit;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         outline: none;
     }
     
-    .form-control:focus {
-        border-color: #0d9488;
-        background: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15);
+    .form-input:focus {
+        border-color: #1a56db;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(26, 86, 219, 0.08);
     }
     
-    .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.3);
+    .form-input::placeholder {
+        color: #94a3b8;
+    }
+    
+    .form-input.error {
+        border-color: #dc2626;
+        background: #fef2f2;
     }
     
     .input-group {
@@ -330,149 +295,158 @@ $modernCSS = <<<CSS
         align-items: center;
     }
     
-    .input-group .form-control {
+    .input-group .form-input {
         padding-right: 50px;
     }
     
-    .input-toggle {
+    .input-toggle-btn {
         position: absolute;
         right: 6px;
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.5);
+        color: #94a3b8;
         padding: 10px;
         cursor: pointer;
         font-size: 1.1rem;
-        transition: color 0.3s;
+        transition: color 0.2s;
     }
     
-    .input-toggle:hover {
-        color: white;
+    .input-toggle-btn:hover {
+        color: #1e293b;
     }
     
-    .form-error {
-        color: #fca5a5;
-        font-size: 0.8rem;
+    .form-error-msg {
+        color: #dc2626;
+        font-size: 0.78rem;
         margin-top: 6px;
     }
     
     /* Buttons */
-    .btn-primary {
-        width: 100%;
-        padding: 16px;
-        background: linear-gradient(135deg, #0d9488, #06b6d4);
-        border: none;
-        border-radius: 16px;
-        color: white;
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.4s ease;
-        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.3);
-        letter-spacing: 0.5px;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 32px rgba(13, 148, 136, 0.5);
-    }
-    
-    .btn-secondary {
-        padding: 14px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1.5px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        color: white;
-        font-size: 0.9rem;
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.95rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
+        border: none;
+        font-family: inherit;
     }
     
-    .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: rgba(255, 255, 255, 0.25);
+    .btn-primary {
+        width: 100%;
+        background: #1a56db;
+        color: white;
+        box-shadow: 0 4px 12px rgba(26, 86, 219, 0.25);
+    }
+    
+    .btn-primary:hover {
+        background: #1e40af;
         transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(26, 86, 219, 0.35);
     }
     
-    .auth-divider {
+    .btn-outline {
+        background: white;
+        border: 1.5px solid #e2e8f0;
+        color: #374151;
+        flex: 1;
+    }
+    
+    .btn-outline:hover {
+        border-color: #1a56db;
+        color: #1a56db;
+        background: #f8fafc;
+    }
+    
+    .divider-text {
         display: flex;
         align-items: center;
         gap: 16px;
-        color: rgba(255, 255, 255, 0.4);
+        color: #94a3b8;
         font-size: 0.85rem;
         margin: 28px 0 16px;
     }
     
-    .auth-divider::before,
-    .auth-divider::after {
+    .divider-text::before,
+    .divider-text::after {
         content: '';
         flex: 1;
         height: 1px;
-        background: rgba(255, 255, 255, 0.15);
+        background: #e2e8f0;
     }
     
-    .auth-links {
+    .btn-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .back-link {
         text-align: center;
         margin-top: 24px;
     }
     
-    .auth-links a {
-        color: rgba(255, 255, 255, 0.5);
+    .back-link a {
+        color: #64748b;
         text-decoration: none;
         font-size: 0.9rem;
-        transition: color 0.3s;
+        transition: color 0.2s;
         display: inline-flex;
         align-items: center;
         gap: 6px;
     }
     
-    .auth-links a:hover {
-        color: #0d9488;
+    .back-link a:hover {
+        color: #1a56db;
     }
     
     /* Responsive */
     @media (max-width: 768px) {
-        .auth-container {
+        .auth-wrapper {
             grid-template-columns: 1fr;
-            max-width: 500px;
+            max-width: 480px;
         }
-        .auth-brand {
-            padding: 36px 32px;
+        
+        .auth-brand-panel {
+            padding: 40px 32px;
         }
+        
         .auth-form-panel {
-            padding: 36px 32px;
+            padding: 40px 32px;
         }
+        
         .brand-title {
-            font-size: 2rem;
+            font-size: 1.8rem;
         }
     }
 </style>
-CSS;
 
-echo $modernCSS;
-?>
-
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
-<div class="bg-orb bg-orb-3"></div>
-
-<div class="auth-container">
+<div class="auth-wrapper">
     <!-- Left Brand Panel -->
-    <div class="auth-brand">
-        <div class="brand-logo">M</div>
-        <h1 class="brand-title">MediCare<br><span>Hospital System</span></h1>
+    <div class="auth-brand-panel">
+        <div class="brand-logo-section">
+            <div class="brand-logo-circle">M</div>
+            <div class="brand-name-block">
+                <h3>MediCare</h3>
+                <p>General Hospital</p>
+            </div>
+        </div>
+        
+        <h1 class="brand-title">Hospital Management System</h1>
+        
         <p class="brand-desc">
-            The centralised management system for all hospital operations — appointments, admissions, pharmacy, billing, and more.
+            The centralised platform for all hospital operations — appointments, admissions, pharmacy, billing, and more.
         </p>
-        <ul class="brand-features">
+        
+        <ul class="brand-feature-list">
             <li><i class="fas fa-calendar-check"></i> Unified appointment booking</li>
-            <li><i class="fas fa-bed"></i> Real-time ward management</li>
+            <li><i class="fas fa-bed"></i> Real-time ward & bed management</li>
             <li><i class="fas fa-file-invoice"></i> Automated billing system</li>
             <li><i class="fas fa-prescription-bottle"></i> Prescription management</li>
             <li><i class="fas fa-truck-medical"></i> Emergency dispatch system</li>
@@ -481,14 +455,14 @@ echo $modernCSS;
 
     <!-- Right Form Panel -->
     <div class="auth-form-panel">
-        <div class="form-inner">
+        <div class="form-container">
             <div class="form-header">
                 <h2>Welcome Back</h2>
                 <p>Sign in to your account to continue</p>
             </div>
 
             <?php if ($error): ?>
-                <div class="alert-error">
+                <div class="alert alert-error">
                     <i class="fas fa-exclamation-triangle"></i>
                     <?php echo htmlspecialchars($error); ?>
                 </div>
@@ -496,56 +470,56 @@ echo $modernCSS;
 
             <form method="POST" action="" id="loginForm" novalidate>
                 <div class="form-group">
-                    <label class="form-label" for="email">Email Address</label>
+                    <label class="form-label" for="email">Email Address <span class="required">*</span></label>
                     <input
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control"
+                        class="form-input"
                         placeholder="your@email.com"
                         value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
                         autocomplete="email"
                         required
                     >
-                    <div class="form-error" id="emailErr" style="display:none"></div>
+                    <div class="form-error-msg" id="emailErr" style="display:none"></div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
+                    <label class="form-label" for="password">Password <span class="required">*</span></label>
                     <div class="input-group">
                         <input
                             type="password"
                             id="password"
                             name="password"
-                            class="form-control"
+                            class="form-input"
                             placeholder="••••••••"
                             autocomplete="current-password"
                             required
                         >
-                        <button type="button" class="input-toggle" id="togglePwd" aria-label="Show password">
+                        <button type="button" class="input-toggle-btn" id="togglePwd" aria-label="Show password">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    <div class="form-error" id="passErr" style="display:none"></div>
+                    <div class="form-error-msg" id="passErr" style="display:none"></div>
                 </div>
 
-                <button type="submit" class="btn-primary" style="margin-top:8px">
-                    <i class="fas fa-sign-in-alt"></i> &nbsp; Sign In
+                <button type="submit" class="btn btn-primary" style="margin-top:8px">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
             </form>
 
-            <div class="auth-divider">or register as</div>
+            <div class="divider-text">or register as</div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <a href="/Web/Hospital-Management-System/register_patient.php" class="btn-secondary">
+            <div class="btn-grid">
+                <a href="/Web/Hospital-Management-System/register_patient.php" class="btn btn-outline">
                     <i class="fas fa-user"></i> Patient
                 </a>
-                <a href="/Web/Hospital-Management-System/register_staff.php" class="btn-secondary">
+                <a href="/Web/Hospital-Management-System/register_staff.php" class="btn btn-outline">
                     <i class="fas fa-hospital-user"></i> Staff
                 </a>
             </div>
 
-            <div class="auth-links">
+            <div class="back-link">
                 <a href="/Web/Hospital-Management-System/home.php">
                     <i class="fas fa-arrow-left"></i> Back to Hospital Website
                 </a>
@@ -567,22 +541,34 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     let valid = true;
     const emailVal = document.getElementById('email').value.trim();
     const emailErr = document.getElementById('emailErr');
+    const emailInput = document.getElementById('email');
+    
     if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
         emailErr.textContent = 'Please enter a valid email address.';
         emailErr.style.display = 'block';
+        emailInput.classList.add('error');
         valid = false;
     } else {
         emailErr.style.display = 'none';
+        emailInput.classList.remove('error');
     }
+
     const passVal = document.getElementById('password').value;
     const passErr = document.getElementById('passErr');
+    const passInput = document.getElementById('password');
+    
     if (!passVal) {
         passErr.textContent = 'Password is required.';
         passErr.style.display = 'block';
+        passInput.classList.add('error');
         valid = false;
     } else {
         passErr.style.display = 'none';
+        passInput.classList.remove('error');
     }
+
     if (!valid) e.preventDefault();
 });
 </script>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>

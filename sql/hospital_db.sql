@@ -55,25 +55,25 @@ CREATE TABLE IF NOT EXISTS doctors (
 ) ENGINE=InnoDB;
 
 -- ── appointments ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id       INT UNSIGNED  NOT NULL,
-    doctor_id        INT UNSIGNED  NOT NULL,
-    appt_date        DATE          NOT NULL,
-    appt_time        TIME          NOT NULL,
-    source           ENUM('online','opd') NOT NULL DEFAULT 'online',
-    status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
-    ref_number       VARCHAR(20)   NOT NULL UNIQUE,
-    notes            TEXT          NULL,
-    booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
-    created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (appointment_id),
-    INDEX idx_appt_date   (appt_date),
-    INDEX idx_appt_doctor (doctor_id),
-    INDEX idx_appt_patient(patient_id),
-    FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
-) ENGINE=InnoDB;
+    CREATE TABLE IF NOT EXISTS appointments (
+        appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+        patient_id       INT UNSIGNED  NOT NULL,
+        doctor_id        INT UNSIGNED  NOT NULL,
+        appt_date        DATE          NOT NULL,
+        appt_time        TIME          NOT NULL,
+        source           ENUM('online','opd') NOT NULL DEFAULT 'online',
+        status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+        ref_number       VARCHAR(20)   NOT NULL UNIQUE,
+        notes            TEXT          NULL,
+        booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
+        created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (appointment_id),
+        INDEX idx_appt_date   (appt_date),
+        INDEX idx_appt_doctor (doctor_id),
+        INDEX idx_appt_patient(patient_id),
+        FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
+        FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
+    ) ENGINE=InnoDB;
 
 -- ── rooms ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rooms (
@@ -263,6 +263,49 @@ VALUES (
     'admin',
     'active'
 );
+
+CREATE TABLE IF NOT EXISTS theatre_operations (
+    operation_id        INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id          INT NOT NULL,
+    lead_surgeon_id     INT NOT NULL,
+    anaesthetist_id     INT NOT NULL,
+    assistant_doctor_id INT DEFAULT NULL,
+    operation_type      VARCHAR(150) NOT NULL,
+    theatre_number      ENUM('Theatre 1','Theatre 2','Labour Theatre','Emergency Theatre') NOT NULL,
+    scheduled_date      DATE NOT NULL,
+    scheduled_time      TIME NOT NULL,
+    duration_minutes    INT DEFAULT 60,
+    pre_op_notes        TEXT DEFAULT NULL,
+    post_op_notes       TEXT DEFAULT NULL,
+    recovery_instructions TEXT DEFAULT NULL,
+    post_op_room_type   ENUM('ICU','Recovery Room','Private Room','General Ward') DEFAULT NULL,
+    status              ENUM('Scheduled','Confirmed','In Progress','Completed','Cancelled','Transferred') DEFAULT 'Scheduled',
+    is_maternity        TINYINT(1) DEFAULT 0,
+    billing_triggered   TINYINT(1) DEFAULT 0,
+    created_by          INT NOT NULL,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (patient_id)          REFERENCES patients(patient_id)  ON DELETE RESTRICT,
+    FOREIGN KEY (lead_surgeon_id)     REFERENCES users(user_id)         ON DELETE RESTRICT,
+    FOREIGN KEY (anaesthetist_id)     REFERENCES users(user_id)         ON DELETE RESTRICT,
+    FOREIGN KEY (assistant_doctor_id) REFERENCES users(user_id)         ON DELETE SET NULL,
+    FOREIGN KEY (created_by)          REFERENCES users(user_id)         ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS theatre_billing_items (
+    billing_item_id  INT AUTO_INCREMENT PRIMARY KEY,
+    operation_id     INT NOT NULL,
+    patient_id       INT NOT NULL,
+    item_type        ENUM('Surgery Fee','Theatre Usage Fee','Anaesthesia Fee','Equipment Fee','Recovery Charge') NOT NULL,
+    amount           DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    description      VARCHAR(255) DEFAULT NULL,
+    added_to_invoice TINYINT(1) DEFAULT 0,
+    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (operation_id) REFERENCES theatre_operations(operation_id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_id)   REFERENCES patients(patient_id)             ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 i create all of the sql table i want only loging resigtaion parts only other partys done by other members remove all sql table and stecher and use siple tables strcher not complax laout only create loging and registaion parts and main web site

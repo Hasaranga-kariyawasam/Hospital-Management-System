@@ -295,7 +295,7 @@
                     <div class="info-box"><label>Address</label><span id="disAddress"></span></div>
                 </div>
 
-                <!-- New Surgery List Table Section -->
+                
                 <div class="surgery-list-section">
                     <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1rem;"><i class="fas fa-notes-medical"></i> Scheduled Surgeries</h4>
                     <table class="surgery-table">
@@ -308,13 +308,12 @@
                             </tr>
                         </thead>
                         <tbody id="surgeryListBody">
-                            <!-- Data will be injected here -->
+                      
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Calendar (Unchanged) -->
             <div class="calendar-card">
                 <div class="calendar-header">
                     <h3 style="margin: 0; color: var(--primary);">Surgery Calendar - May 2026</h3>
@@ -339,9 +338,9 @@
             </div>
         </div>
 
-        <!-- Right Side -->
+       
         <div class="right-panel">
-            <!-- Search Bar (image_48527a.png) -->
+            
             <div class="quick-check">
                 <h3><i class="fas fa-search"></i> Find Your Schedule</h3>
                 <p style="font-size: 0.8rem; opacity: 0.9;">Enter Patient ID or NIC and click Search.</p>
@@ -375,7 +374,7 @@
 </div>
 
 <script>
-    // Data from image_485d02.jpg with added Surgery Details
+   
     const patientData = [
         {
             patient_id: "1",
@@ -406,7 +405,7 @@
             document.getElementById('disPhone').innerText = found.phone;
             document.getElementById('disAddress').innerText = found.address;
 
-            // Clear and inject surgery list
+         
             surgeryListBody.innerHTML = "";
             found.surgeries.forEach(surg => {
                 const statusClass = surg.status === "Approved" ? "status-approved" : "status-pending";
@@ -432,7 +431,7 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // PDF Header
+      
         doc.setFillColor(26, 35, 126);
         doc.rect(0, 0, 210, 40, 'F');
         doc.setTextColor(255, 255, 255);
@@ -441,7 +440,7 @@
         doc.setFontSize(10);
         doc.text("Official Clinical Summary & Surgery Schedule", 15, 30);
 
-        // PDF Patient Info Table
+       
         const patientInfo = [
             ["Patient ID", document.getElementById('disID').innerText],
             ["NIC Number", document.getElementById('disNIC').innerText],
@@ -459,7 +458,7 @@
             headStyles: { fillColor: [26, 35, 126] }
         });
 
-        // PDF Surgery Schedule Table
+        
         doc.setTextColor(26, 35, 126);
         doc.setFontSize(14);
         doc.text("Scheduled Surgery Details", 15, doc.lastAutoTable.finalY + 15);

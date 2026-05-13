@@ -46,7 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $base = '/Web/Hospital-Management-System';
             $redirectMap = [
                 'admin'      => "$base/modules/admin/dashboard.php",
-                'doctor'     => "$base/modules/appointments/doctor_schedule.php",
+
+                'doctor'     => "$base/modules/appointments/doctor_potal.php",
+
                 'reception'  => "$base/modules/appointments/opd_walkin.php",
                 'pharmacist' => "$base/modules/pharmacy/pharmacy_queue.php",
                 'patient'    => "$base/modules/appointments/my_appointments.php",

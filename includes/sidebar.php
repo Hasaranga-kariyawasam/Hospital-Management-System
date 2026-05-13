@@ -4,7 +4,7 @@
 $role = $_SESSION['role'] ?? 'guest';
 ?>
 <aside class="sidebar">
-
+<a href="/Web/Hospital-Management-System/view_doctors.php">🩺 View Doctors</a>
     <?php if ($role === 'admin'): ?>
         <div class="sidebar-section">
             <div class="sidebar-heading">Overview</div>

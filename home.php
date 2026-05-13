@@ -33,6 +33,9 @@
             <li><a href="#services">Services</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
+        <a href="emergency.php" class="emergency-nav-btn">
+          Emergency
+        </a>
 
         <div class="pub-nav-actions">
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-outline">Staff Login</a>
@@ -40,7 +43,87 @@
         </div>
     </div>
 </nav>
+<!-- Emergency Button Near Staff Login -->
+<style>
+    .pub-nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
+    .emergency-nav-btn {
+        background: #ff2d2d;
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1;
+        animation: emergencyGlow 2s infinite;
+    }
+
+    .emergency-nav-btn:hover {
+        background: #d90000;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 45, 45, 0.5);
+    }
+
+    .emergency-nav-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(255, 45, 45, 0.3);
+    }
+
+    .emergency-pulse-nav {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: pulseDot 1.5s infinite;
+    }
+
+    @keyframes emergencyGlow {
+        0%, 100% {
+            box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        }
+        50% {
+            box-shadow: 0 4px 25px rgba(255, 45, 45, 0.6);
+        }
+    }
+
+    @keyframes pulseDot {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.5);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .pub-nav-actions {
+            gap: 8px;
+        }
+        
+        .emergency-nav-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+    }
+</style>
 <!-- ═══════════════════════════════════════════
      HERO
 ════════════════════════════════════════════ -->

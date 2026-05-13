@@ -280,3 +280,19 @@ USE hospital_db;
 -- Add missing columns to theatre_operations
 -- (The base table from hospital_db.sql has fewer columns)
  
+-----sample data-------
+
+INSERT IGNORE INTO users (full_name, email, password_hash, role, status) VALUES
+('Dr. Nimal Silva', 'nimal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kamal Perera', 'kamal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kumari Jayawardena', 'kumari@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Anura Bandara', 'anura@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Shani Weerasinghe', 'shani@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active');
+
+
+INSERT IGNORE INTO doctors (user_id, specialization, license_number) VALUES
+((SELECT user_id FROM users WHERE email = 'nimal@medicare.lk'), 'General Surgery', 'DOC001'),
+((SELECT user_id FROM users WHERE email = 'kamal@medicare.lk'), 'Orthopedics', 'DOC002'),
+((SELECT user_id FROM users WHERE email = 'kumari@medicare.lk'), 'Gynecology', 'DOC003'),
+((SELECT user_id FROM users WHERE email = 'anura@medicare.lk'), 'Cardiology', 'DOC004'),
+((SELECT user_id FROM users WHERE email = 'shani@medicare.lk'), 'Anesthesiology', 'DOC005');

@@ -23,9 +23,12 @@ $patients = $pdo->query("
 ")->fetchAll();
 
 // ── Load doctors ──────────────────────────────────────────────
+// surgeon_id / anaesthetist_id / assistant_doctor_id in theatre_operations
+// all store users.user_id — so we select u.user_id here, not d.doctor_id
 $doctors = $pdo->query("
-    SELECT d.doctor_id, u.full_name, d.specialization
+    SELECT u.user_id, u.full_name, d.specialization
     FROM doctors d JOIN users u ON u.user_id = d.user_id
+    WHERE u.status = 'active'
     ORDER BY u.full_name
 ")->fetchAll();
 
@@ -176,8 +179,8 @@ include __DIR__ . '/../../includes/header.php';
                             <select name="surgeon_id" class="form-control" required>
                                 <option value="">— Select Surgeon —</option>
                                 <?php foreach ($doctors as $d): ?>
-                                    <option value="<?= $d['doctor_id'] ?>"
-                                        <?= (isset($_POST['surgeon_id']) && $_POST['surgeon_id'] == $d['doctor_id']) ? 'selected' : '' ?>>
+                                    <option value="<?= $d['user_id'] ?>"
+                                        <?= (isset($_POST['surgeon_id']) && $_POST['surgeon_id'] == $d['user_id']) ? 'selected' : '' ?>>
                                         Dr. <?= htmlspecialchars($d['full_name']) ?> – <?= htmlspecialchars($d['specialization']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -188,8 +191,8 @@ include __DIR__ . '/../../includes/header.php';
                             <select name="anaesthetist_id" class="form-control">
                                 <option value="">— Not Assigned —</option>
                                 <?php foreach ($doctors as $d): ?>
-                                    <option value="<?= $d['doctor_id'] ?>"
-                                        <?= (isset($_POST['anaesthetist_id']) && $_POST['anaesthetist_id'] == $d['doctor_id']) ? 'selected' : '' ?>>
+                                    <option value="<?= $d['user_id'] ?>"
+                                        <?= (isset($_POST['anaesthetist_id']) && $_POST['anaesthetist_id'] == $d['user_id']) ? 'selected' : '' ?>>
                                         Dr. <?= htmlspecialchars($d['full_name']) ?> – <?= htmlspecialchars($d['specialization']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -201,8 +204,8 @@ include __DIR__ . '/../../includes/header.php';
                         <select name="assistant_id" class="form-control">
                             <option value="">— Not Assigned —</option>
                             <?php foreach ($doctors as $d): ?>
-                                <option value="<?= $d['doctor_id'] ?>"
-                                    <?= (isset($_POST['assistant_id']) && $_POST['assistant_id'] == $d['doctor_id']) ? 'selected' : '' ?>>
+                                <option value="<?= $d['user_id'] ?>"
+                                    <?= (isset($_POST['assistant_id']) && $_POST['assistant_id'] == $d['user_id']) ? 'selected' : '' ?>>
                                     Dr. <?= htmlspecialchars($d['full_name']) ?> – <?= htmlspecialchars($d['specialization']) ?>
                                 </option>
                             <?php endforeach; ?>

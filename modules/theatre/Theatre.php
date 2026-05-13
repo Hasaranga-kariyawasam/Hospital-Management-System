@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theatre Management - MediCare HMS</title>
-    <!-- Google Fonts & Font Awesome Icons -->
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root {
@@ -30,7 +34,6 @@
 
         .main-content { padding: 40px; max-width: 1400px; margin: auto; }
 
-        /* Header Section */
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -41,7 +44,6 @@
         h1 { font-weight: 600; color: var(--primary); margin: 0; font-size: 1.8rem; }
         .page-header p { color: #777; margin: 5px 0 0 0; }
 
-        /* Layout Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -49,12 +51,13 @@
             margin-top: 30px;
         }
 
-        /* Calendar Styling */
+       
         .calendar-card {
             background: var(--white);
             padding: 25px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
         }
 
         .calendar-header {
@@ -95,7 +98,6 @@
             border-radius: 50%;
         }
 
-        /* Patient Quick Check Form */
         .quick-check {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -104,7 +106,6 @@
             margin-bottom: 25px;
         }
 
-        .quick-check h3 { margin-top: 0; font-size: 1.1rem; }
         .input-group {
             display: flex;
             gap: 10px;
@@ -127,7 +128,66 @@
             font-weight: 600;
         }
 
-        /* Status Cards */
+       
+        #searchResultCard {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: none; 
+            margin-bottom: 25px;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .info-box label { font-size: 0.75rem; color: #888; display: block; text-transform: uppercase; }
+        .info-box span { font-weight: 600; color: var(--primary); }
+
+        .btn-pdf {
+            background: white; color: var(--primary); border: 1px solid var(--primary);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+
+       
+        .surgery-list-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .surgery-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .surgery-table th {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: #666;
+            border-bottom: 2px solid #eee;
+        }
+        .surgery-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-approved { background: #e8f5e9; color: #2e7d32; }
+        .status-pending { background: #fff3e0; color: #ef6c00; }
+
+        
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -156,7 +216,7 @@
             color: var(--primary);
         }
 
-        /* Appointment List */
+        
         .apt-list { list-style: none; padding: 0; margin: 0; }
         .apt-item {
             display: flex;
@@ -189,21 +249,15 @@
             <h1>MediCare Patient Portal</h1>
             <p>Operation Theatre Schedule & Status</p>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-check" style="background: white; color: var(--primary); border: 1px solid var(--primary);">
-                <i class="fas fa-download"></i> Reports
-            </button>
-            <button class="btn-check"><i class="fas fa-plus"></i> Request Booking</button>
-        </div>
     </div>
 
-    <!-- Quick Stats -->
+   
     <div class="stats-row">
         <div class="stat-card">
             <div class="icon-box"><i class="fas fa-user-injured"></i></div>
             <div>
-                <small style="color: #888;">Your Status</small>
-                <div style="font-weight: 600;">Confirmed</div>
+                <small style="color: #888;">Patient Status</small>
+                <div style="font-weight: 600;">System Active</div>
             </div>
         </div>
         <div class="stat-card">
@@ -216,15 +270,51 @@
         <div class="stat-card">
             <div class="icon-box" style="color: var(--success);"><i class="fas fa-clock"></i></div>
             <div>
-                <small style="color: #888;">Waiting Time</small>
-                <div style="font-weight: 600;">~ 45 Mins</div>
+                <small style="color: #888;">Current Delay</small>
+                <div style="font-weight: 600;">None</div>
             </div>
         </div>
     </div>
 
     <div class="dashboard-grid">
-        <!-- Left Side: Calendar and Details -->
+        
         <div class="left-panel">
+            
+            
+            <div id="searchResultCard">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;"><i class="fas fa-id-badge"></i> Patient Records Found</h3>
+                    <button class="btn-pdf" onclick="generateReport()"><i class="fas fa-file-pdf"></i> Download Report</button>
+                </div>
+                <div class="info-grid">
+                    <div class="info-box"><label>Patient ID</label><span id="disID"></span></div>
+                    <div class="info-box"><label>NIC Number</label><span id="disNIC"></span></div>
+                    <div class="info-box"><label>Gender</label><span id="disGender"></span></div>
+                    <div class="info-box"><label>Blood Type</label><span id="disBlood"></span></div>
+                    <div class="info-box"><label>Contact</label><span id="disPhone"></span></div>
+                    <div class="info-box"><label>Address</label><span id="disAddress"></span></div>
+                </div>
+
+                <!-- New Surgery List Table Section -->
+                <div class="surgery-list-section">
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1rem;"><i class="fas fa-notes-medical"></i> Scheduled Surgeries</h4>
+                    <table class="surgery-table">
+                        <thead>
+                            <tr>
+                                <th>Surgery Name</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="surgeryListBody">
+                            <!-- Data will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Calendar (Unchanged) -->
             <div class="calendar-card">
                 <div class="calendar-header">
                     <h3 style="margin: 0; color: var(--primary);">Surgery Calendar - May 2026</h3>
@@ -238,8 +328,6 @@
                     <div class="day-name">MON</div><div class="day-name">TUE</div><div class="day-name">WED</div>
                     <div class="day-name">THU</div><div class="day-name">FRI</div><div class="day-name">SAT</div>
                     <div class="day-name">SUN</div>
-                    
-                    <!-- Calendar Days (Static for demo) -->
                     <div class="day">1</div><div class="day">2</div><div class="day">3</div>
                     <div class="day">4</div><div class="day has-event">5</div><div class="day">6</div><div class="day">7</div>
                     <div class="day">8</div><div class="day">9</div><div class="day">10</div>
@@ -248,31 +336,18 @@
                     <div class="day">18</div><div class="day">19</div><div class="day has-event">20</div>
                     <div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div>
                 </div>
-
-                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <h4 style="font-size: 0.9rem; color: #666;">Schedule Details for Today</h4>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; gap: 15px; align-items: center;">
-                            <div style="width: 10px; height: 10px; background: var(--warning); border-radius: 50%;"></div>
-                            <div>
-                                <div style="font-weight: 500;">Minor Surgery - Room 04</div>
-                                <small style="color: #888;">10:30 AM - 11:15 AM</small>
-                            </div>
-                        </div>
-                        <span style="color: var(--primary); font-weight: 600; font-size: 0.8rem;">View Prep Instructions</span>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Right Side: Search and Upcoming -->
+        <!-- Right Side -->
         <div class="right-panel">
+            <!-- Search Bar (image_48527a.png) -->
             <div class="quick-check">
                 <h3><i class="fas fa-search"></i> Find Your Schedule</h3>
-                <p style="font-size: 0.8rem; opacity: 0.9;">Enter your Patient ID or NIC to see your surgery details.</p>
+                <p style="font-size: 0.8rem; opacity: 0.9;">Enter Patient ID or NIC and click Search.</p>
                 <div class="input-group">
-                    <input type="text" placeholder="e.g. PAT-9920">
-                    <button class="btn-check">Search</button>
+                    <input type="text" id="pSearch" placeholder="e.g. 200435800944">
+                    <button class="btn-check" onclick="runSearch()">Search</button>
                 </div>
             </div>
 
@@ -280,45 +355,130 @@
                 <h3 style="margin-top: 0; font-size: 1.1rem; color: var(--primary);">Upcoming Surgeries</h3>
                 <ul class="apt-list">
                     <li class="apt-item">
-                        <div class="apt-date">
-                            <small>MAY</small>
-                            <span>15</span>
-                        </div>
+                        <div class="apt-date"><small>MAY</small><span>15</span></div>
                         <div>
                             <div style="font-weight: 500; font-size: 0.9rem;">Dr. Nilanthi Silva</div>
                             <small style="color: #888;">Knee Replacement</small>
                         </div>
                     </li>
                     <li class="apt-item">
-                        <div class="apt-date" style="background: #fff4e5; color: var(--warning);">
-                            <small>MAY</small>
-                            <span>18</span>
-                        </div>
+                        <div class="apt-date" style="background: #fff4e5; color: var(--warning);"><small>MAY</small><span>18</span></div>
                         <div>
                             <div style="font-weight: 500; font-size: 0.9rem;">Dr. Saman Perera</div>
                             <small style="color: #888;">Heart Checkup</small>
                         </div>
                     </li>
-                    <li class="apt-item" style="border: none;">
-                        <div class="apt-date">
-                            <small>MAY</small>
-                            <span>20</span>
-                        </div>
-                        <div>
-                            <div style="font-weight: 500; font-size: 0.9rem;">Dr. Aruna Bandara</div>
-                            <small style="color: #888;">Eye Surgery</small>
-                        </div>
-                    </li>
                 </ul>
-            </div>
-
-            <div style="margin-top: 20px; background: #e8f5e9; padding: 15px; border-radius: 15px; color: #2e7d32; display: flex; gap: 10px; align-items: center;">
-                <i class="fas fa-info-circle"></i>
-                <small>Please arrive 2 hours before your scheduled time.</small>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Data from image_485d02.jpg with added Surgery Details
+    const patientData = [
+        {
+            patient_id: "1",
+            nic: "200435800944",
+            gender: "male",
+            blood_type: "O+",
+            phone: "0710835022",
+            address: "HORANA",
+            surgeries: [
+                { name: "Appendectomy", doctor: "Dr. Nilanthi Silva", date: "2026-05-15", status: "Approved" },
+                { name: "Knee Replacement", doctor: "Dr. Saman Perera", date: "2026-06-10", status: "Pending" }
+            ]
+        }
+    ];
+
+    function runSearch() {
+        const query = document.getElementById('pSearch').value.trim();
+        const resultCard = document.getElementById('searchResultCard');
+        const surgeryListBody = document.getElementById('surgeryListBody');
+        
+        const found = patientData.find(p => p.patient_id === query || p.nic === query);
+
+        if (found) {
+            document.getElementById('disID').innerText = found.patient_id;
+            document.getElementById('disNIC').innerText = found.nic;
+            document.getElementById('disGender').innerText = found.gender.toUpperCase();
+            document.getElementById('disBlood').innerText = found.blood_type;
+            document.getElementById('disPhone').innerText = found.phone;
+            document.getElementById('disAddress').innerText = found.address;
+
+            // Clear and inject surgery list
+            surgeryListBody.innerHTML = "";
+            found.surgeries.forEach(surg => {
+                const statusClass = surg.status === "Approved" ? "status-approved" : "status-pending";
+                const row = `
+                    <tr>
+                        <td>${surg.name}</td>
+                        <td>${surg.doctor}</td>
+                        <td>${surg.date}</td>
+                        <td><span class="status-badge ${statusClass}">${surg.status}</span></td>
+                    </tr>
+                `;
+                surgeryListBody.innerHTML += row;
+            });
+
+            resultCard.style.display = 'block';
+        } else {
+            alert("No matching record found.");
+            resultCard.style.display = 'none';
+        }
+    }
+
+    function generateReport() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // PDF Header
+        doc.setFillColor(26, 35, 126);
+        doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text("MEDICARE HEALTH CARE", 15, 20);
+        doc.setFontSize(10);
+        doc.text("Official Clinical Summary & Surgery Schedule", 15, 30);
+
+        // PDF Patient Info Table
+        const patientInfo = [
+            ["Patient ID", document.getElementById('disID').innerText],
+            ["NIC Number", document.getElementById('disNIC').innerText],
+            ["Gender", document.getElementById('disGender').innerText],
+            ["Blood Type", document.getElementById('disBlood').innerText],
+            ["Phone Number", document.getElementById('disPhone').innerText],
+            ["Current Address", document.getElementById('disAddress').innerText]
+        ];
+
+        doc.autoTable({
+            startY: 50,
+            head: [['Description', 'Information']],
+            body: patientInfo,
+            theme: 'striped',
+            headStyles: { fillColor: [26, 35, 126] }
+        });
+
+        // PDF Surgery Schedule Table
+        doc.setTextColor(26, 35, 126);
+        doc.setFontSize(14);
+        doc.text("Scheduled Surgery Details", 15, doc.lastAutoTable.finalY + 15);
+
+        const query = document.getElementById('disNIC').innerText;
+        const found = patientData.find(p => p.nic === query);
+        const surgeryRows = found ? found.surgeries.map(s => [s.name, s.doctor, s.date, s.status]) : [];
+
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 20,
+            head: [['Surgery Name', 'Doctor', 'Date', 'Status']],
+            body: surgeryRows,
+            theme: 'grid',
+            headStyles: { fillColor: [57, 73, 171] }
+        });
+
+        doc.save("MediCare_Official_Report.pdf");
+    }
+</script>
 
 </body>
 </html>

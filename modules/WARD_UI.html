@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.30.0/tabler-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0B3B5F;
+            --primary-dark: #082c48;
+            --primary-mid: #145c7a;
+            --accent: #2C7DA0;
+            --accent-dark: #1F5E7A;
+            --accent-light: #d9f0f7;
+            --success: #2C8C5A;
+            --warning: #BA7517;
+            --danger: #E24B4A;
+            --surface: #F8FAFE;
+            --bg: #FFFFFF;
+            --text: #1A2C3E;
+            --text-mid: #4A627A;
+            --muted: #7A8EA8;
+            --border-light: #e4edf2;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .logo-area {
+            padding: 28px 24px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            box-shadow: 0 6px 12px rgba(44,125,160,0.25);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .nav-group {
+            margin-bottom: 20px;
+        }
+
+        .nav-group-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 0 24px 10px;
+            letter-spacing: 0.8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 24px;
+            margin: 2px 12px;
+            border-radius: 10px;
+            color: var(--text-mid);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item i {
+            font-size: 18px;
+        }
+
+        .nav-item:hover {
+            background: var(--accent-light);
+            color: var(--accent-dark);
+        }
+
+        .nav-item.active {
+            background: var(--accent-light);
+            color: var(--accent-dark);
+            font-weight: 600;
+        }
+
+        .user-footer {
+            margin-top: auto;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .metric-card {
+            background: var(--bg);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .filter-chip {
+            padding: 7px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .filter-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: var(--bg);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .room-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+
+        .bed-dots {
+            display: flex;
+            gap: 6px;
+            margin: 14px 0;
+            flex-wrap: wrap;
+        }
+
+        .bed-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid var(--accent);
+            transition: all 0.2s;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #EAF3DE; color: #27500A; }
+        .badge-warning { background: #FAEEDA; color: #633806; }
+        .badge-danger { background: #FCEBEB; color: #791F1F; }
+        .badge-info { background: #E6F1FB; color: #0C447C; }
+        .badge-primary { background: var(--accent-light); color: var(--accent-dark); }
+
+        .card-panel {
+            background: var(--bg);
+            border-radius: var(--radius-xl);
+            padding: 24px 28px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 28px;
+        }
+
+        .request-item {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 18px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .request-item:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-md);
+            transform: translateX(3px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44,125,160,0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border-light);
+            padding: 9px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-mid);
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border-light);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-lg);
+            background: var(--bg);
+            padding: 0;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        tr:hover {
+            background: var(--surface);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 80px; }
+            .sidebar .logo-text, .sidebar .nav-group-title, .sidebar .user-info { display: none; }
+            .nav-item { justify-content: center; padding: 12px; margin: 2px 6px; }
+            .metric-grid { grid-template-columns: 1fr 1fr; }
+            .split-layout { grid-template-columns: 1fr; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <div class="logo">
+                <div class="logo-icon"><i class="ti ti-building-hospital"></i></div>
+                <div class="logo-text">MediCare<br><span class="logo-sub">Ward Management</span></div>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-title">ROOMS</div>
+            <div class="nav-item active" data-page="availability"><i class="ti ti-layout-grid"></i> Room Availability</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">ADMISSION</div>
+            <div class="nav-item" data-page="requests"><i class="ti ti-file-plus"></i> Admission Requests</div>
+            <div class="nav-item" data-page="doctor-review"><i class="ti ti-stethoscope"></i> Doctor Review</div>
+            <div class="nav-item" data-page="assignment"><i class="ti ti-bed"></i> Room Assignment</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">PATIENT RECORDS</div>
+            <div class="nav-item" data-page="inpatients"><i class="ti ti-users"></i> Current Inpatients</div>
+            <div class="nav-item" data-page="discharge"><i class="ti ti-door-exit"></i> Discharge & Billing</div>
+            <div class="nav-item" data-page="newborn"><i class="ti ti-baby-carriage"></i> Newborn Records</div>
+        </div>
+        <div class="nav-group">
+            <div class="nav-group-title">REPORTS</div>
+            <div class="nav-item" data-page="occupancy"><i class="ti ti-chart-bar"></i> Occupancy Dashboard</div>
+        </div>
+
+        <div class="user-footer">
+            <div class="user-avatar">DD</div>
+            <div class="user-info"><strong>D.S.R.N Dahanayaka</strong><br><span style="font-size: 10px; color: var(--muted);">TG/2024/2127</span></div>
+        </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <div id="pageContainer"></div>
+    </main>
+</div>
+
+<script>
+    const roomsData = [
+        { id: "R101", number: "101", type: "Private", ward: "A", rate: 4500, beds: 1, occupied: 0, floor: 1 },
+        { id: "R102", number: "102", type: "Private", ward: "A", rate: 4500, beds: 1, occupied: 1, floor: 1 },
+        { id: "R103", number: "103", type: "Semi-Private", ward: "A", rate: 2800, beds: 2, occupied: 1, floor: 1 },
+        { id: "R104", number: "104", type: "Semi-Private", ward: "A", rate: 2800, beds: 2, occupied: 2, floor: 1 },
+        { id: "R201", number: "201", type: "General Ward", ward: "B", rate: 1500, beds: 4, occupied: 2, floor: 2 },
+        { id: "R202", number: "202", type: "General Ward", ward: "B", rate: 1500, beds: 4, occupied: 4, floor: 2 },
+        { id: "R203", number: "203", type: "ICU", ward: "ICU", rate: 12000, beds: 1, occupied: 1, floor: 2 },
+        { id: "R204", number: "204", type: "ICU", ward: "ICU", rate: 12000, beds: 1, occupied: 0, floor: 2 },
+        { id: "R301", number: "301", type: "Children's Room", ward: "C", rate: 3200, beds: 2, occupied: 1, floor: 3 },
+        { id: "R302", number: "302", type: "Maternity Room", ward: "M", rate: 5000, beds: 1, occupied: 0, floor: 3 },
+        { id: "R303", number: "303", type: "Recovery Room", ward: "R", rate: 8000, beds: 1, occupied: 1, floor: 3 },
+    ];
+
+    let admissionsData = [
+        { id: "ADM001", patientId: "P1042", patientName: "Karunatilake R.M.", roomId: "R102", doctor: "Dr. Perera", admitDate: "2026-05-05", status: "Admitted", diet: "Diabetic Diet", advance: 10000, total: 36000, daysStay: 8 },
+        { id: "ADM002", patientId: "P2017", patientName: "Fernando S.K.", roomId: "R103", doctor: "Dr. Silva", admitDate: "2026-05-08", status: "Admitted", diet: "Standard Meal", advance: 5000, total: 22400, daysStay: 5 },
+        { id: "ADM003", patientId: "P3081", patientName: "Jayasinghe A.P.", roomId: "R201", doctor: "Dr. Bandara", admitDate: "2026-05-10", status: "Admitted", diet: "Low Salt", advance: 0, total: 10500, daysStay: 3 },
+        { id: "ADM004", patientId: "P4055", patientName: "Kumari W.D.N.", roomId: "R303", doctor: "Dr. Ranasinghe", admitDate: "2026-05-12", status: "Post-Op", diet: "Liquid", advance: 20000, total: 58000, daysStay: 1 },
+    ];
+
+    let requestsData = [
+        { id: "REQ001", patientId: "P5022", patientName: "Dissanayake B.G.", doctor: "Dr. Silva", reason: "Post appendectomy", roomType: "Private", diet: "Standard", priority: "High", status: "Pending Review", createdAt: "2026-05-13 09:15" },
+        { id: "REQ002", patientId: "P6011", patientName: "Madushan K.H.", doctor: "Dr. Bandara", reason: "Chest pain", roomType: "ICU", diet: "Doctor-Prescribed", priority: "Critical", status: "Doctor Approved", createdAt: "2026-05-13 08:02" },
+        { id: "REQ003", patientId: "P7034", patientName: "Priyanka N.S.", doctor: "Dr. Gamage", reason: "Maternity", roomType: "Maternity Room", diet: "No Meal", priority: "Normal", status: "Ready for Assignment", createdAt: "2026-05-12 22:40" },
+    ];
+
+    let newbornsData = [
+        { id: "NB001", tempId: "Baby-F-0513", motherName: "Priyanka N.S.", motherId: "P7034", dob: "2026-05-13", time: "06:42", weight: 3.2, gender: "Female", health: "Healthy", room: "R301", notes: "Normal delivery, no complications" }
+    ];
+
+    function getRoomColor(type) {
+        const colors = {
+            "ICU": "#FCEBEB", "Private": "#EEEDFE", "Semi-Private": "#E6F1FB",
+            "General Ward": "#F1EFE8", "Children's Room": "#E1F5EE", "Maternity Room": "#FAEEDA", "Recovery Room": "#EAF3DE"
+        };
+        return colors[type] || "#F1EFE8";
+    }
+
+    function renderAvailability() {
+        const totalBeds = roomsData.reduce((s, r) => s + r.beds, 0);
+        const occupiedBeds = roomsData.reduce((s, r) => s + r.occupied, 0);
+        
+        return `
+            <div>
+                <h1 class="page-title">Room Availability</h1>
+                <p class="page-subtitle">Real-time occupancy across all wards</p>
+                <div class="metric-grid">
+                    <div class="metric-card"><div class="metric-label">Total Beds</div><div class="metric-value">${totalBeds}</div></div>
+                    <div class="metric-card"><div class="metric-label">Occupied</div><div class="metric-value" style="color: var(--danger);">${occupiedBeds}</div></div>
+                    <div class="metric-card"><div class="metric-label">Available</div><div class="metric-value" style="color: var(--success);">${totalBeds - occupiedBeds}</div></div>
+                    <div class="metric-card"><div class="metric-label">Occupancy Rate</div><div class="metric-value">${Math.round((occupiedBeds/totalBeds)*100)}%</div></div>
+                </div>
+                <div class="filter-bar" id="filterBar"></div>
+                <div class="rooms-grid" id="roomsGrid"></div>
+            </div>
+        `;
+    }
+
+    function renderRequests() {
+        return `
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+                    <div><h1 class="page-title">Admission Requests</h1><p class="page-subtitle">Pending and approved admission requests</p></div>
+                    <button class="btn-primary" id="newRequestBtn"><i class="ti ti-plus"></i> New Request</button>
+                </div>
+                <div id="requestsList">
+                    ${requestsData.map(req => `
+                        <div class="request-item">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div><strong style="font-size: 15px;">${req.patientName}</strong><br><span style="font-size: 12px; color: var(--muted);">${req.patientId} · ${req.doctor}</span><br><span style="font-size: 12px; margin-top: 4px;">${req.reason}</span></div>
+                                <div style="text-align: right;"><span class="badge ${req.status === 'Pending Review' ? 'badge-warning' : 'badge-success'}">${req.status}</span><br><span class="badge ${req.priority === 'Critical' ? 'badge-danger' : 'badge-info'}" style="margin-top: 6px;">${req.priority}</span></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderDoctorReview() {
+        const pending = requestsData.filter(r => r.status === "Pending Review");
+        return `
+            <div>
+                <h1 class="page-title">Doctor Review Portal</h1>
+                <p class="page-subtitle">Review and approve admission requests</p>
+                <div class="split-layout">
+                    <div>
+                        <h3 style="margin-bottom: 16px; font-size: 16px;">Pending Reviews (${pending.length})</h3>
+                        ${pending.map(req => `
+                            <div class="request-item" onclick="alert('Review request for ${req.patientName}')">
+                                <div><strong>${req.patientName}</strong><br><span style="font-size: 12px;">${req.reason} · ${req.roomType}</span></div>
+                                <div style="margin-top: 10px;"><button class="btn-primary" style="padding: 6px 16px;">Review</button></div>
+                            </div>
+                        `).join('')}
+                        ${pending.length === 0 ? '<div class="card-panel" style="text-align: center;">No pending reviews</div>' : ''}
+                    </div>
+                    <div class="card-panel">
+                        <h3 style="margin-bottom: 20px;">Review Details</h3>
+                        <div class="form-group"><label>Room Type</label><select><option>Private</option><option>ICU</option><option>Semi-Private</option><option>General Ward</option></select></div>
+                        <div class="form-group"><label>Diet Plan</label><select><option>Standard Meal</option><option>Doctor-Prescribed</option><option>Liquid Diet</option><option>Diabetic Diet</option></select></div>
+                        <div class="form-group"><label>Clinical Notes</label><textarea rows="3" placeholder="Add clinical notes..."></textarea></div>
+                        <button class="btn-primary">Approve Admission</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAssignment() {
+        const approved = requestsData.filter(r => r.status === "Doctor Approved" || r.status === "Ready for Assignment");
+        return `
+            <div>
+                <h1 class="page-title">Room Assignment</h1>
+                <p class="page-subtitle">Assign rooms to approved admissions</p>
+                <div class="split-layout">
+                    <div>
+                        <h3 style="margin-bottom: 16px;">Approved Requests</h3>
+                        ${approved.map(req => `<div class="request-item"><strong>${req.patientName}</strong><br>Requested: ${req.roomType}<br><button class="btn-primary" style="margin-top: 10px; padding: 6px 16px;">Assign Room</button></div>`).join('')}
+                        ${approved.length === 0 ? '<div class="card-panel" style="text-align: center;">No approved requests pending</div>' : ''}
+                    </div>
+                    <div class="card-panel">
+                        <h3 style="margin-bottom: 16px;">Available Rooms</h3>
+                        ${roomsData.filter(r => r.occupied < r.beds).slice(0, 4).map(room => `
+                            <div class="room-card" style="margin-bottom: 12px;"><strong>Room #${room.number}</strong> - ${room.type}<br>Rate: Rs.${room.rate}/day<br><span class="badge badge-success">${room.beds - room.occupied} beds free</span></div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+function renderInpatients() {
+    return `
+        <div>
+            <h1 class="page-title">Current Inpatients</h1>
+            <p class="page-subtitle">${admissionsData.length} patients currently admitted</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Patient ID</th><th>Patient Name</th><th>Room</th><th>Doctor</th><th>Admit Date</th><th>Diet</th><th>Balance</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        ${admissionsData.map(adm => {
+                            const room = roomsData.find(r => r.id === adm.roomId);
+                            const balance = adm.total - adm.advance;
+                            return `
+                                <tr>
+                                    <td>${adm.patientId}</td>
+                                    <td><strong>${adm.patientName}</strong></td>
+                                    <td>#${room?.number} (${room?.type})</td>
+                                    <td>${adm.doctor}</td>
+                                    <td>${adm.admitDate}</td>
+                                    <td>${adm.diet}</td>
+                                    <td style="color: ${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight: 600;">Rs.${balance.toLocaleString()}</td>
+                                    <td><span class="badge badge-success">${adm.status}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+    function renderDischarge() {
+        return `
+            <div>
+                <h1 class="page-title">Discharge & Final Billing</h1>
+                <p class="page-subtitle">Process patient discharge and collect payments</p>
+                <div class="split-layout">
+                    <div>
+                        <h3 style="margin-bottom: 16px;">Select Patient</h3>
+                        ${admissionsData.map(adm => `<div class="request-item"><strong>${adm.patientName}</strong><br>Room #${roomsData.find(r=>r.id===adm.roomId)?.number} · Days: ${adm.daysStay}<br><button class="btn-outline" style="margin-top: 8px;">Process Discharge</button></div>`).join('')}
+                    </div>
+                    <div class="card-panel">
+                        <h3 style="margin-bottom: 20px;">Billing Summary</h3>
+                        <div style="margin: 16px 0;"><div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Room Charges (Private × 8):</span><span>Rs. 36,000</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Meal Charges (8 days):</span><span>Rs. 2,800</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Pharmacy:</span><span>Rs. 4,200</span></div><hr style="margin: 8px 0;"><div style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: 700;"><span>Total:</span><span>Rs. 43,000</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0;"><span>Advance Paid:</span><span>Rs. 10,000</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0; color: var(--danger); font-weight: 700;"><span>Balance Due:</span><span>Rs. 33,000</span></div></div>
+                        <button class="btn-primary" style="width: 100%;">Confirm Payment & Discharge</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderNewborn() {
+        return `
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 28px;"><div><h1 class="page-title">Newborn Records</h1><p class="page-subtitle">Baby records linked to mother</p></div><button class="btn-primary" id="registerNewbornBtn"><i class="ti ti-plus"></i> Register Newborn</button></div>
+                ${newbornsData.map(baby => `
+                    <div class="card-panel">
+                        <div style="display: flex; gap: 20px;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-light), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="ti ti-baby-carriage" style="font-size: 28px; color: white;"></i></div>
+                            <div><strong style="font-size: 16px;">${baby.tempId}</strong><br>Mother: ${baby.motherName} (${baby.motherId})<br>DOB: ${baby.dob} ${baby.time} · Weight: ${baby.weight}kg · Gender: ${baby.gender}<br>Room: #${baby.room} · Health: <span class="badge badge-success">${baby.health}</span><br><span style="font-size: 12px; color: var(--muted);">${baby.notes}</span></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function renderOccupancy() {
+        const byType = {};
+        roomsData.forEach(r => { byType[r.type] = (byType[r.type] || 0) + r.occupied; });
+        const totals = {};
+        roomsData.forEach(r => { totals[r.type] = (totals[r.type] || 0) + r.beds; });
+        
+        return `
+            <div>
+                <h1 class="page-title">Occupancy Dashboard</h1>
+                <p class="page-subtitle">Live occupancy overview by department</p>
+                <div class="metric-grid">
+                    <div class="metric-card"><div class="metric-label">Total Beds</div><div class="metric-value">${roomsData.reduce((s,r)=>s+r.beds,0)}</div></div>
+                    <div class="metric-card"><div class="metric-label">Occupied</div><div class="metric-value" style="color: var(--danger);">${roomsData.reduce((s,r)=>s+r.occupied,0)}</div></div>
+                    <div class="metric-card"><div class="metric-label">Available</div><div class="metric-value" style="color: var(--success);">${roomsData.reduce((s,r)=>s+r.beds - r.occupied,0)}</div></div>
+                    <div class="metric-card"><div class="metric-label">Admissions Today</div><div class="metric-value">3</div></div>
+                </div>
+                <div class="card-panel">
+                    <h3 style="margin-bottom: 20px;">Occupancy by Room Type</h3>
+                    ${Object.keys(byType).map(type => {
+                        const pct = Math.round((byType[type] / totals[type]) * 100);
+                        return `<div style="margin-bottom: 16px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 500;">${type}</span><span>${byType[type]}/${totals[type]} beds · ${pct}%</span></div><div style="background: var(--border-light); height: 8px; border-radius: 10px; overflow: hidden;"><div style="width: ${pct}%; background: linear-gradient(90deg, var(--accent), var(--primary)); height: 8px; border-radius: 10px;"></div></div></div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    const pages = {
+        availability: renderAvailability,
+        requests: renderRequests,
+        "doctor-review": renderDoctorReview,
+        assignment: renderAssignment,
+        inpatients: renderInpatients,
+        discharge: renderDischarge,
+        newborn: renderNewborn,
+        occupancy: renderOccupancy
+    };
+
+    let currentPage = "availability";
+
+    function loadPage(pageId) {
+        currentPage = pageId;
+        const renderFn = pages[pageId];
+        if (renderFn) {
+            document.getElementById('pageContainer').innerHTML = renderFn();
+            if (pageId === 'availability') {
+                const filterBar = document.getElementById('filterBar');
+                if (filterBar) {
+                    const types = ['All', 'Private', 'Semi-Private', 'General Ward', 'ICU', 'Children\'s Room', 'Maternity Room', 'Recovery Room'];
+                    filterBar.innerHTML = types.map(t => `<span class="filter-chip ${t === 'All' ? 'active' : ''}" data-type="${t}">${t}</span>`).join('');
+                    document.querySelectorAll('#filterBar .filter-chip').forEach(chip => {
+                        chip.addEventListener('click', function() {
+                            document.querySelectorAll('#filterBar .filter-chip').forEach(c => c.classList.remove('active'));
+                            this.classList.add('active');
+                            const type = this.getAttribute('data-type');
+                            const filtered = type === 'All' ? roomsData : roomsData.filter(r => r.type === type);
+                            const grid = document.getElementById('roomsGrid');
+                            if (grid) {
+                                grid.innerHTML = filtered.map(room => {
+                                    const avail = room.beds - room.occupied;
+                                    return `<div class="room-card" style="background: ${getRoomColor(room.type)};">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 18px;">#${room.number}</strong><span class="badge ${avail === 0 ? 'badge-danger' : 'badge-success'}">${avail === 0 ? 'Full' : avail + ' free'}</span></div>
+                                        <div style="font-size: 14px; font-weight: 600; margin: 8px 0 4px;">${room.type}</div>
+                                        <div class="bed-dots">${Array.from({length: room.beds}).map((_,i) => `<div class="bed-dot" style="background: ${i < room.occupied ? 'var(--accent)' : 'transparent'}; border-color: var(--accent);"></div>`).join('')}</div>
+                                        <div style="font-size: 12px; color: var(--muted);">Ward ${room.ward} · Floor ${room.floor}</div>
+                                        <div style="font-weight: 700; margin-top: 10px;">Rs.${room.rate.toLocaleString()}<span style="font-weight: 400; font-size: 11px;">/day</span></div>
+                                    </div>`;
+                                }).join('');
+                            }
+                        });
+                    });
+                }
+                const grid = document.getElementById('roomsGrid');
+                if (grid) {
+                    grid.innerHTML = roomsData.map(room => {
+                        const avail = room.beds - room.occupied;
+                        return `<div class="room-card" style="background: ${getRoomColor(room.type)};">
+                            <div style="display: flex; justify-content: space-between; align-items: center;"><strong style="font-size: 18px;">#${room.number}</strong><span class="badge ${avail === 0 ? 'badge-danger' : 'badge-success'}">${avail === 0 ? 'Full' : avail + ' free'}</span></div>
+                            <div style="font-size: 14px; font-weight: 600; margin: 8px 0 4px;">${room.type}</div>
+                            <div class="bed-dots">${Array.from({length: room.beds}).map((_,i) => `<div class="bed-dot" style="background: ${i < room.occupied ? 'var(--accent)' : 'transparent'}; border-color: var(--accent);"></div>`).join('')}</div>
+                            <div style="font-size: 12px; color: var(--muted);">Ward ${room.ward} · Floor ${room.floor}</div>
+                            <div style="font-weight: 700; margin-top: 10px;">Rs.${room.rate.toLocaleString()}<span style="font-weight: 400; font-size: 11px;">/day</span></div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+            if (pageId === 'requests') {
+                const btn = document.getElementById('newRequestBtn');
+                if (btn) btn.onclick = () => alert("New Admission Request Form");
+            }
+            if (pageId === 'newborn') {
+                const btn = document.getElementById('registerNewbornBtn');
+                if (btn) btn.onclick = () => alert("Register Newborn Form");
+            }
+        }
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            const pageId = this.getAttribute('data-page');
+            loadPage(pageId);
+        });
+    });
+
+    loadPage('availability');
+</script>
+</body>
+</html>

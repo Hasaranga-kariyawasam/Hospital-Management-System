@@ -2,242 +2,310 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../../config/db_config.php';
-require_once __DIR__ . '/../../includes/auth_guard.php';
+$requiredRoles = ['admin', 'doctor'];
+require_once __DIR__ . '/../../includes/role_check.php';
 
-requireRole(['admin', 'doctor']);
+
+
+
 
 $pageTitle  = 'Theatre Reports';
 $useSidebar = true;
 
-// ── Filters ───────────────────────────────────────────────────────
-$from    = $_GET['from']    ?? date('Y-m-01');
-$to      = $_GET['to']      ?? date('Y-m-d');
-$theatre = $_GET['theatre'] ?? '';
-$status  = $_GET['status']  ?? '';
+// ── Date range filter ─────────────────────────────────────────
+$fromDate = $_GET['from'] ?? date('Y-m-01');
+$toDate   = $_GET['to']   ?? date('Y-m-d');
 
-$theatres = ['Theatre 1', 'Theatre 2', 'Labour Theatre', 'Emergency Theatre'];
-$statuses = ['Scheduled', 'Confirmed', 'In Progress', 'Completed', 'Cancelled', 'Transferred'];
-
-// ── Base query ────────────────────────────────────────────────────
-$where  = "WHERE o.scheduled_date BETWEEN :from AND :to";
-$params = [':from' => $from, ':to' => $to];
-
-if ($theatre) { $where .= " AND o.theatre_number = :theatre"; $params[':theatre'] = $theatre; }
-if ($status)  { $where .= " AND o.status = :status";          $params[':status']  = $status; }
-
-// ── All operations ────────────────────────────────────────────────
-$ops = $pdo->prepare("
-    SELECT o.*, u.full_name AS patient_name, ls.full_name AS surgeon_name
-    FROM theatre_operations o
-    JOIN patients  p  ON o.patient_id      = p.patient_id
-    JOIN users     u  ON p.user_id         = u.user_id
-    JOIN users     ls ON o.lead_surgeon_id = ls.user_id
-    $where
-    ORDER BY o.scheduled_date DESC, o.scheduled_time
+// ── Overall stats ─────────────────────────────────────────────
+$overall = $pdo->prepare("
+    SELECT
+        COUNT(*)                                AS total,
+        SUM(status = 'completed')               AS completed,
+        SUM(status = 'cancelled')               AS cancelled,
+        SUM(status IN ('scheduled','confirmed')) AS pending,
+        SUM(status = 'in_progress')             AS in_progress
+    FROM theatre_operations
+    WHERE scheduled_date BETWEEN ? AND ?
 ");
-$ops->execute($params);
-$operations = $ops->fetchAll();
+$overall->execute([$fromDate, $toDate]);
+$overall = $overall->fetch();
 
-// ── Summary stats ─────────────────────────────────────────────────
-$total      = count($operations);
-$completed  = count(array_filter($operations, fn($o) => $o['status'] === 'Completed'));
-$pending    = count(array_filter($operations, fn($o) => in_array($o['status'], ['Scheduled','Confirmed'])));
-$cancelled  = count(array_filter($operations, fn($o) => $o['status'] === 'Cancelled'));
-$maternity  = count(array_filter($operations, fn($o) => $o['is_maternity']));
+// ── By Theatre ────────────────────────────────────────────────
+$byTheatre = $pdo->prepare("
+    SELECT theatre_number, COUNT(*) AS total,
+           SUM(status = 'completed') AS completed,
+           SUM(status = 'cancelled') AS cancelled
+    FROM   theatre_operations
+    WHERE  scheduled_date BETWEEN ? AND ?
+    GROUP  BY theatre_number
+    ORDER  BY theatre_number
+");
+$byTheatre->execute([$fromDate, $toDate]);
+$byTheatre = $byTheatre->fetchAll();
 
-// ── Theatre usage count ───────────────────────────────────────────
-$byTheatre = array_count_values(array_column($operations, 'theatre_number'));
+// ── By Surgeon ────────────────────────────────────────────────
+$bySurgeon = $pdo->prepare("
+    SELECT u.full_name, d.specialization,
+           COUNT(*) AS total,
+           SUM(o.status = 'completed') AS completed
+    FROM   theatre_operations o
+    JOIN   users   u ON u.user_id = o.surgeon_id
+    JOIN   doctors d ON d.user_id = o.surgeon_id
+    WHERE  o.scheduled_date BETWEEN ? AND ?
+    GROUP  BY o.surgeon_id
+    ORDER  BY total DESC
+    LIMIT  10
+");
+$bySurgeon->execute([$fromDate, $toDate]);
+$bySurgeon = $bySurgeon->fetchAll();
 
-// ── Doctor-wise count ─────────────────────────────────────────────
-$bySurgeon = [];
-foreach ($operations as $op) {
-    $bySurgeon[$op['surgeon_name']] = ($bySurgeon[$op['surgeon_name']] ?? 0) + 1;
-}
-arsort($bySurgeon);
+// ── By Operation Type ─────────────────────────────────────────
+$byType = $pdo->prepare("
+    SELECT operation_type, COUNT(*) AS total,
+           SUM(status = 'completed') AS completed
+    FROM   theatre_operations
+    WHERE  scheduled_date BETWEEN ? AND ?
+    GROUP  BY operation_type
+    ORDER  BY total DESC
+    LIMIT  10
+");
+$byType->execute([$fromDate, $toDate]);
+$byType = $byType->fetchAll();
 
-// ── Billing total ─────────────────────────────────────────────────
-$billTotal = 0;
-if ($operations) {
-    $ids = implode(',', array_map(fn($o) => (int)$o['operation_id'], $operations));
-    $billTotal = (float)$pdo->query("SELECT COALESCE(SUM(amount),0) FROM theatre_billing_items WHERE operation_id IN ($ids)")->fetchColumn();
-}
+// ── Recent Operations ─────────────────────────────────────────
+$recent = $pdo->prepare("
+    SELECT
+        o.operation_id,
+        o.operation_type,
+        o.theatre_number,
+        o.scheduled_date,
+        o.status,
+        pu.full_name AS patient_name,
+        su.full_name AS surgeon_name
+    FROM   theatre_operations o
+    JOIN   patients pt ON pt.patient_id = o.patient_id
+    JOIN   users    pu ON pu.user_id    = pt.user_id
+    JOIN   users    su ON su.user_id    = o.surgeon_id
+    WHERE  o.scheduled_date BETWEEN ? AND ?
+    ORDER  BY o.scheduled_date DESC, o.scheduled_time DESC
+    LIMIT  20
+");
+$recent->execute([$fromDate, $toDate]);
+$recent = $recent->fetchAll();
 
 include __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="page-header">
-    <div>
-        <h1 class="page-title">📊 Theatre Reports</h1>
-        <p class="page-sub">Operations report from <?= date('d M Y', strtotime($from)) ?> to <?= date('d M Y', strtotime($to)) ?></p>
+<?php include __DIR__ . '/../../includes/sidebar.php'; ?>
+
+<main class="main-content">
+
+    <div class="page-header">
+        <div class="page-header-title">
+            <h2>📊 Theatre Reports</h2>
+            <p>Operation statistics and usage summary</p>
+        </div>
+        <a href="theatre.php" class="btn btn-secondary">← Back to Schedule</a>
     </div>
-</div>
 
-<!-- ── Filters ──────────────────────────────────────────────── -->
-<div class="card" style="margin-bottom:24px">
-    <form method="GET" class="filter-row">
-        <div class="form-group" style="flex:1;min-width:150px">
-            <label class="form-label">From Date</label>
-            <input type="date" name="from" class="form-control" value="<?= htmlspecialchars($from) ?>">
-        </div>
-        <div class="form-group" style="flex:1;min-width:150px">
-            <label class="form-label">To Date</label>
-            <input type="date" name="to" class="form-control" value="<?= htmlspecialchars($to) ?>">
-        </div>
-        <div class="form-group" style="flex:1;min-width:180px">
-            <label class="form-label">Theatre</label>
-            <select name="theatre" class="form-control">
-                <option value="">All Theatres</option>
-                <?php foreach ($theatres as $t): ?>
-                    <option value="<?= htmlspecialchars($t) ?>" <?= $theatre === $t ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($t) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="form-group" style="flex:1;min-width:150px">
-            <label class="form-label">Status</label>
-            <select name="status" class="form-control">
-                <option value="">All Statuses</option>
-                <?php foreach ($statuses as $s): ?>
-                    <option value="<?= htmlspecialchars($s) ?>" <?= $status === $s ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($s) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div style="display:flex;align-items:flex-end;gap:8px">
-            <button type="submit" class="btn btn-primary">Apply</button>
-            <a href="theatre_report.php" class="btn btn-secondary">Reset</a>
-        </div>
-    </form>
-</div>
-
-<!-- ── Summary Cards ─────────────────────────────────────────── -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px">
-    <?php
-    $cards = [
-        ['Total Operations', $total,     '#2563eb', '🔬'],
-        ['Completed',        $completed, '#059669', '✅'],
-        ['Pending / Booked', $pending,   '#d97706', '⏳'],
-        ['Cancelled',        $cancelled, '#dc2626', '❌'],
-        ['Maternity Cases',  $maternity, '#be185d', '🤱'],
-        ['Total Revenue',    'Rs. ' . number_format($billTotal, 0), '#7c3aed', '💳'],
-    ];
-    foreach ($cards as [$label, $val, $col, $icon]): ?>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;border-top:3px solid <?= $col ?>">
-        <div style="font-size:1.5rem"><?= $icon ?></div>
-        <div style="font-size:1.6rem;font-weight:700;color:<?= $col ?>;margin:4px 0"><?= $val ?></div>
-        <div style="font-size:12px;color:var(--muted)"><?= htmlspecialchars($label) ?></div>
+    <!-- Date Filter -->
+    <div class="card" style="margin-bottom:24px">
+        <form method="GET" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+            <div class="form-group" style="margin:0;flex:1;min-width:140px">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from" class="form-control" value="<?= $fromDate ?>">
+            </div>
+            <div class="form-group" style="margin:0;flex:1;min-width:140px">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to" class="form-control" value="<?= $toDate ?>">
+            </div>
+            <button type="submit" class="btn btn-primary">🔍 Generate Report</button>
+            <a href="?from=<?= date('Y-m-01') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-secondary">This Month</a>
+        </form>
     </div>
-    <?php endforeach; ?>
-</div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+    <!-- Overall Stats -->
+    <div class="stat-grid" style="margin-bottom:28px">
+        <div class="stat-card">
+            <div class="stat-icon blue">🔬</div>
+            <div>
+                <div class="stat-label">Total Operations</div>
+                <div class="stat-value"><?= $overall['total'] ?? 0 ?></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div>
+                <div class="stat-label">Completed</div>
+                <div class="stat-value"><?= $overall['completed'] ?? 0 ?></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon yellow">⏳</div>
+            <div>
+                <div class="stat-label">Pending / Scheduled</div>
+                <div class="stat-value"><?= $overall['pending'] ?? 0 ?></div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">✕</div>
+            <div>
+                <div class="stat-label">Cancelled</div>
+                <div class="stat-value"><?= $overall['cancelled'] ?? 0 ?></div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Theatre Usage Breakdown -->
-    <div class="card">
-        <div class="card-header"><h3>🏨 Theatre Usage</h3></div>
-        <div style="padding:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+
+        <!-- By Theatre -->
+        <div class="card">
+            <div class="card-header">
+                <h3>🏥 Usage by Theatre</h3>
+            </div>
             <?php if (empty($byTheatre)): ?>
-                <p style="color:var(--muted)">No data.</p>
+                <p style="color:var(--muted);text-align:center;padding:24px">No data for selected period.</p>
             <?php else: ?>
-                <?php foreach ($theatres as $t):
-                    $cnt = $byTheatre[$t] ?? 0;
-                    $pct = $total > 0 ? round($cnt / $total * 100) : 0;
-                ?>
-                <div style="margin-bottom:12px">
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-                        <span><?= htmlspecialchars($t) ?></span>
-                        <strong><?= $cnt ?> ops (<?= $pct ?>%)</strong>
-                    </div>
-                    <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-                        <div style="height:100%;width:<?= $pct ?>%;background:var(--primary);border-radius:4px"></div>
-                    </div>
+            <?php
+            $theatreLabels = [
+                1 => ['🏥','Theatre 1','General'],
+                2 => ['🚨','Theatre 2','Emergency'],
+                3 => ['👶','Theatre 3','Labour'],
+                4 => ['🔧','Theatre 4','Minor'],
+            ];
+            $maxTotal = max(array_column($byTheatre, 'total')) ?: 1;
+            foreach ($byTheatre as $row):
+                $tl = $theatreLabels[$row['theatre_number']] ?? ['🔬','Theatre '.$row['theatre_number'],''];
+                $pct = round(($row['total'] / $maxTotal) * 100);
+            ?>
+            <div style="margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                    <span style="font-size:13px;font-weight:600"><?= $tl[0] ?> <?= $tl[1] ?> <span style="color:var(--muted);font-weight:400">(<?= $tl[2] ?>)</span></span>
+                    <span style="font-size:13px;font-weight:700"><?= $row['total'] ?> ops</span>
                 </div>
-                <?php endforeach; ?>
+                <div style="height:8px;background:var(--bg);border-radius:999px;overflow:hidden">
+                    <div style="height:100%;width:<?= $pct ?>%;background:var(--accent);border-radius:999px;transition:width 0.5s"></div>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:4px;font-size:11px;color:var(--muted)">
+                    <span>✅ <?= $row['completed'] ?> completed</span>
+                    <span>✕ <?= $row['cancelled'] ?> cancelled</span>
+                </div>
+            </div>
+            <?php endforeach; ?>
             <?php endif; ?>
         </div>
-    </div>
 
-    <!-- Top Surgeons -->
-    <div class="card">
-        <div class="card-header"><h3>👨‍⚕️ Operations by Surgeon</h3></div>
-        <div style="padding:16px">
+        <!-- By Surgeon -->
+        <div class="card">
+            <div class="card-header">
+                <h3>👨‍⚕️ Operations by Surgeon</h3>
+            </div>
             <?php if (empty($bySurgeon)): ?>
-                <p style="color:var(--muted)">No data.</p>
+                <p style="color:var(--muted);text-align:center;padding:24px">No data for selected period.</p>
             <?php else: ?>
-                <table class="table">
-                    <thead><tr><th>Surgeon</th><th style="text-align:right">Operations</th></tr></thead>
-                    <tbody>
-                        <?php foreach ($bySurgeon as $name => $cnt): ?>
+            <div class="table-wrap" style="border:none">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td><?= htmlspecialchars($name) ?></td>
-                            <td style="text-align:right;font-weight:600"><?= $cnt ?></td>
+                            <th>Surgeon</th>
+                            <th>Specialization</th>
+                            <th>Total</th>
+                            <th>Done</th>
                         </tr>
-                        <?php endforeach; ?>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($bySurgeon as $row): ?>
+                        <tr>
+                            <td><strong>Dr. <?= htmlspecialchars($row['full_name']) ?></strong></td>
+                            <td><span style="color:var(--muted);font-size:12px"><?= htmlspecialchars($row['specialization']) ?></span></td>
+                            <td><strong><?= $row['total'] ?></strong></td>
+                            <td><span class="badge badge-success"><?= $row['completed'] ?></span></td>
+                        </tr>
+                    <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
             <?php endif; ?>
         </div>
-    </div>
-</div>
 
-<!-- ── Operations List ─────────────────────────────────────────── -->
-<div class="card">
-    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-        <h3>🗒️ Operations List (<?= $total ?>)</h3>
     </div>
-    <?php if (empty($operations)): ?>
-        <p style="padding:20px;color:var(--muted)">No operations found for the selected filters.</p>
-    <?php else: ?>
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Date & Time</th>
-                    <th>Patient</th>
-                    <th>Operation</th>
-                    <th>Theatre</th>
-                    <th>Lead Surgeon</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php $statusBadgeMap = [
-                    'Scheduled'=>'badge-info','Confirmed'=>'badge-primary','In Progress'=>'badge-warning',
-                    'Completed'=>'badge-success','Cancelled'=>'badge-danger','Transferred'=>'badge-secondary'
+
+    <!-- By Operation Type -->
+    <div class="card" style="margin-bottom:24px">
+        <div class="card-header">
+            <h3>🔬 Top Operation Types</h3>
+        </div>
+        <?php if (empty($byType)): ?>
+            <p style="color:var(--muted);text-align:center;padding:24px">No data for selected period.</p>
+        <?php else: ?>
+        <?php
+        $maxType = max(array_column($byType, 'total')) ?: 1;
+        foreach ($byType as $i => $row):
+            $pct = round(($row['total'] / $maxType) * 100);
+        ?>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+            <div style="width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0"><?= $i+1 ?></div>
+            <div style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                    <span style="font-weight:600;font-size:13px"><?= htmlspecialchars($row['operation_type']) ?></span>
+                    <span style="font-size:13px;color:var(--muted)"><?= $row['total'] ?> × (<?= $row['completed'] ?> done)</span>
+                </div>
+                <div style="height:7px;background:var(--bg);border-radius:999px;overflow:hidden">
+                    <div style="height:100%;width:<?= $pct ?>%;background:var(--accent);border-radius:999px"></div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+    <!-- Recent Operations Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📋 Recent Operations</h3>
+            <span class="badge badge-info"><?= count($recent) ?> shown</span>
+        </div>
+        <?php if (empty($recent)): ?>
+            <p style="text-align:center;padding:24px;color:var(--muted)">No operations in the selected date range.</p>
+        <?php else: ?>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Patient</th>
+                        <th>Operation</th>
+                        <th>Theatre</th>
+                        <th>Date</th>
+                        <th>Surgeon</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                $theatreLabels2 = [1=>'T1',2=>'T2',3=>'T3',4=>'T4'];
+                $badgeMap = [
+                    'scheduled'=>'badge-info','confirmed'=>'badge-success',
+                    'in_progress'=>'badge-warning','completed'=>'badge-success',
+                    'cancelled'=>'badge-danger','transferred'=>'badge-neutral',
                 ];
-                foreach ($operations as $op): ?>
-                <tr>
-                    <td><?= $op['operation_id'] ?></td>
-                    <td>
-                        <div><?= date('d M Y', strtotime($op['scheduled_date'])) ?></div>
-                        <small class="text-muted"><?= date('h:i A', strtotime($op['scheduled_time'])) ?></small>
-                    </td>
-                    <td><?= htmlspecialchars($op['patient_name']) ?></td>
-                    <td>
-                        <?= htmlspecialchars($op['operation_type']) ?>
-                        <?php if ($op['is_maternity']): ?><span class="badge badge-pink" style="font-size:10px">🤱</span><?php endif; ?>
-                    </td>
-                    <td><?= htmlspecialchars($op['theatre_number']) ?></td>
-                    <td><?= htmlspecialchars($op['surgeon_name']) ?></td>
-                    <td>
-                        <span class="badge <?= $statusBadgeMap[$op['status']] ?? 'badge-secondary' ?>">
-                            <?= htmlspecialchars($op['status']) ?>
-                        </span>
-                    </td>
-                    <td>
-                        <a href="operation_details.php?id=<?= $op['operation_id'] ?>"
-                           class="btn btn-sm btn-secondary">View</a>
-                    </td>
-                </tr>
+                foreach ($recent as $op): ?>
+                    <tr>
+                        <td><strong>#<?= $op['operation_id'] ?></strong></td>
+                        <td><?= htmlspecialchars($op['patient_name']) ?></td>
+                        <td><?= htmlspecialchars($op['operation_type']) ?></td>
+                        <td><?= $theatreLabels2[$op['theatre_number']] ?? $op['theatre_number'] ?></td>
+                        <td><?= date('d M Y', strtotime($op['scheduled_date'])) ?></td>
+                        <td><?= htmlspecialchars($op['surgeon_name']) ?></td>
+                        <td><span class="badge <?= $badgeMap[$op['status']] ?? 'badge-neutral' ?>"><?= ucfirst(str_replace('_',' ',$op['status'])) ?></span></td>
+                    </tr>
                 <?php endforeach; ?>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
-</div>
+
+</main>
 
 <?php include __DIR__ . '/../../includes/footer.php'; ?>

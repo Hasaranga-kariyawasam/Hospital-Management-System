@@ -264,5 +264,23 @@ VALUES (
     'active'
 );
 
+USE hospital_db;
+ 
+-- Add missing columns to theatre_operations
+-- (The base table from hospital_db.sql has fewer columns)
+ 
+ALTER TABLE theatre_operations
+    ADD COLUMN IF NOT EXISTS assistant_doctor_id  INT UNSIGNED  NULL          AFTER anaesthetist_id,
+    ADD COLUMN IF NOT EXISTS recovery_instructions TEXT          NULL          AFTER post_op_notes,
+    ADD COLUMN IF NOT EXISTS post_op_room_type     VARCHAR(40)   NULL          AFTER recovery_instructions,
+    ADD COLUMN IF NOT EXISTS created_by            INT UNSIGNED  NULL          AFTER post_op_room_type;
+ 
+-- Add foreign key for assistant_doctor_id (optional — skip if causing issues)
+-- ALTER TABLE theatre_operations
+--     ADD CONSTRAINT fk_th_assistant FOREIGN KEY (assistant_doctor_id) REFERENCES users(user_id);
+ 
+-- Verify structure
+DESCRIBE theatre_operations;
+
 
 i create all of the sql table i want only loging resigtaion parts only other partys done by other members remove all sql table and stecher and use siple tables strcher not complax laout only create loging and registaion parts and main web site

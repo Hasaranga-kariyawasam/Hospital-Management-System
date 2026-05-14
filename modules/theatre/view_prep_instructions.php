@@ -1,18 +1,18 @@
 <?php
-// 1. Session Check (ලොගින් වෙලාද බලනවා)
+
 require_once '../../includes/session_check.php';
 
-// 2. Database Connection
+
 require_once __DIR__ . '/../../config/db_config.php';
 
-// 3. Page Settings (මේවා Header එකට අවශ්‍යයි)
+
 $pageTitle  = "Theatre Management";
 $useSidebar = true;
 $isPublic   = false;
 
 $user_id = $_SESSION['user_id'];
 
-// 4. Prepared Statement භාවිතයෙන් Patient ID එක ලබා ගැනීම
+
 $stmt_patient = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ? LIMIT 1");
 $stmt_patient->execute([$user_id]);
 $patient_id = $stmt_patient->fetchColumn();
@@ -21,12 +21,11 @@ if (!$patient_id) {
     die("Error: Patient record not found for this user.");
 }
 
-// 5. මෙම රෝගියාට අදාළ Theatre Operations ලබා ගැනීම
 $stmt_ops = $pdo->prepare("SELECT * FROM theatre_operations WHERE patient_id = ? ORDER BY scheduled_at ASC");
 $stmt_ops->execute([$patient_id]);
 $theatre_operations = $stmt_ops->fetchAll(PDO::FETCH_ASSOC);
 
-// 6. UI එකේ පෙන්වන Function එක
+
 function Schedule_Details($room = 'N/A', $time = 'Not Scheduled', $operation_id = 0) {
     $link = "view_prep_instructions.php?operation_id=$operation_id";
     echo <<<HTML
@@ -45,7 +44,7 @@ function Schedule_Details($room = 'N/A', $time = 'Not Scheduled', $operation_id 
 HTML;
 }
 
-// 7. Include Header and Sidebar (උඩ බාර් එකයි පැත්තේ බාර් එකයි ඇඩ් වෙනවා)
+
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 ?>
@@ -164,6 +163,6 @@ include '../../includes/sidebar.php';
 </main>
 
 <?php 
-// 8. Include Footer
+
 include '../../includes/footer.php'; 
 ?>

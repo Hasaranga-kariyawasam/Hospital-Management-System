@@ -30,9 +30,10 @@ $role = $_SESSION['role'] ?? 'guest';
         <div class="sidebar-section">
             <div class="sidebar-heading">My Work</div>
             <ul class="sidebar-menu">
-                <li><a href="/Web/Hospital-Management-System/view_doctors.php"><span class="icon">🩺</span> View Doctors</a></li>
+               
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_appointments.php"><span class="icon">📅</span> My Schedule</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/appointments.php"><span class="icon">📋</span> Appointments</a></li>
+                 <li><a href="/Web/Hospital-Management-System/view_doctors.php"><span class="icon">🩺</span> View Doctors</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php"><span class="icon">🔬</span> Operations</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/pharmacy/prescriptions.php"><span class="icon">💊</span> Prescriptions</a></li>
             </ul>

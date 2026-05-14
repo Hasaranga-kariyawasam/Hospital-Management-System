@@ -52,47 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $upd->execute([$newStatus, $postOpNotes, $recoveryInstr, $postOpRoomType ?: null, $id]);
 
-        // ── Auto-billing when completed ────────────────────────
-        if ($newStatus === 'completed') {
-            // Find or create invoice for this patient
-            $inv = $pdo->prepare("SELECT invoice_id FROM billing_invoices WHERE patient_id = ? AND status = 'open' LIMIT 1");
-            $inv->execute([$op['patient_id']]);
-            $invoice = $inv->fetch();
-
-            if (!$invoice) {
-                $pdo->prepare("INSERT INTO billing_invoices (patient_id, total_amount, paid_amount, status) VALUES (?, 0, 0, 'open')")
-                    ->execute([$op['patient_id']]);
-                $invoiceId = (int)$pdo->lastInsertId();
-            } else {
-                $invoiceId = (int)$invoice['invoice_id'];
-            }
-
-            // Add theatre billing items
-            $billingItems = [
-                ['Surgery Fee – ' . $op['operation_type'],   'theatre', 15000.00, 1],
-                ['Theatre Usage Fee',                        'theatre',  8000.00, 1],
-                ['Anaesthesia Fee',                          'theatre',  5000.00, 1],
-                ['Recovery Room Charge',                     'theatre',  3000.00, 1],
-            ];
-
-            $insItem = $pdo->prepare("
-                INSERT INTO billing_items (invoice_id, description, category, unit_price, quantity)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            foreach ($billingItems as [$desc, $cat, $price, $qty]) {
-                $insItem->execute([$invoiceId, $desc, $cat, $price, $qty]);
-            }
-
-            // Update invoice total
-            $pdo->prepare("
-                UPDATE billing_invoices
-                SET total_amount = (
-                    SELECT COALESCE(SUM(line_total), 0) FROM billing_items WHERE invoice_id = ?
-                )
-                WHERE invoice_id = ?
-            ")->execute([$invoiceId, $invoiceId]);
-        }
-
+       
         // ── Auto ward transfer when transferred ───────────────
         if ($newStatus === 'transferred' && $postOpRoomType) {
             $roomTypeMap = [
@@ -245,35 +205,7 @@ include __DIR__ . '/../../includes/header.php';
             </form>
         </div>
 
-        <!-- Info Panel -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-
-            <!-- Billing Auto-Trigger Notice -->
-            <div class="card" style="border:1.5px solid var(--accent);background:var(--accent-light)">
-                <div style="font-weight:700;color:#075985;margin-bottom:8px">💳 Auto-Billing</div>
-                <div style="font-size:13px;color:#075985;line-height:1.7">
-                    When status is set to <strong>Completed</strong>, the following charges are automatically added to the patient invoice:
-                </div>
-                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
-                    <?php
-                    $charges = [
-                        ['Surgery Fee', 'LKR 15,000'],
-                        ['Theatre Usage Fee', 'LKR 8,000'],
-                        ['Anaesthesia Fee', 'LKR 5,000'],
-                        ['Recovery Charge', 'LKR 3,000'],
-                    ];
-                    foreach ($charges as [$label, $price]): ?>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#075985;padding:4px 0;border-bottom:1px solid rgba(14,165,233,0.15)">
-                        <span>✓ <?= $label ?></span>
-                        <strong><?= $price ?></strong>
-                    </div>
-                    <?php endforeach; ?>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;color:#075985;padding:6px 0;font-weight:700">
-                        <span>Total</span>
-                        <span>LKR 31,000</span>
-                    </div>
-                </div>
-            </div>
+     
 
             <!-- Ward Transfer Notice -->
             <div class="card" style="border:1.5px solid var(--success);background:var(--success-light)">

@@ -52,47 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $upd->execute([$newStatus, $postOpNotes, $recoveryInstr, $postOpRoomType ?: null, $id]);
 
-        // ── Auto-billing when completed ────────────────────────
-        if ($newStatus === 'completed') {
-            // Find or create invoice for this patient
-            $inv = $pdo->prepare("SELECT invoice_id FROM billing_invoices WHERE patient_id = ? AND status = 'open' LIMIT 1");
-            $inv->execute([$op['patient_id']]);
-            $invoice = $inv->fetch();
-
-            if (!$invoice) {
-                $pdo->prepare("INSERT INTO billing_invoices (patient_id, total_amount, paid_amount, status) VALUES (?, 0, 0, 'open')")
-                    ->execute([$op['patient_id']]);
-                $invoiceId = (int)$pdo->lastInsertId();
-            } else {
-                $invoiceId = (int)$invoice['invoice_id'];
-            }
-
-            // Add theatre billing items
-            $billingItems = [
-                ['Surgery Fee – ' . $op['operation_type'],   'theatre', 15000.00, 1],
-                ['Theatre Usage Fee',                        'theatre',  8000.00, 1],
-                ['Anaesthesia Fee',                          'theatre',  5000.00, 1],
-                ['Recovery Room Charge',                     'theatre',  3000.00, 1],
-            ];
-
-            $insItem = $pdo->prepare("
-                INSERT INTO billing_items (invoice_id, description, category, unit_price, quantity)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            foreach ($billingItems as [$desc, $cat, $price, $qty]) {
-                $insItem->execute([$invoiceId, $desc, $cat, $price, $qty]);
-            }
-
-            // Update invoice total
-            $pdo->prepare("
-                UPDATE billing_invoices
-                SET total_amount = (
-                    SELECT COALESCE(SUM(line_total), 0) FROM billing_items WHERE invoice_id = ?
-                )
-                WHERE invoice_id = ?
-            ")->execute([$invoiceId, $invoiceId]);
-        }
-
+       
         // ── Auto ward transfer when transferred ───────────────
         if ($newStatus === 'transferred' && $postOpRoomType) {
             $roomTypeMap = [
@@ -136,7 +96,7 @@ include __DIR__ . '/../../includes/header.php';
 
     <div class="page-header">
         <div class="page-header-title">
-            <h2>📝 Post-Operation Update</h2>
+            <h2><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Post-Operation Update</h2>
             <p>Update status, notes and patient transfer for Operation #<?= $id ?></p>
         </div>
         <a href="operation_details.php?id=<?= $id ?>" class="btn btn-secondary">← Back to Details</a>
@@ -151,7 +111,7 @@ include __DIR__ . '/../../includes/header.php';
         <!-- Update Form -->
         <div class="card">
             <div class="card-header">
-                <h3>🔬 <?= htmlspecialchars($op['operation_type']) ?></h3>
+                <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="12" cy="8" r="3"/><path d="M12 11v10M8 21h8M6 15h12M17 5l2-2M15 3l4 4"/></svg> <?= htmlspecialchars($op['operation_type']) ?></h3>
                 <span style="color:var(--muted);font-size:13px">
                     Patient: <strong><?= htmlspecialchars($op['patient_name']) ?></strong>
                     &mdash; <?= date('d M Y', strtotime($op['scheduled_date'])) ?>
@@ -166,11 +126,11 @@ include __DIR__ . '/../../includes/header.php';
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px" id="statusGrid">
                         <?php
                         $statuses = [
-                            ['confirmed',   '✅','Confirmed',   'badge-success'],
-                            ['in_progress', '⏳','In Progress', 'badge-warning'],
-                            ['completed',   '🏆','Completed',   'badge-success'],
-                            ['cancelled',   '✕', 'Cancelled',   'badge-danger'],
-                            ['transferred', '🏥','Transferred', 'badge-neutral'],
+                            ['confirmed',   '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><polyline points="20 6 9 17 4 12"/></svg>','Confirmed',   'badge-success'],
+                            ['in_progress', '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>','In Progress', 'badge-warning'],
+                            ['completed',   '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>','Completed',   'badge-success'],
+                            ['cancelled',   '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>', 'Cancelled',   'badge-danger'],
+                            ['transferred', '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>','Transferred', 'badge-neutral'],
                         ];
                         foreach ($statuses as [$val, $icon, $label, $cls]):
                             $current = $op['status'] === $val;
@@ -209,10 +169,10 @@ include __DIR__ . '/../../includes/header.php';
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
                         <?php
                         $wards = [
-                            ['icu',           '🔴','ICU',           'Intensive Care Unit'],
-                            ['recovery_room', '🟡','Recovery Room', 'Post-anaesthesia care'],
-                            ['private_room',  '🟢','Private Room',  'Individual patient room'],
-                            ['general_ward',  '🔵','General Ward',  'Open ward bed'],
+                            ['icu',           '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="8"/></svg>','ICU',           'Intensive Care Unit'],
+                            ['recovery_room', '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="8"/><polyline points="12 8 12 12 14 14"/></svg>','Recovery Room', 'Post-anaesthesia care'],
+                            ['private_room',  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="8"/></svg>','Private Room',  'Individual patient room'],
+                            ['general_ward',  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8" fill="none"/></svg>','General Ward',  'Open ward bed'],
                         ];
                         foreach ($wards as [$val, $dot, $label, $desc]):
                             $cur = $op['post_op_room_type'] === $val;
@@ -238,46 +198,18 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
 
                 <div style="display:flex;gap:12px;margin-top:8px;padding-top:16px;border-top:1px solid var(--border-light)">
-                    <button type="submit" class="btn btn-primary btn-lg">💾 Save Update</button>
+                    <button type="submit" class="btn btn-primary btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Update</button>
                     <a href="operation_details.php?id=<?= $id ?>" class="btn btn-secondary btn-lg">Cancel</a>
                 </div>
 
             </form>
         </div>
 
-        <!-- Info Panel -->
-        <div style="display:flex;flex-direction:column;gap:16px">
-
-            <!-- Billing Auto-Trigger Notice -->
-            <div class="card" style="border:1.5px solid var(--accent);background:var(--accent-light)">
-                <div style="font-weight:700;color:#075985;margin-bottom:8px">💳 Auto-Billing</div>
-                <div style="font-size:13px;color:#075985;line-height:1.7">
-                    When status is set to <strong>Completed</strong>, the following charges are automatically added to the patient invoice:
-                </div>
-                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
-                    <?php
-                    $charges = [
-                        ['Surgery Fee', 'LKR 15,000'],
-                        ['Theatre Usage Fee', 'LKR 8,000'],
-                        ['Anaesthesia Fee', 'LKR 5,000'],
-                        ['Recovery Charge', 'LKR 3,000'],
-                    ];
-                    foreach ($charges as [$label, $price]): ?>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#075985;padding:4px 0;border-bottom:1px solid rgba(14,165,233,0.15)">
-                        <span>✓ <?= $label ?></span>
-                        <strong><?= $price ?></strong>
-                    </div>
-                    <?php endforeach; ?>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;color:#075985;padding:6px 0;font-weight:700">
-                        <span>Total</span>
-                        <span>LKR 31,000</span>
-                    </div>
-                </div>
-            </div>
+     
 
             <!-- Ward Transfer Notice -->
             <div class="card" style="border:1.5px solid var(--success);background:var(--success-light)">
-                <div style="font-weight:700;color:#065f46;margin-bottom:8px">🏥 Auto Ward Transfer</div>
+                <div style="font-weight:700;color:#065f46;margin-bottom:8px"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Auto Ward Transfer</div>
                 <div style="font-size:13px;color:#065f46;line-height:1.7">
                     When status is set to <strong>Transferred</strong>, an admission record is automatically created in the ward / room module.
                 </div>
@@ -286,7 +218,7 @@ include __DIR__ . '/../../includes/header.php';
             <!-- Maternity Notice -->
             <?php if ($op['theatre_number'] == 3): ?>
             <div class="card" style="border:1.5px solid #f472b6;background:#fdf2f8">
-                <div style="font-weight:700;color:#9d174d;margin-bottom:6px">👶 Labour Theatre</div>
+                <div style="font-weight:700;color:#9d174d;margin-bottom:6px"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M9 12h.01M15 12h.01M10 16c.5.3 1.1.5 2 .5s1.5-.2 2-.5"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg> Labour Theatre</div>
                 <div style="font-size:13px;color:#9d174d">After completing this operation, remember to add the newborn record via the Newborn module.</div>
             </div>
             <?php endif; ?>

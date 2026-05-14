@@ -77,7 +77,7 @@ $role = $_SESSION['role'] ?? 'guest';
                 </a>
             </li>
             <li>
-                <a href="/Web/Hospital-Management-System/modules/Theatre/Theatre.php">
+                <a href="/Web/Hospital-Management-System/modules/Theatre/patient_theatre.php">
                     <span class="icon">🔬</span> Operations
                 </a>
             </li>

@@ -1,31 +1,28 @@
 <?php
 /**
- * modules/pharmacy/prescription.php
+ * modules/pharmacy/prescriptions.php
  * MediCare HMS — Doctor: Issue Prescription
  * Group 05 | ICT1242 Web Development Practicum
- *
- * Requires: includes/db.php, includes/header.php,
- *           includes/sidebar.php, includes/footer.php
  */
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../includes/db.php';
 
-// ── Session / auth ────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Uncomment to enforce doctor login:
+// Uncomment in production:
 // if (($_SESSION['role'] ?? '') !== 'doctor') {
 //     header('Location: /Web/Hospital-Management-System/login.php');
 //     exit;
 // }
 
-// ── Doctor info from session (or DB fallback) ─────────────────────────────
-$doctorName = htmlspecialchars($_SESSION['full_name'] ?? 'Dr. Saman Perera');
-$doctorReg  = htmlspecialchars($_SESSION['staff_id']  ?? 'REG-DOC-0042');
+// ── Doctor info from session ──────────────────────────────────────────────
+$doctorName = htmlspecialchars($_SESSION['full_name']  ?? 'Dr. Saman Perera');
+$doctorReg  = htmlspecialchars($_SESSION['staff_id']   ?? 'REG-DOC-0042');
 $doctorDept = htmlspecialchars($_SESSION['department'] ?? 'General Medicine');
+$doctorId   = htmlspecialchars($_SESSION['user_id']    ?? '');
 $initials   = implode('', array_map(
     fn($w) => $w[0],
     array_slice(explode(' ', strip_tags($doctorName)), -2)
@@ -46,7 +43,6 @@ try {
     error_log('Drug load failed: ' . $e->getMessage());
 }
 
-// ── Page config for header.php ────────────────────────────────────────────
 $pageTitle  = 'Issue Prescription';
 $pageCss    = '/Web/Hospital-Management-System/modules/pharmacy/prescription.css';
 $useSidebar = true;
@@ -56,7 +52,7 @@ require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 ?>
 
-<!-- MAIN CONTENT (fits inside existing main container from header/sidebar) -->
+<!-- ══ PRESCRIPTION PAGE ═══════════════════════════════════════════════════ -->
 <div class="rx-page-wrap">
 
     <!-- Breadcrumb -->
@@ -70,7 +66,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 
     <h1 class="sr-only">Doctor Prescription Form</h1>
 
-    <!-- Doctor info bar -->
+    <!-- ── Doctor bar ───────────────────────────────────────────────────── -->
     <div class="doc-bar">
         <div class="doc-info">
             <div class="doc-avatar"><?php echo strtoupper($initials); ?></div>
@@ -86,7 +82,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
         </div>
     </div>
 
-    <!-- Patient lookup -->
+    <!-- ── 1. Patient Lookup ─────────────────────────────────────────────── -->
     <div class="section-card">
         <div class="card-title">
             <i class="ti ti-user-search" aria-hidden="true"></i>
@@ -95,9 +91,10 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 
         <div class="appt-row">
             <div class="field-group">
-                <label for="apptNo">Appointment reference number</label>
+                <label for="apptNo">Appointment Reference Number</label>
                 <input type="text" id="apptNo" placeholder="e.g. APT-2026-0089"
-                       oninput="onApptInput()" onkeydown="if(event.key==='Enter')lookupPatient()">
+                       oninput="onApptInput()"
+                       onkeydown="if(event.key==='Enter')lookupPatient()">
             </div>
             <button class="btn btn-outline btn-sm" onclick="lookupPatient()">
                 <i class="ti ti-search" aria-hidden="true"></i> Lookup
@@ -106,29 +103,57 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 
         <div id="errAppt" class="err-msg" role="alert"></div>
 
-        <div id="patientFields" style="display:none;margin-top:12px">
-            <div class="field-grid fg-4" id="patientGrid">
-                <div class="field-group">
-                    <label>Patient name</label>
+        <!-- Patient detail fields — shown after successful lookup -->
+        <div id="patientFields" style="display:none; margin-top:14px">
+
+            <!-- Row 1: Name, Age, Gender, Blood Type -->
+            <div class="field-grid fg-4" style="margin-bottom:10px">
+                <div class="field-group patient-filled">
+                    <label>Patient Name</label>
                     <input type="text" id="patientName" readonly>
                 </div>
-                <div class="field-group">
+                <div class="field-group patient-filled">
                     <label>Age</label>
                     <input type="text" id="patientAge" readonly>
                 </div>
-                <div class="field-group">
+                <div class="field-group patient-filled">
+                    <label>Gender</label>
+                    <input type="text" id="patientGender" readonly>
+                </div>
+                <div class="field-group patient-filled">
+                    <label>Blood Type</label>
+                    <input type="text" id="patientBlood" readonly>
+                </div>
+            </div>
+
+            <!-- Row 2: Patient ID, NIC, Phone, Appointment Date -->
+            <div class="field-grid fg-4">
+                <div class="field-group patient-filled">
                     <label>Patient ID</label>
                     <input type="text" id="patientId" readonly>
                 </div>
-                <div class="field-group">
+                <div class="field-group patient-filled">
                     <label>NIC</label>
                     <input type="text" id="patientNic" readonly>
                 </div>
+                <div class="field-group patient-filled">
+                    <label>Phone</label>
+                    <input type="text" id="patientPhone" readonly>
+                </div>
+                <div class="field-group patient-filled">
+                    <label>Appointment Date</label>
+                    <input type="text" id="apptDate" readonly>
+                </div>
             </div>
+
+            <!-- Hidden: store raw IDs for submit payload -->
+            <input type="hidden" id="hiddenPatientId">
+            <input type="hidden" id="hiddenUserId">
+            <input type="hidden" id="hiddenApptId">
         </div>
     </div>
 
-    <!-- Diagnosis & notes -->
+    <!-- ── 2. Diagnosis & Notes ──────────────────────────────────────────── -->
     <div class="section-card">
         <div class="card-title">
             <i class="ti ti-stethoscope" aria-hidden="true"></i>
@@ -201,20 +226,20 @@ require_once __DIR__ . '/../../includes/sidebar.php';
                 </select>
             </div>
             <div class="field-group">
-                <label for="clinicalNotes">Clinical notes</label>
+                <label for="clinicalNotes">Clinical Notes</label>
                 <input type="text" id="clinicalNotes" placeholder="Brief note (optional)">
             </div>
         </div>
     </div>
 
-    <!-- Add medicine -->
+    <!-- ── 3. Add Medicine (Drug Search) ────────────────────────────────── -->
     <div class="section-card">
         <div class="card-title">
             <i class="ti ti-pill" aria-hidden="true"></i>
             Add Medicine
         </div>
         <?php if (empty($drugs)): ?>
-            <div class="err-msg" style="margin-bottom:10px">
+            <div class="err-msg" style="display:block; margin-bottom:10px">
                 ⚠️ Could not load drug catalogue from database. Check DB connection.
             </div>
         <?php endif; ?>
@@ -230,7 +255,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
         <div class="drug-list" id="drugList" role="listbox"></div>
     </div>
 
-    <!-- Prescribed medicines table -->
+    <!-- ── 4. Prescribed Medicines Table ────────────────────────────────── -->
     <div class="section-card">
         <div class="card-title">
             <i class="ti ti-clipboard-list" aria-hidden="true"></i>
@@ -241,7 +266,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
             <table class="rx-tbl" id="rxTbl">
                 <thead>
                     <tr>
-                        <th style="width:145px">Drug name</th>
+                        <th style="width:145px">Drug Name</th>
                         <th style="width:65px">Unit</th>
                         <th style="width:58px">Status</th>
                         <th style="width:195px">Dosage — Morning / Afternoon / Evening / Night</th>
@@ -284,13 +309,13 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 
 </div><!-- /.rx-page-wrap -->
 
-<!-- Confirmation modal -->
+<!-- ══ CONFIRMATION MODAL ═══════════════════════════════════════════════════ -->
 <div id="confirmModal" class="modal-backdrop" style="display:none" role="dialog"
      aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-box">
         <div class="modal-header">
             <div class="modal-icon-wrap">
-                <i class="ti ti-circle-check" style="font-size:32px;color:var(--color-success)"></i>
+                <i class="ti ti-circle-check" style="font-size:32px;color:var(--color-success-text)"></i>
             </div>
             <h2 id="modalTitle">Prescription Submitted</h2>
             <p id="modalSub" class="modal-sub"></p>
@@ -307,9 +332,128 @@ require_once __DIR__ . '/../../includes/sidebar.php';
     </div>
 </div>
 
+<!-- ══ EXTRA STYLES (modal + sidebar active state) ══════════════════════════ -->
+<style>
+/* ── Modal ── */
+.modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9000;
+    padding: 16px;
+}
+.modal-box {
+    background: var(--color-background-primary);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 700px;
+    max-height: 90vh; overflow-y: auto;
+    animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } }
+
+.modal-header {
+    text-align: center;
+    padding: 28px 28px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.modal-icon-wrap {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--color-success-bg);
+    border: 2px solid var(--color-success-border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+}
+.modal-header h2 {
+    font-size: 18px; font-weight: 700;
+    color: var(--color-text-primary);
+}
+.modal-sub {
+    font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;
+}
+.modal-body { padding: 20px 28px; }
+.modal-footer {
+    padding: 16px 28px;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* ── Prescription summary table inside modal ── */
+.rx-summary-table {
+    width: 100%; border-collapse: collapse;
+    margin-top: 16px; font-size: 12px;
+}
+.rx-summary-table th {
+    background: var(--color-background-secondary);
+    font-size: 10px; font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase; letter-spacing: .5px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--color-border-tertiary);
+    text-align: left;
+}
+.rx-summary-table td {
+    padding: 7px 10px;
+    border: 0.5px solid var(--color-border-tertiary);
+    color: var(--color-text-primary);
+    vertical-align: middle;
+}
+.rx-summary-table tr:nth-child(even) td {
+    background: var(--color-background-secondary);
+}
+
+/* ── Info grid inside modal ── */
+.modal-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.modal-info-block {
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-sm);
+    padding: 8px 12px;
+}
+.modal-info-block.full { grid-column: 1 / -1; }
+.mib-label { font-size: 10px; font-weight: 600; color: var(--color-text-secondary);
+             text-transform: uppercase; letter-spacing: .4px; margin-bottom: 3px; }
+.mib-val   { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+
+.modal-msg {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
+    border: 0.5px solid var(--color-success-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+}
+
+/* ── Sidebar active link highlight ── */
+.sidebar a.active,
+.sidebar-menu li a.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+</style>
+
+<!-- ══ JAVASCRIPT ════════════════════════════════════════════════════════════ -->
 <script>
-// Drug data from PHP/DB
+// ── Drug data injected from PHP/DB ────────────────────────────────────────
 const DRUGS = <?php echo json_encode(array_values($drugs), JSON_UNESCAPED_UNICODE); ?>;
+
+// ── Doctor info from PHP session ──────────────────────────────────────────
+const DOCTOR = {
+    name: <?php echo json_encode($doctorName); ?>,
+    reg:  <?php echo json_encode($doctorReg); ?>,
+    dept: <?php echo json_encode($doctorDept); ?>,
+    id:   <?php echo json_encode($doctorId); ?>,
+};
 
 const INSTRUCTIONS = [
     '— select —','After meals','Before meals','With meals','On empty stomach',
@@ -320,30 +464,49 @@ const INSTRUCTIONS = [
 ];
 
 const LOW = 20;
-let rxItems = [];
+let rxItems     = [];
+let currentAppt = null; // stores full patient+appt object from lookup
 
-// Utilities
+// ── Utilities ─────────────────────────────────────────────────────────────
 function stockInfo(d) {
     const qty = parseInt(d.stock ?? d.stock_qty ?? 0);
-    if (qty === 0) return {lbl:'Out of stock', cls:'badge-ot', ok:false};
-    if (qty <= LOW)  return {lbl:'Low stock',   cls:'badge-lw', ok:true};
-    return               {lbl:'Available',    cls:'badge-av', ok:true};
+    if (qty === 0) return { lbl: 'Out of stock', cls: 'badge-ot', ok: false };
+    if (qty <= LOW) return { lbl: 'Low stock',   cls: 'badge-lw', ok: true };
+    return               { lbl: 'Available',    cls: 'badge-av', ok: true };
 }
 function tpd(r)  { return (r.M||0)+(r.A||0)+(r.E||0)+(r.N||0); }
 function tqty(r) { return tpd(r) * (r.days||1); }
 function instrOpts(sel) {
-    return INSTRUCTIONS.map(o => `<option${o===sel?' selected':''}>${o}</option>`).join('');
+    return INSTRUCTIONS.map(o =>
+        `<option${o === sel ? ' selected' : ''}>${o}</option>`
+    ).join('');
+}
+function showErr(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg ?? '';
+    el.style.display = msg ? 'block' : 'none';
 }
 
-// Set today's date
+// ── Today's date in doc-bar ───────────────────────────────────────────────
 (function setDate() {
-    const d = new Date();
     const el = document.getElementById('todayDate');
-    if (el) el.textContent =
-        d.toLocaleDateString('en-GB', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+    if (el) el.textContent = new Date().toLocaleDateString('en-GB',
+        { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
 })();
 
-// Patient lookup
+// ── Mark sidebar link active ───────────────────────────────────────────────
+(function markSidebarActive() {
+    const path = window.location.pathname;
+    document.querySelectorAll('.sidebar a, .sidebar-menu a').forEach(a => {
+        if (a.getAttribute('href') && path.endsWith(a.getAttribute('href').split('/').pop())) {
+            a.classList.add('active');
+        }
+    });
+})();
+
+// ══ PATIENT LOOKUP ════════════════════════════════════════════════════════
+
 function onApptInput() {
     showErr('errAppt', null);
     const v = document.getElementById('apptNo').value.trim().toUpperCase();
@@ -358,9 +521,11 @@ async function lookupPatient(val) {
         const res  = await fetch(`prescription_actions.php?action=lookup_patient&appt=${encodeURIComponent(v)}`);
         const data = await res.json();
         if (data.ok) {
-            fillPatient(data.patient);
+            currentAppt = data;
+            fillPatient(data.patient, data.appt);
             showErr('errAppt', null);
         } else {
+            currentAppt = null;
             hidePatient();
             showErr('errAppt', data.error ?? 'Appointment not found.');
         }
@@ -369,25 +534,51 @@ async function lookupPatient(val) {
     }
 }
 
-function fillPatient(p) {
-    document.getElementById('patientName').value = p.name        ?? p.full_name ?? '';
-    document.getElementById('patientAge').value  = (p.age ?? '') + ' yrs';
-    document.getElementById('patientId').value   = p.patient_id  ?? p.id ?? '';
-    document.getElementById('patientNic').value  = p.nic         ?? '';
+function fillPatient(p, apptRef) {
+    // Row 1
+    document.getElementById('patientName').value   = p.name        ?? p.full_name ?? '';
+    document.getElementById('patientAge').value    = (p.age        ?? '—') + ' yrs';
+    document.getElementById('patientGender').value = capitalize(p.gender ?? '—');
+    document.getElementById('patientBlood').value  = p.blood_type  ?? '—';
+    // Row 2
+    document.getElementById('patientId').value     = 'PAT-' + (p.patient_id ?? p.id ?? '');
+    document.getElementById('patientNic').value    = p.nic         ?? '—';
+    document.getElementById('patientPhone').value  = p.phone       ?? '—';
+    document.getElementById('apptDate').value      = formatDate(p.appt_date ?? '') + (p.appt_time ? ' · ' + p.appt_time : '');
+
+    // Hidden raw values for submit
+    document.getElementById('hiddenPatientId').value = p.patient_id ?? '';
+    document.getElementById('hiddenUserId').value    = p.user_id    ?? '';
+    document.getElementById('hiddenApptId').value    = p.appointment_id ?? '';
+
     const pf = document.getElementById('patientFields');
     pf.style.display = 'block';
     pf.querySelectorAll('.field-group').forEach(g => g.classList.add('patient-filled'));
 }
 
 function hidePatient() {
+    currentAppt = null;
     document.getElementById('patientFields').style.display = 'none';
-    ['patientName','patientAge','patientId','patientNic']
-        .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    ['patientName','patientAge','patientGender','patientBlood',
+     'patientId','patientNic','patientPhone','apptDate',
+     'hiddenPatientId','hiddenUserId','hiddenApptId']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.getElementById('patientFields')
         .querySelectorAll('.field-group').forEach(g => g.classList.remove('patient-filled'));
 }
 
-// Drug search
+function capitalize(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ══ DRUG SEARCH ═══════════════════════════════════════════════════════════
+
 function searchDrugs() {
     const q    = document.getElementById('drugQ').value.toLowerCase();
     const list = document.getElementById('drugList');
@@ -398,18 +589,21 @@ function searchDrugs() {
     if (!hits.length) { list.style.display = 'none'; return; }
     list.style.display = 'block';
     list.innerHTML = hits.map(d => {
-        const s       = stockInfo(d);
+        const s      = stockInfo(d);
         const already = rxItems.find(r => r.id === d.id);
-        const dis     = (!s.ok || already) ? 'disabled' : '';
-        const note    = already ? '<span style="font-size:10px;color:#854F0B;margin-left:4px">(added)</span>' : '';
+        const dis    = (!s.ok || already) ? 'disabled' : '';
+        const note   = already
+            ? '<span style="font-size:10px;color:#854F0B;margin-left:4px">(added)</span>' : '';
         return `<div class="drug-item ${dis}" role="option" tabindex="0"
                      onclick="addDrug('${d.id}')"
                      onkeydown="if(event.key==='Enter')addDrug('${d.id}')">
             <div>
                 <span class="d-name">${d.name}${note}</span><br>
-                <span class="d-cat">${d.cat} · ${d.unit}</span>
+                <span class="d-cat">${d.cat} · ${d.unit}
+                    ${d.unit_price ? ' · LKR ' + parseFloat(d.unit_price).toFixed(2) : ''}
+                </span>
             </div>
-            <span class="badge ${s.cls}">${s.lbl}</span>
+            <span class="badge ${s.cls}">${s.lbl} (${parseInt(d.stock)})</span>
             <i class="ti ti-circle-plus" style="font-size:18px;color:var(--color-text-info)" aria-hidden="true"></i>
         </div>`;
     }).join('');
@@ -425,7 +619,7 @@ function addDrug(id) {
     if (rxItems.find(r => r.id === id)) return;
     const d = DRUGS.find(x => x.id == id);
     if (!d || !stockInfo(d).ok) return;
-    rxItems.push({...d, M:1, A:0, E:1, N:0, days:5, instr:''});
+    rxItems.push({ ...d, M: 1, A: 0, E: 1, N: 0, days: 5, instr: '' });
     renderRx();
     document.getElementById('drugQ').value = '';
     closeDrugList();
@@ -445,11 +639,12 @@ function upd(id, field, val) {
     renderRx();
 }
 
-// Render prescription table (using slot-row/slot-cell from prescription.css)
+// ══ PRESCRIPTION TABLE RENDER ══════════════════════════════════════════════
+
 function renderRx() {
     const body = document.getElementById('rxBody');
     if (!rxItems.length) {
-        body.innerHTML = `</table><td colspan="8">
+        body.innerHTML = `<tr><td colspan="8">
             <div class="empty-state">
                 <i class="ti ti-pill empty-icon" aria-hidden="true"></i>
                 No medicines added — search above and click a drug to add
@@ -462,28 +657,27 @@ function renderRx() {
         const s     = stockInfo(r);
         const rowBg = i % 2 !== 0 ? 'background:var(--color-background-secondary)' : '';
         return `<tr style="${rowBg}">
-            <td><span style="font-size:12px;font-weight:600;color:var(--color-text-primary);line-height:1.4">${r.name}</span></td>
+            <td>
+                <span style="font-size:12px;font-weight:600;color:var(--color-text-primary);line-height:1.4">${r.name}</span>
+                <br><span style="font-size:10px;color:var(--color-text-secondary)">${r.cat}</span>
+            </td>
             <td><span style="font-size:11px;color:var(--color-text-secondary)">${r.unit}</span></td>
             <td><span class="badge ${s.cls}">${s.lbl}</span></td>
             <td>
                 <div class="slot-row">
-                    <div class="slot-cell">
-                        <span>M</span>
+                    <div class="slot-cell"><span>M</span>
                         <input type="number" value="${r.M}" min="0" max="10" step="0.5"
                                onchange="upd('${r.id}','M',this.value)">
                     </div>
-                    <div class="slot-cell">
-                        <span>A</span>
+                    <div class="slot-cell"><span>A</span>
                         <input type="number" value="${r.A}" min="0" max="10" step="0.5"
                                onchange="upd('${r.id}','A',this.value)">
                     </div>
-                    <div class="slot-cell">
-                        <span>E</span>
+                    <div class="slot-cell"><span>E</span>
                         <input type="number" value="${r.E}" min="0" max="10" step="0.5"
                                onchange="upd('${r.id}','E',this.value)">
                     </div>
-                    <div class="slot-cell">
-                        <span>N</span>
+                    <div class="slot-cell"><span>N</span>
                         <input type="number" value="${r.N}" min="0" max="10" step="0.5"
                                onchange="upd('${r.id}','N',this.value)">
                     </div>
@@ -517,25 +711,21 @@ function updateStats() {
     document.getElementById('cntQty').textContent = rxItems.reduce((s, r) => s + tqty(r), 0);
 }
 
+// ══ CLEAR ALL ══════════════════════════════════════════════════════════════
+
 function clearAll() {
     rxItems = [];
     renderRx();
-    document.getElementById('apptNo').value       = '';
-    document.getElementById('diagnosisSel').value = '';
+    document.getElementById('apptNo').value        = '';
+    document.getElementById('diagnosisSel').value  = '';
     document.getElementById('clinicalNotes').value = '';
     hidePatient();
-    showErr('errAppt', null);
+    showErr('errAppt',   null);
     showErr('errSubmit', null);
 }
 
-function showErr(id, msg) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = msg ?? '';
-    el.style.display = msg ? 'block' : 'none';
-}
+// ══ SUBMIT PRESCRIPTION ════════════════════════════════════════════════════
 
-// Submit prescription
 async function submitRx() {
     showErr('errSubmit', null);
 
@@ -543,8 +733,8 @@ async function submitRx() {
     const diagnosis = document.getElementById('diagnosisSel').value;
     const notes     = document.getElementById('clinicalNotes').value.trim();
 
-    if (!appt)      { showErr('errSubmit', 'Please look up a patient first.'); return; }
-    if (!diagnosis) { showErr('errSubmit', 'Please select a diagnosis.'); return; }
+    if (!appt)      { showErr('errSubmit', 'Please look up a patient first.');    return; }
+    if (!diagnosis) { showErr('errSubmit', 'Please select a diagnosis.');          return; }
     if (!rxItems.length) { showErr('errSubmit', 'Add at least one medicine.'); return; }
 
     const btn = document.getElementById('submitBtn');
@@ -554,18 +744,16 @@ async function submitRx() {
     const payload = {
         appt, diagnosis, notes,
         medicines: rxItems.map(r => ({
-            id:    r.id,
-            name:  r.name,
-            M:     r.M, A: r.A, E: r.E, N: r.N,
-            days:  r.days,
-            instr: r.instr,
+            id: r.id, name: r.name,
+            M: r.M, A: r.A, E: r.E, N: r.N,
+            days: r.days, instr: r.instr,
         })),
     };
 
     try {
         const res  = await fetch('prescription_actions.php?action=submit_rx', {
             method:  'POST',
-            headers: {'Content-Type':'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify(payload),
         });
         const data = await res.json();
@@ -584,40 +772,83 @@ async function submitRx() {
     }
 }
 
-// Confirmation modal
+// ══ CONFIRMATION MODAL ════════════════════════════════════════════════════
+
 function showModal(d) {
-    document.getElementById('modalSub').textContent  = `${d.rx_ref} · ${d.issued_at}`;
+    const p   = currentAppt?.patient ?? {};
+    const pid = document.getElementById('hiddenPatientId').value || (p.patient_id ?? '—');
+    const did = DOCTOR.id || '—';
+
+    document.getElementById('modalSub').textContent = `${d.rx_ref} · ${d.issued_at}`;
+
     document.getElementById('modalBody').innerHTML = `
-        <div class="modal-grid">
+        <!-- Info grid: Patient + Doctor IDs prominent -->
+        <div class="modal-info-grid">
             <div class="modal-info-block">
                 <div class="mib-label">Patient</div>
-                <div class="mib-val">${d.patient.name} · ${d.patient.id ?? d.patient.patient_id}</div>
+                <div class="mib-val">${d.patient?.name ?? p.name ?? '—'}</div>
+            </div>
+            <div class="modal-info-block">
+                <div class="mib-label">Patient ID</div>
+                <div class="mib-val" style="font-family:monospace">PAT-${pid}</div>
             </div>
             <div class="modal-info-block">
                 <div class="mib-label">Doctor</div>
-                <div class="mib-val">${d.doctor.name}</div>
+                <div class="mib-val">${DOCTOR.name}</div>
             </div>
-            <div class="modal-info-block" style="grid-column:1/-1">
+            <div class="modal-info-block">
+                <div class="mib-label">Doctor ID / Reg</div>
+                <div class="mib-val" style="font-family:monospace">${DOCTOR.reg}${did && did !== '—' ? ' (UID: '+did+')' : ''}</div>
+            </div>
+            <div class="modal-info-block">
+                <div class="mib-label">Appointment Ref</div>
+                <div class="mib-val" style="font-family:monospace">${d.appt ?? '—'}</div>
+            </div>
+            <div class="modal-info-block">
+                <div class="mib-label">Department</div>
+                <div class="mib-val">${DOCTOR.dept}</div>
+            </div>
+            <div class="modal-info-block full">
                 <div class="mib-label">Diagnosis</div>
                 <div class="mib-val">${d.diagnosis}</div>
             </div>
+            ${d.notes ? `<div class="modal-info-block full">
+                <div class="mib-label">Clinical Notes</div>
+                <div class="mib-val">${d.notes}</div>
+            </div>` : ''}
         </div>
-        <table class="modal-rx-tbl">
+
+        <!-- Prescription detail table -->
+        <table class="rx-summary-table">
             <thead>
-                <tr><th>Drug</th><th>Dosage (M-A-E-N)</th><th>Days</th><th>Total</th><th>Instruction</th></tr>
+                <tr>
+                    <th>#</th>
+                    <th>Drug Name</th>
+                    <th>Drug ID</th>
+                    <th>Dosage (M-A-E-N)</th>
+                    <th>Days</th>
+                    <th>Total Qty</th>
+                    <th>Instruction</th>
+                </tr>
             </thead>
             <tbody>
-                ${d.medicines.map(m => `
+                ${d.medicines.map((m, i) => `
                     <tr>
-                        <td>${m.name}</td>
+                        <td style="color:var(--color-text-secondary);font-size:11px">${i+1}</td>
+                        <td style="font-weight:600">${m.name}</td>
+                        <td style="font-family:monospace;font-size:11px;color:var(--color-text-secondary)">${m.drug_id}</td>
                         <td style="font-family:monospace">${m.dosage}</td>
-                        <td>${m.days}</td>
-                        <td><b>${m.total_qty}</b></td>
-                        <td>${m.instruction || '—'}</td>
+                        <td style="text-align:center">${m.days}</td>
+                        <td style="text-align:center"><b>${m.total_qty}</b></td>
+                        <td style="font-size:11px">${m.instruction || '—'}</td>
                     </tr>`).join('')}
             </tbody>
         </table>
-        <p class="modal-msg"><i class="ti ti-circle-check"></i> ${d.message}</p>
+
+        <p class="modal-msg">
+            <i class="ti ti-circle-check"></i>
+            ${d.message}
+        </p>
     `;
     document.getElementById('confirmModal').style.display = 'flex';
 }

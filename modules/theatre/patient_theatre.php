@@ -1,27 +1,23 @@
 <?php
-// 1. Session Check
+
 require_once '../../includes/session_check.php';
 
-// 2. Database Connection
 require_once __DIR__ . '/../../config/db_config.php';
 
-// 3. Get patient data
 $user_id = $_SESSION['user_id'];
 
-// Patient ID ලබා ගැනීම
+
 $stmt_p = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ? LIMIT 1");
 $stmt_p->execute([$user_id]);
 $patient_id = $stmt_p->fetchColumn();
 
-// රෝගියාට අදාළ ශල්‍යකර්ම සියල්ල ලබා ගැනීම
 $stmt_ops = $pdo->prepare("SELECT * FROM theatre_operations WHERE patient_id = ?");
 $stmt_ops->execute([$patient_id]);
 $theatre_operations = $stmt_ops->fetchAll(PDO::FETCH_ASSOC);
 
-// ශල්‍යකර්ම සංඛ්‍යාව
 $operation_count = count($theatre_operations);
 
-// 4. Function for schedule details
+
 function Schedule_Details($room='null', $time='none', $operation_id=0){
     $link = "view_prep_instructions.php?operation_id=$operation_id";
     echo <<<HTML

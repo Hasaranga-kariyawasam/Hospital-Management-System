@@ -1,18 +1,18 @@
 <?php
-// 1. Session Check (ලොගින් වෙලාද බලනවා)
+
 require_once '../../includes/session_check.php';
 
-// 2. Database Connection
+
 require_once __DIR__ . '/../../config/db_config.php';
 
-// 3. Page Settings (මේවා Header එකට අවශ්‍යයි)
+
 $pageTitle  = "Theatre Management";
 $useSidebar = true;
 $isPublic   = false;
 
 $user_id = $_SESSION['user_id'];
 
-// 4. Prepared Statement භාවිතයෙන් Patient ID එක ලබා ගැනීම
+
 $stmt_patient = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ? LIMIT 1");
 $stmt_patient->execute([$user_id]);
 $patient_id = $stmt_patient->fetchColumn();
@@ -21,12 +21,10 @@ if (!$patient_id) {
     die("Error: Patient record not found for this user.");
 }
 
-// 5. මෙම රෝගියාට අදාළ Theatre Operations ලබා ගැනීම
 $stmt_ops = $pdo->prepare("SELECT * FROM theatre_operations WHERE patient_id = ? ORDER BY scheduled_at ASC");
 $stmt_ops->execute([$patient_id]);
 $theatre_operations = $stmt_ops->fetchAll(PDO::FETCH_ASSOC);
 
-// 6. UI එකේ පෙන්වන Function එක
 function Schedule_Details($room = 'N/A', $time = 'Not Scheduled', $operation_id = 0) {
     $link = "view_prep_instructions.php?operation_id=$operation_id";
     echo <<<HTML
@@ -45,28 +43,28 @@ function Schedule_Details($room = 'N/A', $time = 'Not Scheduled', $operation_id 
 HTML;
 }
 
-// 7. Include Header and Sidebar (උඩ බාර් එකයි පැත්තේ බාර් එකයි ඇඩ් වෙනවා)
+
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 ?>
 
 <style>
    :root {
-        /* Original Colors */
-        --primary: #1a237e;    /* Used for: Scheduled */
-        --secondary: #3949ab;  /* Used for: Generic / Secondary Actions */
-        --success: #2e7d32;    /* Used for: Confirmed */
-        --warning: #ffa000;    /* Used for: Transferred */
+      
+        --primary: #1a237e;  
+        --secondary: #3949ab;  
+        --success: #2e7d32;    
+        --warning: #ffa000;    
         --bg-light: #f0f4f8;
         --white: #ffffff;
 
-        /* Added Colors for missing statuses in image_866176_2.png */
-        --info: #0288d1;       /* Used for: In Progress (Blue) */
-        --danger: #c62828;     /* Used for: Cancelled (Red) */
-        --completed: #757575;  /* Used for: Completed (Grey) */
+        
+        --info: #0288d1;       
+        --danger: #c62828;     
+        --completed: #757575;  
     }
 
-    /* Sidebar එකත් එක්ක content එක හරියට align වෙන්න padding ඇඩ් කළා */
+    
     .main-content { 
         padding: 40px; 
         max-width: 1200px; 
@@ -164,6 +162,6 @@ include '../../includes/sidebar.php';
 </main>
 
 <?php 
-// 8. Include Footer
+
 include '../../includes/footer.php'; 
 ?>

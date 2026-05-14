@@ -1,6 +1,6 @@
 <?php
 /**
- * modules/pharmacy/prescription_actions.php
+ * modules/pharmacy/prescription_action.php
  * MediCare HMS — Doctor Prescription Backend (DB-connected)
  * Group 05 | ICT1242 Web Development Practicum
  *
@@ -68,10 +68,9 @@ switch ($action) {
             FROM appointments a
             JOIN patients  p ON p.patient_id = a.patient_id
             JOIN users     u ON u.user_id     = p.user_id
-            WHERE a.ref_number = :ref
-            LIMIT 1
+            WHERE a.ref_number = :ref1 OR a.appointment_id = :ref2 LIMIT 1
         ");
-        $stmt->execute([':ref' => $ref]);
+        $stmt->execute([':ref1' => $ref, ':ref2' => $ref]);
         $row = $stmt->fetch();
 
         if (!$row) {
@@ -134,10 +133,9 @@ switch ($action) {
             FROM appointments a
             JOIN patients p ON p.patient_id = a.patient_id
             JOIN users    u ON u.user_id    = p.user_id
-            WHERE a.ref_number = :ref
-            LIMIT 1
+            WHERE a.ref_number = :ref1 OR a.appointment_id = :ref2 LIMIT 1
         ");
-        $apptStmt->execute([':ref' => $apptRef]);
+        $apptStmt->execute([':ref1' => $apptRef, ':ref2' => $apptRef]);
         $appt = $apptStmt->fetch();
 
         if (!$appt) {

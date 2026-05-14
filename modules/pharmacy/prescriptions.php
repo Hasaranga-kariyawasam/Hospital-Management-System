@@ -518,7 +518,7 @@ async function lookupPatient(val) {
     if (!v) { showErr('errAppt', 'Enter an appointment number.'); return; }
 
     try {
-        const res  = await fetch(`prescription_actions.php?action=lookup_patient&appt=${encodeURIComponent(v)}`);
+        const res  = await fetch(`http://localhost/Web/Hospital-Management-System/modules/pharmacy/prescription_action.php?action=lookup_patient&appt=${encodeURIComponent(v)}`);
         const data = await res.json();
         if (data.ok) {
             currentAppt = data;
@@ -541,7 +541,7 @@ function fillPatient(p, apptRef) {
     document.getElementById('patientGender').value = capitalize(p.gender ?? '—');
     document.getElementById('patientBlood').value  = p.blood_type  ?? '—';
     // Row 2
-    document.getElementById('patientId').value     = 'PAT-' + (p.patient_id ?? p.id ?? '');
+    document.getElementById('patientId').value     = (p.patient_id ?? p.id ?? '');
     document.getElementById('patientNic').value    = p.nic         ?? '—';
     document.getElementById('patientPhone').value  = p.phone       ?? '—';
     document.getElementById('apptDate').value      = formatDate(p.appt_date ?? '') + (p.appt_time ? ' · ' + p.appt_time : '');
@@ -751,7 +751,7 @@ async function submitRx() {
     };
 
     try {
-        const res  = await fetch('prescription_actions.php?action=submit_rx', {
+        const res  = await fetch('http://localhost/Web/Hospital-Management-System/modules/pharmacy/prescription_action.php?action=submit_rx', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify(payload),

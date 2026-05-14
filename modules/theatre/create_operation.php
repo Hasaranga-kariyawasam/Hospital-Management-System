@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conflict->execute([$theatreNumber, $scheduledDate, $scheduledTime]);
 
         if ($conflict->fetchColumn() > 0) {
-            $error = '⚠️ Theatre ' . $theatreNumber . ' is already booked on ' . date('d M Y', strtotime($scheduledDate)) . ' at ' . date('h:i A', strtotime($scheduledTime)) . '. Please choose a different time or theatre.';
+            $error = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Theatre ' . $theatreNumber . ' is already booked on ' . date('d M Y', strtotime($scheduledDate)) . ' at ' . date('h:i A', strtotime($scheduledTime)) . '. Please choose a different time or theatre.';
         } else {
             // ── Insert operation ──────────────────────────────
             $stmt = $pdo->prepare("
@@ -92,7 +92,7 @@ include __DIR__ . '/../../includes/header.php';
 
     <div class="page-header">
         <div class="page-header-title">
-            <h2>➕ Schedule New Operation</h2>
+            <h2><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Schedule New Operation</h2>
             <p>Book a theatre slot and assign surgical team</p>
         </div>
         <a href="theatre.php" class="btn btn-secondary">← Back to Schedule</a>
@@ -104,7 +104,7 @@ include __DIR__ . '/../../includes/header.php';
 
     <!-- Availability Checker Banner -->
     <div class="alert alert-info" style="margin-bottom:24px">
-        ℹ️ The system will automatically check for <strong>double-booking</strong> before saving. If a conflict is found, you will be notified.
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> The system will automatically check for <strong>double-booking</strong> before saving. If a conflict is found, you will be notified.
     </div>
 
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;align-items:start">
@@ -112,7 +112,7 @@ include __DIR__ . '/../../includes/header.php';
         <!-- Main Form -->
         <div class="card">
             <div class="card-header">
-                <h3>🗓️ Operation Details</h3>
+                <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/></svg> Operation Details</h3>
             </div>
 
             <form method="POST" id="opForm">
@@ -146,10 +146,10 @@ include __DIR__ . '/../../includes/header.php';
                         <label class="form-label">Theatre <span style="color:var(--danger)">*</span></label>
                         <select name="theatre_number" class="form-control" required id="theatreSelect">
                             <option value="">— Select —</option>
-                            <option value="1" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 1) ? 'selected' : '' ?>>🏥 Theatre 1 – General</option>
-                            <option value="2" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 2) ? 'selected' : '' ?>>🚨 Theatre 2 – Emergency</option>
-                            <option value="3" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 3) ? 'selected' : '' ?>>👶 Theatre 3 – Labour</option>
-                            <option value="4" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 4) ? 'selected' : '' ?>>🔧 Theatre 4 – Minor</option>
+                            <option value="1" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 1) ? 'selected' : '' ?>>Theatre 1 – General</option>
+                            <option value="2" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 2) ? 'selected' : '' ?>>Theatre 2 – Emergency</option>
+                            <option value="3" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 3) ? 'selected' : '' ?>>Theatre 3 – Labour</option>
+                            <option value="4" <?= (isset($_POST['theatre_number']) && $_POST['theatre_number'] == 4) ? 'selected' : '' ?>>Theatre 4 – Minor</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -172,7 +172,7 @@ include __DIR__ . '/../../includes/header.php';
 
                 <!-- Surgical Team -->
                 <div style="padding:16px;background:var(--bg);border-radius:var(--radius-sm);margin-bottom:20px">
-                    <div style="font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px">👨‍⚕️ Surgical Team</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="11" x2="12" y2="15"/><line x1="10" y1="13" x2="14" y2="13"/></svg> Surgical Team</div>
                     <div class="form-row">
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label">Lead Surgeon <span style="color:var(--danger)">*</span></label>
@@ -221,7 +221,7 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
 
                 <div style="display:flex;gap:12px;margin-top:8px">
-                    <button type="submit" class="btn btn-primary btn-lg">🔬 Schedule Operation</button>
+                    <button type="submit" class="btn btn-primary btn-lg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><circle cx="12" cy="8" r="3"/><path d="M12 11v10M8 21h8M6 15h12M17 5l2-2M15 3l4 4"/></svg> Schedule Operation</button>
                     <a href="theatre.php" class="btn btn-secondary btn-lg">Cancel</a>
                 </div>
 
@@ -234,15 +234,15 @@ include __DIR__ . '/../../includes/header.php';
             <!-- Theatre Guide -->
             <div class="card">
                 <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">
-                    <h3>🏥 Theatre Guide</h3>
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Theatre Guide</h3>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:10px">
                     <?php
                     $theatreInfo = [
-                        ['num'=>1,'icon'=>'🏥','name'=>'Theatre 1','desc'=>'General surgery, orthopaedics, urology'],
-                        ['num'=>2,'icon'=>'🚨','name'=>'Theatre 2','desc'=>'Emergency and trauma operations'],
-                        ['num'=>3,'icon'=>'👶','name'=>'Theatre 3','desc'=>'Labour, maternity and C-sections'],
-                        ['num'=>4,'icon'=>'🔧','name'=>'Theatre 4','desc'=>'Minor procedures and day surgery'],
+                        ['num'=>1,'icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>','name'=>'Theatre 1','desc'=>'General surgery, orthopaedics, urology'],
+                        ['num'=>2,'icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>','name'=>'Theatre 2','desc'=>'Emergency and trauma operations'],
+                        ['num'=>3,'icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M9 12h.01M15 12h.01M10 16c.5.3 1.1.5 2 .5s1.5-.2 2-.5"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>','name'=>'Theatre 3','desc'=>'Labour, maternity and C-sections'],
+                        ['num'=>4,'icon'=>'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>','name'=>'Theatre 4','desc'=>'Minor procedures and day surgery'],
                     ];
                     foreach ($theatreInfo as $t): ?>
                     <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--bg);border-radius:var(--radius-sm)">
@@ -259,7 +259,7 @@ include __DIR__ . '/../../includes/header.php';
             <!-- Status Flow -->
             <div class="card">
                 <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">
-                    <h3>📋 Status Flow</h3>
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Status Flow</h3>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
                     <?php
@@ -302,9 +302,9 @@ function checkAvailability() {
         .then(data => {
             resultEl.style.display = 'block';
             if (data.available) {
-                resultEl.innerHTML = `<div class="alert alert-success">✅ Theatre ${t} is available on ${d} at ${tm}.</div>`;
+                resultEl.innerHTML = `<div class="alert alert-success"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><polyline points="20 6 9 17 4 12"/></svg> Theatre ${t} is available on ${d} at ${tm}.</div>`;
             } else {
-                resultEl.innerHTML = `<div class="alert alert-error">⚠️ Theatre ${t} is already booked at this time. Please choose another slot.</div>`;
+                resultEl.innerHTML = `<div class="alert alert-error"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Theatre ${t} is already booked at this time. Please choose another slot.</div>`;
             }
         })
         .catch(() => { resultEl.style.display='none'; });

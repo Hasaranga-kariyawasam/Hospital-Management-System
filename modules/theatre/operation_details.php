@@ -232,8 +232,6 @@ $tl = $theatreLabels[$op['theatre_number']] ?? ['<svg xmlns="http://www.w3.org/2
             </div>
             <?php endif; ?>
 
-            
-
             <!-- Meta Info -->
             <div class="card">
                 <div style="font-size:12px;color:var(--muted);line-height:1.9">

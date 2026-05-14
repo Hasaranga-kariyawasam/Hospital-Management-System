@@ -163,7 +163,7 @@ include '../../includes/sidebar.php';
                         <th>Source</th>
                         <th>Fee (Rs.)</th>
                         <th>Payment Status</th>
-                        <th>Receipt</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
@@ -201,16 +201,7 @@ include '../../includes/sidebar.php';
                         <td><span class="source-tag"><?php echo htmlspecialchars(strtoupper($b['source'] ?? 'OPD')); ?></span></td>
                         <td class="fee-cell">Rs. <?php echo number_format((float)$b['consultation_fee'], 2); ?></td>
                         <td><span class="badge <?php echo $statusClass; ?>"><?php echo $statusLabel; ?></span></td>
-                        <td>
-                            <?php if ($isDone && !empty($b['receipt_number'])): ?>
-                                <a href="receipt.php?ref=<?php echo urlencode($b['receipt_number']); ?>"
-                                   class="btn btn-secondary btn-sm">🧾 Receipt</a>
-                            <?php elseif (!$isDone && !$isCancelled): ?>
-                                <span class="muted-text">Awaiting payment</span>
-                            <?php else: ?>
-                                <span class="muted-text">—</span>
-                            <?php endif; ?>
-                        </td>
+                        
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

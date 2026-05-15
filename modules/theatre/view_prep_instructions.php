@@ -25,7 +25,6 @@ $stmt_ops = $pdo->prepare("SELECT * FROM theatre_operations WHERE patient_id = ?
 $stmt_ops->execute([$patient_id]);
 $theatre_operations = $stmt_ops->fetchAll(PDO::FETCH_ASSOC);
 
-
 function Schedule_Details($room = 'N/A', $time = 'Not Scheduled', $operation_id = 0) {
     $link = "view_prep_instructions.php?operation_id=$operation_id";
     echo <<<HTML
@@ -51,21 +50,21 @@ include '../../includes/sidebar.php';
 
 <style>
    :root {
-        /* Original Colors */
-        --primary: #1a237e;    /* Used for: Scheduled */
-        --secondary: #3949ab;  /* Used for: Generic / Secondary Actions */
-        --success: #2e7d32;    /* Used for: Confirmed */
-        --warning: #ffa000;    /* Used for: Transferred */
+      
+        --primary: #1a237e;  
+        --secondary: #3949ab;  
+        --success: #2e7d32;    
+        --warning: #ffa000;    
         --bg-light: #f0f4f8;
         --white: #ffffff;
 
-        /* Added Colors for missing statuses in image_866176_2.png */
-        --info: #0288d1;       /* Used for: In Progress (Blue) */
-        --danger: #c62828;     /* Used for: Cancelled (Red) */
-        --completed: #757575;  /* Used for: Completed (Grey) */
+        
+        --info: #0288d1;       
+        --danger: #c62828;     
+        --completed: #757575;  
     }
 
-    /* Sidebar එකත් එක්ක content එක හරියට align වෙන්න padding ඇඩ් කළා */
+    
     .main-content { 
         padding: 40px; 
         max-width: 1200px; 

@@ -2,9 +2,7 @@
 
 require_once '../../includes/session_check.php';
 
-
 require_once __DIR__ . '/../../config/db_config.php';
-
 
 $user_id = $_SESSION['user_id'];
 
@@ -13,11 +11,9 @@ $stmt_p = $pdo->prepare("SELECT patient_id FROM patients WHERE user_id = ? LIMIT
 $stmt_p->execute([$user_id]);
 $patient_id = $stmt_p->fetchColumn();
 
-
 $stmt_ops = $pdo->prepare("SELECT * FROM theatre_operations WHERE patient_id = ?");
 $stmt_ops->execute([$patient_id]);
 $theatre_operations = $stmt_ops->fetchAll(PDO::FETCH_ASSOC);
-
 
 $operation_count = count($theatre_operations);
 

@@ -200,21 +200,32 @@ CREATE TABLE IF NOT EXISTS ambulances (
     is_available    TINYINT(1)    NOT NULL DEFAULT 1,
     PRIMARY KEY (ambulance_id)
 ) ENGINE=InnoDB;
-
--- ── theatre_operations ────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS theatre_operations (
-    operation_id      INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id        INT UNSIGNED  NOT NULL,
-    surgeon_id        INT UNSIGNED  NOT NULL COMMENT 'doctor user reference',
-    anaesthetist_id   INT UNSIGNED  NULL,
-    operation_type    VARCHAR(120)  NOT NULL,
-    theatre_number    TINYINT       NOT NULL,
-    scheduled_at      DATETIME      NOT NULL,
-    status            ENUM('scheduled','in_progress','completed','cancelled') NOT NULL DEFAULT 'scheduled',
-    pre_op_notes      TEXT          NULL,
-    post_op_notes     TEXT          NULL,
+DROP TABLE IF EXISTS theatre_operations;
+CREATE TABLE theatre_operations (
+    operation_id          INT UNSIGNED   NOT NULL AUTO_INCREMENT,
+    patient_id            INT UNSIGNED   NOT NULL,
+    surgeon_id            INT UNSIGNED   NOT NULL,
+    anaesthetist_id       INT UNSIGNED   NULL,
+    assistant_doctor_id   INT UNSIGNED   NULL,
+    operation_type        VARCHAR(120)   NOT NULL,
+    theatre_number        TINYINT        NOT NULL,
+    scheduled_date        DATE           NOT NULL,
+    scheduled_time        TIME           NOT NULL,
+    scheduled_at          TIMESTAMP      GENERATED ALWAYS AS (TIMESTAMP(scheduled_date, scheduled_time)) STORED,
+    status                ENUM('scheduled','confirmed','in_progress','completed','cancelled','transferred') NOT NULL DEFAULT 'scheduled',
+    pre_op_notes          TEXT           NULL,
+    post_op_notes         TEXT           NULL,
+    recovery_instructions TEXT           NULL,
+    post_op_room_type     VARCHAR(40)    NULL,
+    created_by            INT UNSIGNED   NULL,
+    created_at            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (operation_id),
-    INDEX idx_theatre_sched (scheduled_at, theatre_number)
+    INDEX idx_theatre_date (theatre_number, scheduled_date, scheduled_time),
+    FOREIGN KEY fk_th_patient   (patient_id)         REFERENCES patients(patient_id),
+    FOREIGN KEY fk_th_surgeon   (surgeon_id)          REFERENCES users(user_id),
+    FOREIGN KEY fk_th_anaes     (anaesthetist_id)     REFERENCES users(user_id),
+    FOREIGN KEY fk_th_assistant (assistant_doctor_id) REFERENCES users(user_id),
+    FOREIGN KEY fk_th_created   (created_by)          REFERENCES users(user_id)
 ) ENGINE=InnoDB;
 
 -- ── doctor_schedules ─────────────────────────────────────────
@@ -264,48 +275,25 @@ VALUES (
     'active'
 );
 
-CREATE TABLE IF NOT EXISTS theatre_operations (
-    operation_id        INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id          INT NOT NULL,
-    lead_surgeon_id     INT NOT NULL,
-    anaesthetist_id     INT NOT NULL,
-    assistant_doctor_id INT DEFAULT NULL,
-    operation_type      VARCHAR(150) NOT NULL,
-    theatre_number      ENUM('Theatre 1','Theatre 2','Labour Theatre','Emergency Theatre') NOT NULL,
-    scheduled_date      DATE NOT NULL,
-    scheduled_time      TIME NOT NULL,
-    duration_minutes    INT DEFAULT 60,
-    pre_op_notes        TEXT DEFAULT NULL,
-    post_op_notes       TEXT DEFAULT NULL,
-    recovery_instructions TEXT DEFAULT NULL,
-    post_op_room_type   ENUM('ICU','Recovery Room','Private Room','General Ward') DEFAULT NULL,
-    status              ENUM('Scheduled','Confirmed','In Progress','Completed','Cancelled','Transferred') DEFAULT 'Scheduled',
-    is_maternity        TINYINT(1) DEFAULT 0,
-    billing_triggered   TINYINT(1) DEFAULT 0,
-    created_by          INT NOT NULL,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+USE hospital_db;
+ 
+-- Add missing columns to theatre_operations
+-- (The base table from hospital_db.sql has fewer columns)
+ 
+-----sample data-------
 
-    FOREIGN KEY (patient_id)          REFERENCES patients(patient_id)  ON DELETE RESTRICT,
-    FOREIGN KEY (lead_surgeon_id)     REFERENCES users(user_id)         ON DELETE RESTRICT,
-    FOREIGN KEY (anaesthetist_id)     REFERENCES users(user_id)         ON DELETE RESTRICT,
-    FOREIGN KEY (assistant_doctor_id) REFERENCES users(user_id)         ON DELETE SET NULL,
-    FOREIGN KEY (created_by)          REFERENCES users(user_id)         ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS theatre_billing_items (
-    billing_item_id  INT AUTO_INCREMENT PRIMARY KEY,
-    operation_id     INT NOT NULL,
-    patient_id       INT NOT NULL,
-    item_type        ENUM('Surgery Fee','Theatre Usage Fee','Anaesthesia Fee','Equipment Fee','Recovery Charge') NOT NULL,
-    amount           DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    description      VARCHAR(255) DEFAULT NULL,
-    added_to_invoice TINYINT(1) DEFAULT 0,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (operation_id) REFERENCES theatre_operations(operation_id) ON DELETE CASCADE,
-    FOREIGN KEY (patient_id)   REFERENCES patients(patient_id)             ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+INSERT IGNORE INTO users (full_name, email, password_hash, role, status) VALUES
+('Dr. Nimal Silva', 'nimal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kamal Perera', 'kamal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kumari Jayawardena', 'kumari@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Anura Bandara', 'anura@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Shani Weerasinghe', 'shani@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active');
 
 
-i create all of the sql table i want only loging resigtaion parts only other partys done by other members remove all sql table and stecher and use siple tables strcher not complax laout only create loging and registaion parts and main web site
+INSERT IGNORE INTO doctors (user_id, specialization, license_number) VALUES
+((SELECT user_id FROM users WHERE email = 'nimal@medicare.lk'), 'General Surgery', 'DOC001'),
+((SELECT user_id FROM users WHERE email = 'kamal@medicare.lk'), 'Orthopedics', 'DOC002'),
+((SELECT user_id FROM users WHERE email = 'kumari@medicare.lk'), 'Gynecology', 'DOC003'),
+((SELECT user_id FROM users WHERE email = 'anura@medicare.lk'), 'Cardiology', 'DOC004'),
+((SELECT user_id FROM users WHERE email = 'shani@medicare.lk'), 'Anesthesiology', 'DOC005');
+

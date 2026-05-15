@@ -341,7 +341,18 @@ button,.btn{
 
         <div id="errPid" class="err-msg" role="alert"></div>
 
-        
+        <!-- Sample IDs from DB -->
+        <?php if (!empty($sampleIds)): ?>
+        <div class="hint-pills">
+            <span class="hint-label">Sample IDs:</span>
+            <?php foreach ($sampleIds as $sid): ?>
+            <span class="hint-pill" onclick="quickFill('<?php echo htmlspecialchars($sid); ?>')">
+                <?php echo htmlspecialchars($sid); ?>
+            </span>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
 
     <!-- Loading spinner -->
     <div id="loadingState" style="display:none;text-align:center;padding:30px;color:#5A6677;font-size:13px;">

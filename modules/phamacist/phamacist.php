@@ -81,38 +81,34 @@ if (!empty($_GET['action']) && $_GET['action'] === 'lookup_patient') {
         $as->execute([$patient['patient_id']]);
         $appt = $as->fetch() ?: [];
 
-        // ── Prescription (optional — table may not exist yet) ─────────────────
-        $rx    = null;
+        // ── Prescriptions via appointments → prescriptions → pharmacy_drugs ───
         $items = [];
         try {
-            $rs = db()->prepare("
-                SELECT id AS rx_id, prescription_code, diagnosis, notes, created_at
-                FROM   prescriptions
-                WHERE  patient_id = ?
-                ORDER  BY created_at DESC
-                LIMIT  1
+            $is = db()->prepare("
+                SELECT
+                    pr.prescription_id,
+                    pr.appointment_id,
+                    pr.drug_id,
+                    pr.dosage,
+                    pr.frequency,
+                    pr.duration_days  AS days,
+                
+                    pd.drug_name,
+                    pd.category,
+                    pd.unit,
+                    pd.unit_price,
+                    pd.stock_qty,
+                    ap.appt_date
+                FROM   appointments  ap
+                JOIN   prescriptions pr ON pr.appointment_id = ap.appointment_id
+                JOIN   pharmacy_drugs pd ON pd.drug_id       = pr.drug_id
+                WHERE  ap.patient_id = ?
+                ORDER  BY ap.appt_date DESC, pr.prescription_id ASC
             ");
-            $rs->execute([$patient['patient_id']]);
-            $rx = $rs->fetch() ?: null;
-
-            if ($rx) {
-                $is = db()->prepare("
-                    SELECT drug_name, category,
-                           dose_morning   AS morning,
-                           dose_afternoon AS afternoon,
-                           dose_evening   AS evening,
-                           dose_night     AS night,
-                           duration_days  AS days,
-                           unit_price
-                    FROM   prescription_items
-                    WHERE  prescription_id = ?
-                    ORDER  BY id
-                ");
-                $is->execute([$rx['rx_id']]);
-                $items = $is->fetchAll();
-            }
+            $is->execute([$patient['patient_id']]);
+            $items = $is->fetchAll();
         } catch (Throwable $e) {
-            error_log('[Pharmacy] prescriptions skipped: ' . $e->getMessage());
+            error_log('[Pharmacy] prescriptions query failed: ' . $e->getMessage());
         }
 
         echo json_encode([
@@ -127,14 +123,14 @@ if (!empty($_GET['action']) && $_GET['action'] === 'lookup_patient') {
                 'appt'  => $appt['ref_number']     ?? '—',
             ],
             'prescription' => [
-                'ref'        => $rx['prescription_code']   ?? null,
-                'date'       => $rx['created_at']          ?? ($appt['appt_date'] ?? null),
-                'diagnosis'  => $rx['diagnosis']           ?? ($appt['notes'] ?? '—'),
-                'notes'      => $rx['notes']               ?? '',
-                'doctorName' => $appt['doctor_name']       ?? '—',
-                'specialty'  => $appt['specialization']    ?? '—',
-                'docReg'     => $appt['license_number']    ?? '—',
-                'medicines'  => $items,
+                'ref'        => null,
+                'date'       => $appt['appt_date']      ?? null,
+                'diagnosis'  => $appt['notes']           ?? '—',
+                'notes'      => '',
+                'doctorName' => $appt['doctor_name']     ?? '—',
+                'specialty'  => $appt['specialization']  ?? '—',
+                'docReg'     => $appt['license_number']  ?? '—',
+                'medicines'  => $items,   // each row: drug_name, category, unit, unit_price, dosage, frequency, days, status
             ],
         ]);
 
@@ -584,10 +580,7 @@ button,.btn{
 <script>
 /* helpers */
 function initials(n){ return (n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
-function tpd(m)     { return (+m.morning||0)+(+m.afternoon||0)+(+m.evening||0)+(+m.night||0); }
-function tqty(m)    { return tpd(m)*(+m.days||1); }
 function fmt(n)     { return 'LKR '+(+n).toFixed(2); }
-function doseStr(m) { return `${+m.morning}-${+m.afternoon}-${+m.evening}-${+m.night}`; }
 function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
                     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -676,25 +669,48 @@ function renderReceipt(p,rx){
     if(meds.length===0){
         document.getElementById('medBody').innerHTML=
             '<tr><td colspan="6" style="text-align:center;color:#5A6677;font-size:12px;padding:20px">'+
-            'No prescription items on record.</td></tr>';
+            'No prescriptions found for this patient.</td></tr>';
     }else{
         document.getElementById('medBody').innerHTML=meds.map((m,i)=>{
-            const qty=tqty(m),amt=qty*(+m.unit_price||0);
-            subtotal+=amt;
-            const bg=i%2===1?'background:var(--color-background-secondary)':'';
+            // qty = duration_days (stock dispensed per prescription row)
+            const days   = parseInt(m.days)  || 1;
+            const price  = parseFloat(m.unit_price) || 0;
+            // For dosage like "1-0-1-0" try to sum, otherwise treat as 1 unit/day
+            const doseNum = (()=>{
+                const parts = String(m.dosage||'1').split('-').map(Number);
+                const sum   = parts.reduce((a,b)=>a+(isNaN(b)?0:b),0);
+                return sum > 0 ? sum : 1;
+            })();
+            const qty    = doseNum * days;
+            const amt    = qty * price;
+            subtotal    += amt;
+            const bg     = i%2===1?'background:var(--color-background-secondary)':'';
+
+            // Status badge colour
+            const statusColor = m.status==='dispensed'
+                ? 'color:#3B6D11;background:#EAF3DE;border:0.5px solid #97C459'
+                : 'color:#92400e;background:#fffbeb;border:0.5px solid #fcd34d';
+
             return `<tr style="${bg}">
                 <td>
                     <div class="drug-name">${escHtml(m.drug_name)}</div>
                     <div class="drug-cat">${escHtml(m.category||'')}</div>
                 </td>
-                <td><span class="dose-pill">${doseStr(m)}</span></td>
-                <td class="muted-cell">${m.days}d</td>
+                <td>
+                    <span class="dose-pill">${escHtml(m.dosage||'—')}</span>
+                    <div style="font-size:10px;color:#5A6677;margin-top:3px">${escHtml(m.frequency||'')}</div>
+                </td>
+                <td class="muted-cell">${days}d</td>
                 <td class="muted-cell">${qty}</td>
-                <td class="muted-cell">${fmt(m.unit_price||0)}</td>
-                <td class="amount-cell">${fmt(amt)}</td>
+                <td class="muted-cell">${fmt(price)}</td>
+                <td class="amount-cell">
+                    ${fmt(amt)}
+                    
+                </td>
             </tr>`;
         }).join('');
     }
+
 
     /* totals */
     document.getElementById('tSubtotal').textContent=fmt(subtotal);

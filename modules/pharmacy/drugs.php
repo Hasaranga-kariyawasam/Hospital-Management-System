@@ -306,25 +306,8 @@ body { font-family:var(--font-sans); background:var(--color-background-page); co
 <div class="dc-wrap">
 
     <!-- Breadcrumb -->
-    <nav class="breadcrumb">
-        <a href="/Web/Hospital-Management-System/modules/admin/dashboard.php">Dashboard</a>
-        <span class="sep">›</span>
-        <a href="phamacist.php">Pharmacy</a>
-        <span class="sep">›</span>
-        <span>Drug Catalog</span>
-    </nav>
-
-    <!-- ── Page tab strip ──────────────────────────────────────────────── -->
-    <div class="ph-tab-strip">
-        <a class="ph-tab" href="phamacist.php">
-            <i class="ti ti-file-prescription" aria-hidden="true"></i>
-            Dispense Prescription
-        </a>
-        <a class="ph-tab active" href="/Web/Hospital-Management-System/modules/pharmacy/drugs.php">
-            <i class="ti ti-pill" aria-hidden="true"></i>
-            Drug Catalog
-        </a>
-    </div>
+   
+   
 
     <!-- Page title -->
     <div class="page-title-row">

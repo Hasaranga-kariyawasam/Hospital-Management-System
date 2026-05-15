@@ -562,22 +562,6 @@ body { font-family:var(--font); background:var(--color-bg-page); color:var(--col
 <main class="main-content">
 <div class="pq-wrap">
 
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb no-print">
-        <a href="#">Dashboard</a>
-        <span class="sep">›</span>
-        <a href="#">Pharmacy</a>
-        <span class="sep">›</span>
-        <span>Pharmacy Queue</span>
-    </nav>
-
-    <!-- Tab strip (mirrors drug_catalog.php) -->
-    <div class="ph-tab-strip no-print">
-        <a href="prescriptions.php"  class="ph-tab"><i class="ti ti-prescription"></i> Dispensing</a>
-        <a href="drugs.php"          class="ph-tab"><i class="ti ti-pill"></i> Drug Catalog</a>
-        <a href="pharmacy_queue.php" class="ph-tab active"><i class="ti ti-shopping-cart"></i> Pharmacy Queue</a>
-    </div>
-
     <!-- Page title -->
     <div class="page-title-row no-print">
         <div class="page-title">

@@ -566,7 +566,7 @@ body { font-family:var(--font); background:var(--color-bg-page); color:var(--col
 
     <!-- Tab strip (mirrors drug_catalog.php) -->
     <div class="ph-tab-strip no-print">
-        <a href="prescriptions.php"  class="ph-tab"><i class="ti ti-prescription"></i> Dispensing</a>
+        <a href="http://localhost/Web/Hospital-Management-System/modules/phamacist/phamacist.php"  class="ph-tab"><i class="ti ti-prescription"></i> Dispensing</a>
         
         <a href="pharmacy_queue.php" class="ph-tab active"><i class="ti ti-shopping-cart"></i> Pharmacy Queue</a>
     </div>

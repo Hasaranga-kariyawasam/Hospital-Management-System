@@ -17,12 +17,42 @@ if (session_status() === PHP_SESSION_NONE) {
 //     header('Location: /Web/Hospital-Management-System/login.php');
 //     exit;
 // }
+// ── Doctor info from session (with DB fallback if session is incomplete) ──
+$doctorId   = (string)($_SESSION['user_id']   ?? '');
+$doctorName = $_SESSION['full_name']  ?? '';
+$doctorReg  = $_SESSION['staff_id']   ?? '';
+$doctorDept = $_SESSION['department'] ?? '';
 
-// ── Doctor info from session ──────────────────────────────────────────────
-$doctorName = htmlspecialchars($_SESSION['full_name']  ?? 'Dr. Saman Perera');
-$doctorReg  = htmlspecialchars($_SESSION['staff_id']   ?? 'REG-DOC-0042');
-$doctorDept = htmlspecialchars($_SESSION['department'] ?? 'General Medicine');
-$doctorId   = htmlspecialchars($_SESSION['user_id']    ?? '');
+// If session is missing staff_id or department, reload from DB
+if ($doctorId !== '' && ($doctorReg === '' || $doctorDept === '')) {
+    try {
+        $dRow = db()->prepare(
+            "SELECT full_name, staff_id, department FROM users WHERE user_id = ? LIMIT 1"
+        );
+        $dRow->execute([$doctorId]);
+        $row = $dRow->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            if ($doctorName === '') $doctorName = $row['full_name']  ?? '';
+            if ($doctorReg  === '') $doctorReg  = $row['staff_id']   ?? '';
+            if ($doctorDept === '') $doctorDept = $row['department']  ?? '';
+            // Refresh session so future pages don't need to re-query
+            $_SESSION['full_name']  = $doctorName;
+            $_SESSION['staff_id']   = $doctorReg;
+            $_SESSION['department'] = $doctorDept;
+        }
+    } catch (Throwable $_) {}
+}
+
+// Final fallbacks for display
+if ($doctorName === '') $doctorName = 'Dr. Saman Perera';
+if ($doctorReg  === '') $doctorReg  = 'REG-DOC-0042';
+if ($doctorDept === '') $doctorDept = 'General Medicine';
+
+$doctorName = htmlspecialchars($doctorName);
+$doctorReg  = htmlspecialchars($doctorReg);
+$doctorDept = htmlspecialchars($doctorDept);
+$doctorId   = htmlspecialchars($doctorId);
+
 $initials   = implode('', array_map(
     fn($w) => $w[0],
     array_slice(explode(' ', strip_tags($doctorName)), -2)
@@ -845,34 +875,6 @@ function showModal(d) {
 
         <p class="modal-msg">
             <i class="ti ti-circle-check"></i>
-            ${d.message}
-        </p>
-    `;
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-    clearAll();
-}
-</script>
-
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-ck"></i>
-            ${d.message}
-        </p>
-    `;
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-    clearAll();
-}
-</script>
-
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-ck"></i>
             ${d.message}
         </p>
     `;

@@ -77,6 +77,35 @@ if ($action !== '') {
 
         try {
             $pdo = db();
+
+            // Auto-create tables if they don't exist yet
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS pharmacy_sales (
+                    id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    sale_ref      VARCHAR(40)    NOT NULL UNIQUE,
+                    cashier       VARCHAR(120)   NOT NULL DEFAULT 'Pharmacy Counter',
+                    sale_date     DATE           NOT NULL,
+                    total_amount  DECIMAL(12,2)  NOT NULL DEFAULT 0.00,
+                    created_at    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_sale_date (sale_date)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS pharmacy_sale_items (
+                    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    sale_id     INT UNSIGNED   NOT NULL,
+                    drug_id     VARCHAR(20)    NOT NULL,
+                    drug_name   VARCHAR(200)   NOT NULL,
+                    unit_price  DECIMAL(10,2)  NOT NULL,
+                    quantity    INT UNSIGNED   NOT NULL,
+                    line_total  DECIMAL(12,2)  NOT NULL,
+                    CONSTRAINT fk_psi_sale FOREIGN KEY (sale_id)
+                        REFERENCES pharmacy_sales(id) ON DELETE CASCADE,
+                    INDEX idx_psi_sale (sale_id),
+                    INDEX idx_psi_drug (drug_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+
             $pdo->beginTransaction();
 
             // Validate stock & compute total
@@ -148,7 +177,7 @@ if ($action !== '') {
         } catch (Throwable $e) {
             try { db()->rollBack(); } catch (Throwable $_) {}
             error_log('[PQ] confirm_sale: ' . $e->getMessage());
-            echo json_encode(['ok' => false, 'error' => 'Sale failed. Please try again.']);
+            echo json_encode(['ok' => false, 'error' => 'Sale failed: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -495,12 +524,35 @@ body { font-family:var(--font); background:var(--color-bg-page); color:var(--col
 
 /* ── Print ── */
 @media print {
+    /* Hide everything except the receipt card */
+    body > *:not(#receiptOverlay),
     .no-print, .topbar, .sidebar, .site-footer,
-    .receipt-actions, .receipt-overlay > :not(.receipt-card) { display:none !important; }
-    .receipt-overlay { position:static; background:none; display:block !important; padding:0; }
-    .receipt-card    { box-shadow:none; border-radius:0; width:100%; max-width:100%; }
-    .rx-head         { background:#0C447C !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    @page            { size:A5; margin:1cm; }
+    main, .pq-wrap, .toast { display:none !important; }
+
+    /* Flatten the overlay so the card fills the page */
+    .receipt-overlay {
+        position:static !important;
+        background:none !important;
+        display:block !important;
+        padding:0 !important;
+        overflow:visible !important;
+    }
+    .receipt-card {
+        box-shadow:none !important;
+        border-radius:0 !important;
+        width:100% !important;
+        max-width:100% !important;
+    }
+    /* Force header gradient to print */
+    .rx-head {
+        background:#0C447C !important;
+        -webkit-print-color-adjust:exact !important;
+        print-color-adjust:exact !important;
+        color:#fff !important;
+    }
+    /* Hide modal action buttons on print */
+    .receipt-actions { display:none !important; }
+    @page { size:A5; margin:1cm; }
 }
 </style>
 
@@ -992,6 +1044,9 @@ async function confirmSale() {
         fetchDailyIncome();
         cart = [];
         renderCart();
+        // Refresh search results so updated stock quantities are shown
+        const q = document.getElementById('drugSearch').value.trim();
+        if (q.length >= 2) searchDrugs(q);
 
     } catch(e) {
         toast('Network error. Please try again.', 'error');
@@ -1005,7 +1060,7 @@ async function confirmSale() {
 // ── Receipt ──────────────────────────────────────────────────────────────────
 function showReceipt(data) {
     document.getElementById('rxRefNo').textContent    = data.sale_ref;
-    document.getElementById('rxRefDate').textContent  = 'Receipt';
+    document.getElementById('rxRefDate').textContent  = data.date;
     document.getElementById('rxCashier').textContent  = data.cashier;
     document.getElementById('rxDateTime').textContent = data.date;
 

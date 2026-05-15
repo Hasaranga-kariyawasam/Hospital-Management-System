@@ -36,12 +36,11 @@ function Schedule_Details($room='null', $time='none', $operation_id=0){
 HTML;
 }
 
-// 5. Page settings
 $pageTitle  = "Theatre Management";
 $useSidebar = true;
 $isPublic   = false;
 
-// 6. Include header and sidebar
+
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 ?>

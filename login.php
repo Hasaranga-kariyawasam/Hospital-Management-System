@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'doctor'     => "$base/modules/appointments/doctor_appointments.php",
                 'reception'  => "$base/modules/appointments/opd_walkin.php",
                 'pharmacist' => "$base/modules/pharmacy/pharmacy_queue.php",
-                'patient'    => "$base/modules/appointments/my_appointment.php",
+                'patient'    => "$base/modules/appointments/my_appointments.php",
                 'dispatcher' => "$base/modules/emergency/dispatcher_dashboard.php",
                 'driver'     => "$base/modules/emergency/driver_job.php",
             ];

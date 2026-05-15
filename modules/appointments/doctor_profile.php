@@ -134,7 +134,7 @@ include '../../includes/sidebar.php';
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-title">
-            <h2>✏️ Edit My Profile</h2>
+            <h2>Edit My Profile</h2>
             <p>Update your personal and professional information</p>
         </div>
         <div class="flex gap-12 items-center">
@@ -203,7 +203,7 @@ include '../../includes/sidebar.php';
             <!-- Change Password -->
             <div class="card">
                 <div class="card-header">
-                    <h3>🔒 Change Password</h3>
+                    <h3>Change Password</h3>
                     <span class="optional-badge">Optional</span>
                 </div>
                 <p class="card-hint">Leave blank to keep your current password.</p>
@@ -265,7 +265,7 @@ include '../../includes/sidebar.php';
             <!-- Read-only summary -->
             <div class="card readonly-card">
                 <div class="card-header">
-                    <h3>📋 Current Record</h3>
+                    <h3>Current Record</h3>
                 </div>
                 <table class="mini-table">
                     <tr><th>Doctor ID</th><td>#<?php echo (int)$row['doctor_id']; ?></td></tr>
@@ -276,7 +276,7 @@ include '../../includes/sidebar.php';
 
             <!-- Save button -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-full">💾 Save Changes</button>
+                <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
                 <a href="../../modules/appointments/doctor_profile.php" class="btn btn-secondary btn-full">Cancel</a>
             </div>
 

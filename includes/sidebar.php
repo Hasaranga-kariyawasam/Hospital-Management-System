@@ -4,7 +4,7 @@
 $role = $_SESSION['role'] ?? 'guest';
 ?>
 <aside class="sidebar">
-<a href="/Web/Hospital-Management-System/view_doctors.php">🩺 View Doctors</a>
+
     <?php if ($role === 'admin'): ?>
         <div class="sidebar-section">
             <div class="sidebar-heading">Overview</div>
@@ -30,8 +30,10 @@ $role = $_SESSION['role'] ?? 'guest';
         <div class="sidebar-section">
             <div class="sidebar-heading">My Work</div>
             <ul class="sidebar-menu">
-                <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_schedule.php"><span class="icon">📅</span> My Schedule</a></li>
+               
+                <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_appointments.php"><span class="icon">📅</span> My Schedule</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/appointments.php"><span class="icon">📋</span> Appointments</a></li>
+                 <li><a href="/Web/Hospital-Management-System/view_doctors.php"><span class="icon">🩺</span> View Doctors</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php"><span class="icon">🔬</span> Operations</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/pharmacy/prescriptions.php"><span class="icon">💊</span> Prescriptions</a></li>
             </ul>
@@ -58,16 +60,37 @@ $role = $_SESSION['role'] ?? 'guest';
             </ul>
         </div>
 
-    <?php elseif ($role === 'patient'): ?>
-        <div class="sidebar-section">
-            <div class="sidebar-heading">My Portal</div>
-            <ul class="sidebar-menu">
-                <li><a href="/Web/Hospital-Management-System/modules/appointments/my_appointments.php"><span class="icon">📅</span> My Appointments</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/appointments/book.php"><span class="icon">➕</span> Book Appointment</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/emergency/request_ambulance.php"><span class="icon">🚑</span> Ambulance</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/billing/my_bills.php"><span class="icon">💳</span> My Bills</a></li>
-            </ul>
-        </div>
+ <?php elseif ($role === 'patient'): ?>
+    <div class="sidebar-section">
+        <div class="sidebar-heading">My Portal</div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="/Web/Hospital-Management-System/modules/appointments/my_appointments.php">
+                    <span class="icon">📅</span> My Appointments
+                </a>
+            </li>
+            <li>
+                <a href="/Web/Hospital-Management-System/modules/appointments/book.php">
+                    <span class="icon">➕</span> Book Appointment
+                </a>
+            </li>
+            <li>
+                <a href="/Web/Hospital-Management-System/modules/emergency/request_ambulance.php">
+                    <span class="icon">🚑</span> Ambulance
+                </a>
+            </li>
+            <li>
+                <a href="/Web/Hospital-Management-System/modules/Theatre/patient_theatre.php">
+                    <span class="icon">🔬</span> Operations
+                </a>
+            </li>
+            <li>
+                <a href="/Web/Hospital-Management-System/modules/billing/my_bills.php">
+                    <span class="icon">💳</span> My Bills
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <?php elseif ($role === 'dispatcher'): ?>
         <div class="sidebar-section">

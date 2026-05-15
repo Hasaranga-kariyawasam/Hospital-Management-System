@@ -138,13 +138,13 @@ include '../../includes/sidebar.php';
         <!-- ── Left: Today's Appointment Queue ── -->
         <div class="card">
             <div class="card-header">
-                <h3>📋 Today's Patient Queue</h3>
+                <h3>Today's Patient Queue</h3>
                 <span class="badge badge-info"><?php echo count($todayAppts); ?> patients</span>
             </div>
 
             <?php if (empty($todayAppts)): ?>
                 <div class="empty-state">
-                    <div class="empty-icon">🗓️</div>
+                    <div class="empty-icon"></div>
                     <p class="empty-title">No appointments today</p>
                     <p class="empty-sub">Your schedule is clear for <?php echo date('d F Y'); ?>.</p>
                 </div>
@@ -197,7 +197,7 @@ include '../../includes/sidebar.php';
             <!-- ══ Doctor Info Card (with full data table) ══ -->
             <div class="card mb-16">
                 <div class="card-header">
-                    <h3>👨‍⚕️ My Profile</h3>
+                    <h3>My Profile</h3>
                     <div class="flex gap-8">
                         <!-- link to full doctor profile page -->
                         <a href="doctor_profile.php" class="btn btn-primary btn-sm">View Full Profile</a>
@@ -269,13 +269,13 @@ include '../../includes/sidebar.php';
             <!-- Weekly Availability Card -->
             <div class="card">
                 <div class="card-header">
-                    <h3>🗓️ Weekly Availability</h3>
+                    <h3>Weekly Availability</h3>
                     <a href="manage_schedule.php" class="btn btn-secondary btn-sm">Manage</a>
                 </div>
 
                 <?php if (empty($scheduleSlots)): ?>
                     <div class="empty-state">
-                        <div class="empty-icon">📆</div>
+                        <div class="empty-icon"></div>
                         <p class="empty-title">No schedule set</p>
                         <p class="empty-sub">Add your weekly availability so patients can book appointments.</p>
                         <a href="manage_schedule.php" class="btn btn-primary btn-sm" style="margin-top:12px">Set Schedule</a>
@@ -377,7 +377,7 @@ include '../../includes/sidebar.php';
     flex-shrink: 0;
 }
 
-.appt-info { flex: 1; min-width: 0; }
+.appt-info { flex: 2; min-width: 0; }
 .appt-name { font-weight: 600; font-size: 14px; color: var(--text); }
 .appt-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .appt-notes {

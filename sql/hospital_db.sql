@@ -55,25 +55,25 @@ CREATE TABLE IF NOT EXISTS doctors (
 ) ENGINE=InnoDB;
 
 -- ── appointments ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id       INT UNSIGNED  NOT NULL,
-    doctor_id        INT UNSIGNED  NOT NULL,
-    appt_date        DATE          NOT NULL,
-    appt_time        TIME          NOT NULL,
-    source           ENUM('online','opd') NOT NULL DEFAULT 'online',
-    status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
-    ref_number       VARCHAR(20)   NOT NULL UNIQUE,
-    notes            TEXT          NULL,
-    booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
-    created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (appointment_id),
-    INDEX idx_appt_date   (appt_date),
-    INDEX idx_appt_doctor (doctor_id),
-    INDEX idx_appt_patient(patient_id),
-    FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
-) ENGINE=InnoDB;
+    CREATE TABLE IF NOT EXISTS appointments (
+        appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+        patient_id       INT UNSIGNED  NOT NULL,
+        doctor_id        INT UNSIGNED  NOT NULL,
+        appt_date        DATE          NOT NULL,
+        appt_time        TIME          NOT NULL,
+        source           ENUM('online','opd') NOT NULL DEFAULT 'online',
+        status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+        ref_number       VARCHAR(20)   NOT NULL UNIQUE,
+        notes            TEXT          NULL,
+        booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
+        created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (appointment_id),
+        INDEX idx_appt_date   (appt_date),
+        INDEX idx_appt_doctor (doctor_id),
+        INDEX idx_appt_patient(patient_id),
+        FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
+        FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
+    ) ENGINE=InnoDB;
 
 -- ── rooms ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rooms (
@@ -296,3 +296,4 @@ INSERT IGNORE INTO doctors (user_id, specialization, license_number) VALUES
 ((SELECT user_id FROM users WHERE email = 'kumari@medicare.lk'), 'Gynecology', 'DOC003'),
 ((SELECT user_id FROM users WHERE email = 'anura@medicare.lk'), 'Cardiology', 'DOC004'),
 ((SELECT user_id FROM users WHERE email = 'shani@medicare.lk'), 'Anesthesiology', 'DOC005');
+

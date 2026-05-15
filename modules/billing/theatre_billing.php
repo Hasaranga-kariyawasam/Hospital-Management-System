@@ -197,46 +197,70 @@ include __DIR__ . '/../../includes/sidebar.php';
 
 <div class="page-header">
     <div class="page-header-title">
-        <h2>🏥 Theatre Billing</h2>
+        <h2>Theatre Billing</h2>
         <p>Manage operation charges and link to patient invoices — <?= date('l, d F Y') ?></p>
     </div>
     <div style="display:flex;gap:10px">
-        <a href="../theatre/theatre.php" class="btn btn-secondary">🔬 Theatre Schedule</a>
+        <a href="../theatre/theatre.php" class="btn btn-secondary">Theatre Schedule</a>
     </div>
 </div>
 
 <?php if ($success): ?>
-    <div class="alert-msg success">✅ <?= htmlspecialchars($success) ?></div>
+    <div class="alert-msg success"> <?= htmlspecialchars($success) ?></div>
 <?php endif; ?>
 <?php if ($error): ?>
-    <div class="alert-msg danger">❌ <?= htmlspecialchars($error) ?></div>
+    <div class="alert-msg danger"> <?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
-<!-- ── Stat Cards ── -->
+<!-- ── Stat Cards with Modern Black & White Icons ── -->
 <div class="stat-grid">
     <div class="stat-card">
-        <div class="stat-icon blue">🔬</div>
+        <div class="stat-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                <path d="M12 2v4"/>
+                <path d="M12 18v4"/>
+            </svg>
+        </div>
         <div>
             <div class="stat-label">Total Operations</div>
             <div class="stat-value"><?= (int)$stats['total_ops'] ?></div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon yellow">⏳</div>
+        <div class="stat-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
         <div>
             <div class="stat-label">Pending Billing</div>
             <div class="stat-value"><?= (int)$stats['pending'] ?></div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon blue">📄</div>
+        <div class="stat-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+        </div>
         <div>
             <div class="stat-label">Invoiced</div>
             <div class="stat-value"><?= (int)$stats['invoiced'] ?></div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green">💰</div>
+        <div class="stat-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
         <div>
             <div class="stat-label">Collected</div>
             <div class="stat-value">Rs. <?= number_format((float)$stats['collected'], 0) ?></div>
@@ -252,10 +276,10 @@ include __DIR__ . '/../../includes/sidebar.php';
             <label class="form-label">Billing Status</label>
             <select name="status" class="form-control" onchange="this.form.submit()">
                 <option value="all"      <?= $filter_status==='all'      ?'selected':'' ?>>All Statuses</option>
-                <option value="pending"  <?= $filter_status==='pending'  ?'selected':'' ?>>⏳ Pending</option>
-                <option value="invoiced" <?= $filter_status==='invoiced' ?'selected':'' ?>>📄 Invoiced</option>
-                <option value="paid"     <?= $filter_status==='paid'     ?'selected':'' ?>>✅ Paid</option>
-                <option value="waived"   <?= $filter_status==='waived'   ?'selected':'' ?>>🔕 Waived</option>
+                <option value="pending"  <?= $filter_status==='pending'  ?'selected':'' ?>>Pending</option>
+                <option value="invoiced" <?= $filter_status==='invoiced' ?'selected':'' ?>>Invoiced</option>
+                <option value="paid"     <?= $filter_status==='paid'     ?'selected':'' ?>>Paid</option>
+                <option value="waived"   <?= $filter_status==='waived'   ?'selected':'' ?>>Waived</option>
             </select>
         </div>
         <div class="form-group" style="margin:0;flex:1;min-width:160px">
@@ -264,7 +288,7 @@ include __DIR__ . '/../../includes/sidebar.php';
                    value="<?= htmlspecialchars($filter_date) ?>" onchange="this.form.submit()">
         </div>
         <div style="display:flex;gap:8px">
-            <button type="submit" class="btn btn-primary">🔍 Filter</button>
+            <button type="submit" class="btn btn-primary">Filter</button>
             <a href="theatre_billing.php" class="btn btn-secondary">✕ Clear</a>
         </div>
     </form>
@@ -279,7 +303,7 @@ include __DIR__ . '/../../includes/sidebar.php';
 
     <?php if (empty($operations)): ?>
         <div style="text-align:center;padding:48px;color:var(--muted)">
-            <div style="font-size:48px;margin-bottom:12px">🏥</div>
+            <div style="font-size:48px;margin-bottom:12px"></div>
             <p>No operations found.</p>
         </div>
     <?php else: ?>
@@ -293,7 +317,7 @@ include __DIR__ . '/../../includes/sidebar.php';
                     <th>Theatre</th>
                     <th>Date</th>
                     <th>Op Status</th>
-                    <th>Charges (Rs.)</th>
+                    
                     <th>Billing Status</th>
                     <th>Actions</th>
                 </tr>
@@ -324,21 +348,7 @@ include __DIR__ . '/../../includes/sidebar.php';
                         <?= ucfirst(str_replace('_',' ',$op['op_status'])) ?>
                     </span>
                 </td>
-                <td>
-                    <?php if ($hasBilling): ?>
-                        <div style="font-size:12px;line-height:1.7">
-                            <span>Op: <strong>Rs. <?= number_format((float)$op['operation_charge'],2) ?></strong></span><br>
-                            <span>Anaes: Rs. <?= number_format((float)$op['anaesthesia_charge'],2) ?></span><br>
-                            <span>Consm: Rs. <?= number_format((float)$op['consumables_charge'],2) ?></span><br>
-                            <span style="color:var(--success);font-weight:700">Total: Rs. <?= number_format((float)$op['total_charge'],2) ?></span>
-                        </div>
-                    <?php else: ?>
-                        <span style="color:var(--muted);font-style:italic;font-size:12px">Not set</span>
-                        <?php if ($op['default_charge'] > 0): ?>
-                            <div style="font-size:11px;color:var(--muted)">Default: Rs. <?= number_format($op['default_charge'],2) ?></div>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </td>
+                
                 <td>
                     <?php if ($hasBilling): ?>
                         <!-- inline status update -->
@@ -348,13 +358,13 @@ include __DIR__ . '/../../includes/sidebar.php';
                             <select name="billing_status" class="form-control"
                                     style="font-size:12px;padding:4px 8px"
                                     onchange="this.form.submit()">
-                                <?php foreach(['pending'=>'⏳ Pending','invoiced'=>'📄 Invoiced','paid'=>'✅ Paid','waived'=>'🔕 Waived'] as $v=>$l): ?>
+                                <?php foreach(['pending'=>'Pending','invoiced'=>'Invoiced','paid'=>'Paid','waived'=>'Waived'] as $v=>$l): ?>
                                     <option value="<?= $v ?>" <?= $op['billing_status']===$v?'selected':'' ?>><?= $l ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </form>
                         <?php if ($op['invoice_id']): ?>
-                            <div style="font-size:11px;color:var(--accent-dark);margin-top:4px">📄 Inv #<?= $op['invoice_id'] ?></div>
+                            <div style="font-size:11px;color:var(--accent-dark);margin-top:4px">Inv #<?= $op['invoice_id'] ?></div>
                         <?php endif; ?>
                     <?php else: ?>
                         <span class="badge badge-neutral">No record</span>
@@ -370,20 +380,15 @@ include __DIR__ . '/../../includes/sidebar.php';
                                         '<?= addslashes($op['patient_name']) ?>',
                                         '<?= addslashes($op['operation_type']) ?>',
                                         <?= (float)$op['default_charge'] ?>)">
-                                ➕ Add Billing
+                                Add Billing
                             </button>
                         <?php else: ?>
-                            <?php if (!$op['invoice_id'] && $op['billing_status'] !== 'waived'): ?>
-                                <button class="btn btn-sm btn-secondary"
-                                        onclick="openLinkModal(<?= $op['operation_id'] ?>, '<?= addslashes($op['patient_name']) ?>', <?= (float)$op['total_charge'] ?>)">
-                                    🔗 Link Invoice
-                                </button>
-                            <?php endif; ?>
+                           
                             <a href="theatre_billing_detail.php?op=<?= $op['operation_id'] ?>"
                                class="btn btn-sm btn-secondary">View</a>
                         <?php endif; ?>
                     </div>
-                </td>
+                 </td>
             </tr>
             <?php endforeach; ?>
             </tbody>
@@ -436,7 +441,7 @@ include __DIR__ . '/../../includes/sidebar.php';
                 </div>
                 <div class="tb-modal-ft">
                     <button type="button" class="btn btn-secondary" onclick="closeCreate()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">💾 Save Billing</button>
+                    <button type="submit" class="btn btn-primary">Save Billing</button>
                 </div>
             </form>
         </div>
@@ -447,7 +452,7 @@ include __DIR__ . '/../../includes/sidebar.php';
 <div id="linkModal" class="tb-modal-ov" style="display:none" onclick="if(event.target===this)closeLink()">
     <div class="tb-modal-box">
         <div class="tb-modal-hd">
-            <h3>🔗 Link to Invoice</h3>
+            <h3>Link to Invoice</h3>
             <button onclick="closeLink()" class="tb-modal-x">✕</button>
         </div>
         <div class="tb-modal-bd">
@@ -475,7 +480,7 @@ include __DIR__ . '/../../includes/sidebar.php';
                 </div>
                 <div class="tb-modal-ft">
                     <button type="button" class="btn btn-secondary" onclick="closeLink()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">🔗 Link &amp; Add Charge</button>
+                    <button type="submit" class="btn btn-primary">Link &amp; Add Charge</button>
                 </div>
             </form>
         </div>
@@ -490,6 +495,71 @@ include __DIR__ . '/../../includes/sidebar.php';
 .alert-msg { padding:12px 16px; border-radius:var(--radius); margin-bottom:16px; font-size:14px; font-weight:500; }
 .alert-msg.success { background:#d1fae5; color:#065f46; border:1px solid #a7f3d0; }
 .alert-msg.danger  { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+/* Modern Stat Cards */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2c3e50;
+}
+
+.stat-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 1.5;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.stat-change {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 500;
+}
 
 /* Modal */
 .tb-modal-ov  { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:flex;align-items:center;justify-content:center; }

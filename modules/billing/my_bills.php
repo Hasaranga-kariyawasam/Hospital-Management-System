@@ -92,12 +92,12 @@ include '../../includes/sidebar.php';
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-title">
-            <h2>💳 My Bills &amp; Payments</h2>
+            <h2>My Bills &amp; Payments</h2>
             <p>View your appointment invoices, payment status, and receipts — <?php echo htmlspecialchars($patientName); ?></p>
         </div>
         <div class="flex gap-12 items-center">
             <a href="/Web/Hospital-Management-System/modules/appointments/book.php" class="btn btn-primary">
-                <span class="icon">➕</span> Book Appointment
+                <span class="icon"></span> Book Appointment
             </a>
         </div>
     </div>
@@ -105,7 +105,14 @@ include '../../includes/sidebar.php';
     <!-- ── Summary Stat Cards ── -->
     <div class="stat-grid">
         <div class="stat-card">
-            <div class="stat-icon blue">📋</div>
+            <div class="stat-icon blue">
+
+             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    <path d="M12 2v4" />
+                    <path d="M12 18v4" />
+                </svg>
+            </div>
             <div>
                 <div class="stat-label">Total Appointments</div>
                 <div class="stat-value"><?php echo $totalBills; ?></div>
@@ -113,7 +120,13 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green">
+
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </div>
             <div>
                 <div class="stat-label">Total Paid</div>
                 <div class="stat-value">Rs. <?php echo number_format($totalPaid, 2); ?></div>
@@ -121,7 +134,16 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-icon yellow">
+
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+        </div>
             <div>
                 <div class="stat-label">Pending Bills</div>
                 <div class="stat-value"><?php echo $pendingCount; ?></div>
@@ -129,7 +151,13 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon red">💰</div>
+            <div class="stat-icon red">
+
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
             <div>
                 <div class="stat-label">Outstanding Balance</div>
                 <div class="stat-value">Rs. <?php echo number_format(max(0, $totalBalance), 2); ?></div>
@@ -141,13 +169,13 @@ include '../../includes/sidebar.php';
     <!-- ── Appointment Payment Table ── -->
     <div class="card">
         <div class="card-header">
-            <h3>📅 Appointment Payments</h3>
+            <h3>Appointment Payments</h3>
             <span class="badge badge-info"><?php echo $totalBills; ?> records</span>
         </div>
 
         <?php if (empty($bills)): ?>
             <div class="empty-state">
-                <div class="empty-icon">🧾</div>
+                <div class="empty-icon"></div>
                 <p class="empty-title">No billing records found</p>
                 <p class="empty-sub">Your appointment payments will appear here once booked.</p>
             </div>
@@ -178,9 +206,9 @@ include '../../includes/sidebar.php';
                             default      => 'badge-warning',
                         };
                         $statusLabel = match(true) {
-                            $isDone      => '✅ Done',
-                            $isCancelled => '❌ Cancelled',
-                            default      => '⏳ Pending',
+                            $isDone      => 'Done',
+                            $isCancelled => 'Cancelled',
+                            default      => 'Pending',
                         };
                     ?>
                     <tr>
@@ -213,7 +241,7 @@ include '../../includes/sidebar.php';
     <!-- ── Patient Info Footer Card ── -->
     <div class="card info-card">
         <div class="card-header">
-            <h3>ℹ️ Payment Information</h3>
+            <h3>Payment Information</h3>
         </div>
         <div class="info-grid">
             <div class="info-item">

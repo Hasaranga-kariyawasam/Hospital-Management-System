@@ -3,7 +3,7 @@ declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../../config/db_config.php';
 
-$requiredRoles = ['admin', 'reception', 'doctor'];
+$requiredRoles = ['admin', 'reception'];
 require_once __DIR__ . '/../../includes/role_check.php';
 
 $operation_id = (int)($_GET['op'] ?? 0);
@@ -70,12 +70,12 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 
 <div class="page-header">
     <div class="page-header-title">
-        <h2>🏥 Operation Billing Detail</h2>
+        <h2>Operation Billing Detail</h2>
         <p><?= htmlspecialchars($op['operation_type']) ?> — #<?= $operation_id ?></p>
     </div>
     <div style="display:flex;gap:10px">
         <a href="theatre_billing.php" class="btn btn-secondary">← Back to Billing List</a>
-        <a href="../theatre/operation_details.php?id=<?= $operation_id ?>" class="btn btn-secondary">🔬 Op Details</a>
+        <a href="../theatre/operation_details.php?id=<?= $operation_id ?>" class="btn btn-secondary">Op Details</a>
     </div>
 </div>
 
@@ -83,7 +83,7 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 
     <!-- Operation Info -->
     <div class="card">
-        <div class="card-header"><h3>🔬 Operation Info</h3></div>
+        <div class="card-header"><h3>Operation Info</h3></div>
         <div style="padding:16px 20px">
             <table class="detail-tbl">
                 <tr><td class="dtl-lbl">Operation ID</td><td><strong>#<?= $op['operation_id'] ?></strong></td></tr>
@@ -104,7 +104,7 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 
     <!-- Patient Info -->
     <div class="card">
-        <div class="card-header"><h3>🧑‍⚕️ Patient Info</h3></div>
+        <div class="card-header"><h3>Patient Info</h3></div>
         <div style="padding:16px 20px">
             <table class="detail-tbl">
                 <tr><td class="dtl-lbl">Name</td><td><strong><?= htmlspecialchars($op['patient_name']) ?></strong></td></tr>
@@ -120,7 +120,7 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 <?php if ($op['theatre_billing_id']): ?>
 <div class="card" style="margin-bottom:20px">
     <div class="card-header">
-        <h3>💰 Billing Breakdown</h3>
+        <h3>Billing Breakdown</h3>
         <span class="badge <?= $bilBadge[$op['billing_status']] ?? 'badge-neutral' ?>">
             <?= ucfirst($op['billing_status']) ?>
         </span>
@@ -149,13 +149,13 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 
         <?php if ($op['billing_notes']): ?>
             <div style="margin-top:14px;padding:10px 14px;background:var(--bg);border-radius:var(--radius);font-size:13px;color:var(--muted)">
-                📝 <?= htmlspecialchars($op['billing_notes']) ?>
+                <?= htmlspecialchars($op['billing_notes']) ?>
             </div>
         <?php endif; ?>
 
         <?php if ($op['invoice_id']): ?>
             <div style="margin-top:16px;padding:14px;background:#eff6ff;border-radius:var(--radius);border:1px solid #bfdbfe">
-                <strong>📄 Linked Invoice #<?= $op['invoice_id'] ?></strong>
+                <strong>Linked Invoice #<?= $op['invoice_id'] ?></strong>
                 <span style="float:right">
                     Total: Rs. <?= number_format((float)$op['invoice_total'],2) ?> |
                     Paid: Rs. <?= number_format((float)$op['invoice_paid'],2) ?> |
@@ -167,16 +167,16 @@ $bilBadge      = ['pending'=>'badge-warning','invoiced'=>'badge-info','paid'=>'b
 </div>
 <?php else: ?>
 <div class="card" style="margin-bottom:20px;text-align:center;padding:32px">
-    <div style="font-size:40px;margin-bottom:10px">💳</div>
+    <div style="font-size:40px;margin-bottom:10px"></div>
     <p style="color:var(--muted)">No billing record yet for this operation.</p>
-    <a href="theatre_billing.php" class="btn btn-primary" style="margin-top:12px">➕ Add Billing Record</a>
+    <a href="theatre_billing.php" class="btn btn-primary" style="margin-top:12px">Add Billing Record</a>
 </div>
 <?php endif; ?>
 
 <!-- Clinical Notes -->
 <?php if ($op['pre_op_notes'] || $op['post_op_notes']): ?>
 <div class="card">
-    <div class="card-header"><h3>📋 Clinical Notes</h3></div>
+    <div class="card-header"><h3>Clinical Notes</h3></div>
     <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div>
             <div class="notes-lbl">Pre-Op Notes</div>

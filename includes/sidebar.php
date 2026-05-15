@@ -46,7 +46,8 @@ $role = $_SESSION['role'] ?? 'guest';
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/opd_walkin.php"><span class="icon">🚶</span> OPD Walk-in</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/patients/patients.php"><span class="icon">🧑‍⚕️</span> Patients</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/ward/admissions.php"><span class="icon">🏥</span> Admissions</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/billing/billing.php"><span class="icon">💳</span> Billing</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/billing/billing_check.php"><span class="icon">💳</span> Appointment Billing</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/billing/theatre_billing.php"><span class="icon">💳</span> Theater Billing</a></li>
             </ul>
         </div>
 

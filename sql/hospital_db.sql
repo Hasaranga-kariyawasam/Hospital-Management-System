@@ -55,25 +55,25 @@ CREATE TABLE IF NOT EXISTS doctors (
 ) ENGINE=InnoDB;
 
 -- ── appointments ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id       INT UNSIGNED  NOT NULL,
-    doctor_id        INT UNSIGNED  NOT NULL,
-    appt_date        DATE          NOT NULL,
-    appt_time        TIME          NOT NULL,
-    source           ENUM('online','opd') NOT NULL DEFAULT 'online',
-    status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
-    ref_number       VARCHAR(20)   NOT NULL UNIQUE,
-    notes            TEXT          NULL,
-    booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
-    created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (appointment_id),
-    INDEX idx_appt_date   (appt_date),
-    INDEX idx_appt_doctor (doctor_id),
-    INDEX idx_appt_patient(patient_id),
-    FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
-) ENGINE=InnoDB;
+    CREATE TABLE IF NOT EXISTS appointments (
+        appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+        patient_id       INT UNSIGNED  NOT NULL,
+        doctor_id        INT UNSIGNED  NOT NULL,
+        appt_date        DATE          NOT NULL,
+        appt_time        TIME          NOT NULL,
+        source           ENUM('online','opd') NOT NULL DEFAULT 'online',
+        status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+        ref_number       VARCHAR(20)   NOT NULL UNIQUE,
+        notes            TEXT          NULL,
+        booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
+        created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (appointment_id),
+        INDEX idx_appt_date   (appt_date),
+        INDEX idx_appt_doctor (doctor_id),
+        INDEX idx_appt_patient(patient_id),
+        FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
+        FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
+    ) ENGINE=InnoDB;
 
 -- ── rooms ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rooms (
@@ -200,21 +200,32 @@ CREATE TABLE IF NOT EXISTS ambulances (
     is_available    TINYINT(1)    NOT NULL DEFAULT 1,
     PRIMARY KEY (ambulance_id)
 ) ENGINE=InnoDB;
-
--- ── theatre_operations ────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS theatre_operations (
-    operation_id      INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    patient_id        INT UNSIGNED  NOT NULL,
-    surgeon_id        INT UNSIGNED  NOT NULL COMMENT 'doctor user reference',
-    anaesthetist_id   INT UNSIGNED  NULL,
-    operation_type    VARCHAR(120)  NOT NULL,
-    theatre_number    TINYINT       NOT NULL,
-    scheduled_at      DATETIME      NOT NULL,
-    status            ENUM('scheduled','in_progress','completed','cancelled') NOT NULL DEFAULT 'scheduled',
-    pre_op_notes      TEXT          NULL,
-    post_op_notes     TEXT          NULL,
+DROP TABLE IF EXISTS theatre_operations;
+CREATE TABLE theatre_operations (
+    operation_id          INT UNSIGNED   NOT NULL AUTO_INCREMENT,
+    patient_id            INT UNSIGNED   NOT NULL,
+    surgeon_id            INT UNSIGNED   NOT NULL,
+    anaesthetist_id       INT UNSIGNED   NULL,
+    assistant_doctor_id   INT UNSIGNED   NULL,
+    operation_type        VARCHAR(120)   NOT NULL,
+    theatre_number        TINYINT        NOT NULL,
+    scheduled_date        DATE           NOT NULL,
+    scheduled_time        TIME           NOT NULL,
+    scheduled_at          TIMESTAMP      GENERATED ALWAYS AS (TIMESTAMP(scheduled_date, scheduled_time)) STORED,
+    status                ENUM('scheduled','confirmed','in_progress','completed','cancelled','transferred') NOT NULL DEFAULT 'scheduled',
+    pre_op_notes          TEXT           NULL,
+    post_op_notes         TEXT           NULL,
+    recovery_instructions TEXT           NULL,
+    post_op_room_type     VARCHAR(40)    NULL,
+    created_by            INT UNSIGNED   NULL,
+    created_at            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (operation_id),
-    INDEX idx_theatre_sched (scheduled_at, theatre_number)
+    INDEX idx_theatre_date (theatre_number, scheduled_date, scheduled_time),
+    FOREIGN KEY fk_th_patient   (patient_id)         REFERENCES patients(patient_id),
+    FOREIGN KEY fk_th_surgeon   (surgeon_id)          REFERENCES users(user_id),
+    FOREIGN KEY fk_th_anaes     (anaesthetist_id)     REFERENCES users(user_id),
+    FOREIGN KEY fk_th_assistant (assistant_doctor_id) REFERENCES users(user_id),
+    FOREIGN KEY fk_th_created   (created_by)          REFERENCES users(user_id)
 ) ENGINE=InnoDB;
 
 -- ── doctor_schedules ─────────────────────────────────────────
@@ -265,6 +276,27 @@ VALUES (
 );
 ======================================================================================================================================
 
+USE hospital_db;
+ 
+-- Add missing columns to theatre_operations
+-- (The base table from hospital_db.sql has fewer columns)
+ 
+-----sample data-------
+
+INSERT IGNORE INTO users (full_name, email, password_hash, role, status) VALUES
+('Dr. Nimal Silva', 'nimal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kamal Perera', 'kamal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kumari Jayawardena', 'kumari@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Anura Bandara', 'anura@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Shani Weerasinghe', 'shani@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active');
+
+
+INSERT IGNORE INTO doctors (user_id, specialization, license_number) VALUES
+((SELECT user_id FROM users WHERE email = 'nimal@medicare.lk'), 'General Surgery', 'DOC001'),
+((SELECT user_id FROM users WHERE email = 'kamal@medicare.lk'), 'Orthopedics', 'DOC002'),
+((SELECT user_id FROM users WHERE email = 'kumari@medicare.lk'), 'Gynecology', 'DOC003'),
+((SELECT user_id FROM users WHERE email = 'anura@medicare.lk'), 'Cardiology', 'DOC004'),
+((SELECT user_id FROM users WHERE email = 'shani@medicare.lk'), 'Anesthesiology', 'DOC005');
 
 
 

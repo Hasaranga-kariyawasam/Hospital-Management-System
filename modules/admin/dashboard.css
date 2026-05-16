@@ -1,7 +1,3 @@
-/* modules/admin/dashboard.css — Admin Dashboard Specific Styles */
-
-/* The dashboard inherits everything from layout.css.
-   Add any page-specific overrides here. */
 
 .stat-grid {
     grid-template-columns: repeat(5, 1fr);

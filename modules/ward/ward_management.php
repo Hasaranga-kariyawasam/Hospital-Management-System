@@ -70,8 +70,9 @@ $recentAdmissions = $pdo->query("
 $pageTitle  = 'Ward & Room Management';
 $useSidebar = true;
 include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../../includes/sidebar.php';
 ?>
-<?php include __DIR__ . '/../../includes/sidebar.php'; ?>
+
 
 <main class="main-content">
 
@@ -108,13 +109,7 @@ include __DIR__ . '/../../includes/header.php';
                 <div class="stat-value"><?= $roomStats['available_rooms'] ?? 0 ?></div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon red">🔴</div>
-            <div>
-                <div class="stat-label">Occupied</div>
-                <div class="stat-value"><?= $roomStats['occupied_rooms'] ?? 0 ?></div>
-            </div>
-        </div>
+        
        
     </div>
 
@@ -144,9 +139,6 @@ include __DIR__ . '/../../includes/header.php';
                         <th>Room Type</th>
                         <th>Total</th>
                         <th>Available</th>
-                        <th>Occupied</th>
-                        <th>Occupancy %</th>
-                     
                     </tr>
                 </thead>
                 <tbody>
@@ -154,6 +146,7 @@ include __DIR__ . '/../../includes/header.php';
                 
                 foreach ($roomsByType as $rt):
                     $pct = $rt['total'] > 0 ? round(($rt['occupied'] / $rt['total']) * 100) : 0;
+                    
                     $barColor = $pct >= 90 ? 'var(--danger)' : ($pct >= 60 ? 'var(--warning)' : 'var(--success)');
                     $info = $typeLabels[$rt['room_type']] ?? ['label' => ucfirst($rt['room_type']), 'icon' => ''];
                 ?>
@@ -161,15 +154,8 @@ include __DIR__ . '/../../includes/header.php';
                     <td><strong><?= $info['icon'] ?> <?= htmlspecialchars($info['label']) ?></strong></td>
                     <td><?= $rt['total'] ?></td>
                     <td><span style="color:var(--success);font-weight:600"><?= $rt['available'] ?></span></td>
-                    <td><span style="color:var(--danger);font-weight:600"><?= $rt['occupied'] ?></span></td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px">
-                            <div style="flex:1;height:8px;background:var(--border-light);border-radius:4px;overflow:hidden">
-                                <div style="width:<?= $pct ?>%;height:100%;background:<?= $barColor ?>;border-radius:4px"></div>
-                            </div>
-                            <span style="font-size:12px;color:var(--muted);min-width:32px"><?= $pct ?>%</span>
-                        </div>
-                    </td>
+                  
+                   
                   
                 </tr>
                 <?php endforeach; ?>

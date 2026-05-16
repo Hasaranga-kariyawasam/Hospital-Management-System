@@ -33,20 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 trim($_POST['full_name']), trim($_POST['nic']),
                 trim($_POST['phone']),     trim($_POST['license_no']),
                 trim($_POST['ambulance_no']), $_POST['status'],
-                (int)$_POST['id']
+                (int)$_POST['driver_id']
             ];
-            $pdo->prepare("UPDATE drivers SET full_name=?,nic=?,phone=?,license_no=?,ambulance_no=?,status=? WHERE id=?")
+            $pdo->prepare("UPDATE drivers SET full_name=?,nic=?,phone=?,license_no=?,ambulance_no=?,status=? WHERE driver_id=?")
                 ->execute($fields);
             // Update password only if provided
             if (!empty(trim($_POST['password']))) {
-                $pdo->prepare("UPDATE drivers SET password=? WHERE id=?")
-                    ->execute([password_hash(trim($_POST['password']), PASSWORD_DEFAULT), (int)$_POST['id']]);
+                $pdo->prepare("UPDATE drivers SET password=? WHERE driver_id=?")
+                    ->execute([password_hash(trim($_POST['password']), PASSWORD_DEFAULT), (int)$_POST['driver_id']]);
             }
             echo json_encode(['ok' => true]);
             break;
 
         case 'delete_driver':
-            $pdo->prepare("DELETE FROM drivers WHERE id=?")->execute([(int)$_POST['id']]);
+            $pdo->prepare("DELETE FROM drivers WHERE driver_id=?")->execute([(int)$_POST['driver_id']]);
             echo json_encode(['ok' => true]);
             break;
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $did = (int)$_POST['driver_id'];
             $pdo->prepare("UPDATE emergency_requests SET driver_id=?, status='dispatched', dispatched_at=NOW() WHERE emergency_id=?")
                 ->execute([$did, $rid]);
-            $pdo->prepare("UPDATE drivers SET status='on_duty' WHERE id=?")
+            $pdo->prepare("UPDATE drivers SET status='on_duty' WHERE driver_id=?")
                 ->execute([$did]);
             echo json_encode(['ok' => true]);
             break;
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $row->execute([$rid]);
             $r = $row->fetch();
             if (!empty($r['driver_id'])) {
-                $pdo->prepare("UPDATE drivers SET status='available' WHERE id=?")->execute([$r['driver_id']]);
+                $pdo->prepare("UPDATE drivers SET status='available' WHERE driver_id=?")->execute([$r['driver_id']]);
             }
             $pdo->prepare("UPDATE emergency_requests SET status='cancelled', driver_id=NULL WHERE emergency_id=?")
                 ->execute([$rid]);
@@ -83,7 +83,7 @@ $available = array_filter($drivers, fn($d) => $d['status'] === 'available');
 $requests = $pdo->query("
     SELECT er.*, d.full_name AS driver_name, d.ambulance_no AS driver_ambulance
     FROM emergency_requests er
-    LEFT JOIN drivers d ON er.driver_id = d.id
+    LEFT JOIN drivers d ON er.driver_id = d.driver_id
     ORDER BY er.submitted_at DESC
 ")->fetchAll();
 
@@ -371,7 +371,7 @@ $avail    = count(array_filter($drivers,  fn($d) => $d['status'] === 'available'
 function openModal(d = null) {
     document.getElementById('modalTitle').textContent = d ? 'Edit Driver' : 'Add Driver';
     document.getElementById('passNote').textContent   = d ? '(leave blank to keep existing)' : '(required)';
-    document.getElementById('dId').value      = d ? d.id        : '';
+    document.getElementById('dId').value      = d ? d.driver_id : '';
     document.getElementById('dName').value    = d ? d.full_name : '';
     document.getElementById('dNic').value     = d ? d.nic       : '';
     document.getElementById('dPhone').value   = d ? d.phone     : '';
@@ -388,7 +388,7 @@ async function saveDriver() {
     const id   = document.getElementById('dId').value;
     const body = new FormData();
     body.append('action',       id ? 'edit_driver' : 'add_driver');
-    body.append('id',           id);
+    body.append('driver_id',    id);
     body.append('full_name',    document.getElementById('dName').value.trim());
     body.append('nic',          document.getElementById('dNic').value.trim());
     body.append('phone',        document.getElementById('dPhone').value.trim());
@@ -406,7 +406,7 @@ async function delDriver(id, name) {
     if (!confirm(`Delete driver "${name}"? This cannot be undone.`)) return;
     const body = new FormData();
     body.append('action', 'delete_driver');
-    body.append('id', id);
+    body.append('driver_id', id);
     const r = await fetch('dispatcher.php', { method: 'POST', body });
     const j = await r.json();
     if (j.ok) location.reload();
@@ -430,7 +430,7 @@ async function cancelReq(id) {
     if (!confirm('Cancel this emergency request?')) return;
     const body = new FormData();
     body.append('action', 'cancel_request');
-    body.append('id', id);
+    body.append('driver_id', id);
     const r = await fetch('dispatcher.php', { method: 'POST', body });
     const j = await r.json();
     if (j.ok) location.reload();

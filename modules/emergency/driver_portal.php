@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($newStatus === 'resolved') {
             $pdo->prepare("UPDATE emergency_requests SET completed_at=NOW() WHERE emergency_id=?")
                 ->execute([$reqId]);
-            $pdo->prepare("UPDATE drivers SET status='available' WHERE id=?")
+            $pdo->prepare("UPDATE drivers SET status='available' WHERE driver_id=?")
                 ->execute([$driverId]);
         }
 
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // ── Fetch driver ──────────────────────────────────────────────
-$dStmt = $pdo->prepare("SELECT * FROM drivers WHERE id=?");
+$dStmt = $pdo->prepare("SELECT * FROM drivers WHERE driver_id=?");
 $dStmt->execute([$driverId]);
 $driver = $dStmt->fetch();
 if (!$driver) { session_destroy(); header('Location: driver_login.php'); exit; }

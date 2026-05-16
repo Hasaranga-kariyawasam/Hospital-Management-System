@@ -5,42 +5,18 @@
 --   CREATE DATABASE hospital_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- ============================================================
 
-USE hospital_db;
 
--- ── users (central identity for all roles) ──────────────────
 CREATE TABLE IF NOT EXISTS users (
-    user_id       INT UNSIGNED     NOT NULL AUTO_INCREMENT,
-    full_name     VARCHAR(120)     NOT NULL,
-    email         VARCHAR(180)     NOT NULL UNIQUE,
-    password_hash VARCHAR(255)     NOT NULL,
-    role          ENUM('admin','doctor','reception','pharmacist','patient','dispatcher','driver') NOT NULL,
-    status        ENUM('active','inactive') NOT NULL DEFAULT 'inactive',
-    staff_id      VARCHAR(40)      NULL,
-    department    VARCHAR(100)     NULL,
-    created_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id),
-    INDEX idx_email (email),
-    INDEX idx_role  (role)
+    user_id       INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    full_name     VARCHAR(150)  NOT NULL,
+    email         VARCHAR(150)  NOT NULL UNIQUE,
+    password_hash VARCHAR(255)  NOT NULL,
+    role          ENUM('admin', 'doctor', 'patient', 'staff') NOT NULL,
+    status        ENUM('active', 'inactive', 'suspended') NOT NULL DEFAULT 'active',
+    created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id)
 ) ENGINE=InnoDB;
-
--- ── patients (extended profile for patient users) ────────────
-CREATE TABLE IF NOT EXISTS patients (
-    patient_id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    user_id           INT UNSIGNED  NOT NULL,
-    nic               VARCHAR(20)   NOT NULL UNIQUE,
-    dob               DATE          NOT NULL,
-    gender            ENUM('male','female','other') NOT NULL,
-    blood_type        ENUM('A+','A-','B+','B-','O+','O-','AB+','AB-') NULL,
-    phone             VARCHAR(20)   NOT NULL,
-    address           TEXT          NULL,
-    emergency_contact VARCHAR(120)  NULL,
-    registered_at     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (patient_id),
-    UNIQUE  KEY uk_user   (user_id),
-    UNIQUE  KEY uk_nic    (nic),
-    FOREIGN KEY fk_pat_user (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
+6
 -- ── doctors (extended profile for doctor users) ─────────────
 CREATE TABLE IF NOT EXISTS doctors (
     doctor_id        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
@@ -82,10 +58,10 @@ CREATE TABLE IF NOT EXISTS rooms (
     room_type     ENUM('semi_private','private','children','icu') NOT NULL,
     floor         TINYINT UNSIGNED NOT NULL DEFAULT 1,
     is_available  TINYINT(1)    NOT NULL DEFAULT 1,
-    daily_rate    DECIMAL(8,2)  NOT NULL DEFAULT 0.00,
-    PRIMARY KEY (room_id),
+    dY KEY (room_id),
     INDEX idx_room_type (room_type)
-) ENGINE=InnoDB;
+) ENGINE=Innaily_rate    DECIMAL(8,2)  NOT NULL DEFAULT 0.00,
+    PRIMARoDB;
 
 -- ── admissions ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admissions (

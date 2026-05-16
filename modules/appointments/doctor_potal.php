@@ -100,7 +100,7 @@ include '../../includes/sidebar.php';
     <!-- ── Stat Cards ── -->
     <div class="stat-grid">
         <div class="stat-card">
-            <div class="stat-icon blue">📅</div>
+            <div class="stat-icon blue"></div>
             <div>
                 <div class="stat-label">Today's Appointments</div>
                 <div class="stat-value"><?php echo (int)($statsRow['total'] ?? 0); ?></div>
@@ -108,7 +108,7 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-icon yellow"></div>
             <div>
                 <div class="stat-label">Pending</div>
                 <div class="stat-value"><?php echo (int)($statsRow['pending'] ?? 0); ?></div>
@@ -116,7 +116,7 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon blue">✅</div>
+            <div class="stat-icon blue"></div>
             <div>
                 <div class="stat-label">Confirmed</div>
                 <div class="stat-value"><?php echo (int)($statsRow['confirmed'] ?? 0); ?></div>
@@ -124,7 +124,7 @@ include '../../includes/sidebar.php';
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">🏁</div>
+            <div class="stat-icon green"></div>
             <div>
                 <div class="stat-label">Completed</div>
                 <div class="stat-value"><?php echo (int)($statsRow['completed'] ?? 0); ?></div>

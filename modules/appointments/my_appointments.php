@@ -165,7 +165,7 @@ include '../../includes/sidebar.php';
 
 <!-- Tabs -->
 <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid var(--border-light);">
-    <?php foreach (['upcoming'=>'📅 Upcoming','past'=>'📁 History','all'=>'📋 All'] as $tab=>$label): ?>
+    <?php foreach (['upcoming'=>'Upcoming','past'=>'History','all'=>'All'] as $tab=>$label): ?>
     <a href="?tab=<?= $tab ?>"
        style="padding:10px 20px;font-size:13px;font-weight:600;color:<?= $filterTab===$tab?'var(--accent)':'var(--muted)' ?>;
               border-bottom:<?= $filterTab===$tab?'2px solid var(--accent)':'2px solid transparent' ?>;
@@ -184,7 +184,7 @@ include '../../includes/sidebar.php';
 
 <?php if (empty($appointments)): ?>
 <div style="padding:60px;text-align:center;color:var(--muted);">
-    <div style="font-size:48px;margin-bottom:12px;">📭</div>
+    <div style="font-size:48px;margin-bottom:12px;"></div>
     <p style="margin-bottom:16px;">No appointments found.</p>
     <a href="book.php" class="btn btn-primary">Book Your First Appointment</a>
 </div>
@@ -243,12 +243,12 @@ include '../../includes/sidebar.php';
                 <input type="hidden" name="appointment_id" value="<?= $a['appointment_id'] ?>">
                 <input type="hidden" name="action" value="cancel">
                 <input type="hidden" name="tab" value="<?= htmlspecialchars($filterTab) ?>">
-                <button type="submit" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);background:var(--danger-light);color:var(--danger);border:1px solid #fca5a5;">❌ Cancel</button>
+                <button type="submit" style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);background:var(--danger-light);color:var(--danger);border:1px solid #fca5a5;"> Cancel</button>
             </form>
             <!-- Reschedule toggle -->
             <button onclick="toggleReschedule(<?= $a['appointment_id'] ?>)"
                     style="padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);background:var(--warning-light);color:var(--warning);border:1px solid #fcd34d;">
-                🔄 Reschedule
+                Reschedule
             </button>
         </div>
         <!-- Reschedule form (hidden) -->
@@ -283,7 +283,7 @@ include '../../includes/sidebar.php';
                 </div>
                 <div style="display:flex;gap:8px;">
                     <button type="submit" style="padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);background:var(--accent);color:#fff;border:none;">
-                        ✅ Confirm Reschedule
+                        Confirm Reschedule
                     </button>
                     <button type="button" onclick="toggleReschedule(<?= $a['appointment_id'] ?>)"
                             style="padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);background:#f1f5f9;color:var(--muted);border:1px solid var(--border);">
@@ -322,7 +322,7 @@ function rsLoadSlots(apptId) {
     hiddenTime.value = '';
     if (!did || !date) { box.innerHTML = 'Select doctor & date.'; return; }
 
-    box.innerHTML = '⏳ Loading…';
+    box.innerHTML = 'Loading…';
     fetch(`get_slots.php?doctor_id=${did}&date=${date}`)
         .then(r => r.json())
         .then(data => {

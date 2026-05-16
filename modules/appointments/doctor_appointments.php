@@ -97,10 +97,10 @@ include '../../includes/sidebar.php';
 <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
     <?php
     $statItems = [
-        ['icon'=>'📅','label'=>'Today Total', 'val'=>(int)$stats['total'],     'cls'=>'blue'],
-        ['icon'=>'⏳','label'=>'Pending',      'val'=>(int)$stats['pending'],   'cls'=>'yellow'],
-        ['icon'=>'✅','label'=>'Confirmed',    'val'=>(int)$stats['confirmed'], 'cls'=>'blue'],
-        ['icon'=>'🏁','label'=>'Completed',    'val'=>(int)$stats['completed'], 'cls'=>'green'],
+        ['icon'=>'','label'=>'Today Total', 'val'=>(int)$stats['total'],     'cls'=>'blue'],
+        ['icon'=>'','label'=>'Pending',      'val'=>(int)$stats['pending'],   'cls'=>'yellow'],
+        ['icon'=>'','label'=>'Confirmed',    'val'=>(int)$stats['confirmed'], 'cls'=>'blue'],
+        ['icon'=>'','label'=>'Completed',    'val'=>(int)$stats['completed'], 'cls'=>'green'],
     ];
     foreach ($statItems as $si):
     ?>

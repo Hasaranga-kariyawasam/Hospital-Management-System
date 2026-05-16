@@ -32,11 +32,12 @@ $role = $_SESSION['role'] ?? 'guest';
             <div class="sidebar-heading">My Work</div>
             <ul class="sidebar-menu">
                
-                <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_appointments.php"><span class="icon">📅</span> My Schedule</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/appointments/appointments.php"><span class="icon">📋</span> Appointments</a></li>
-                 <li><a href="/Web/Hospital-Management-System/view_doctors.php"><span class="icon">🩺</span> View Doctors</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php"><span class="icon">🔬</span> Operations</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/pharmacy/prescriptions.php"><span class="icon">💊</span> Prescriptions</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_appointments.php">My Schedule</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/appointments/appointments.php">Appointments</a></li>
+                 <li><a href="/Web/Hospital-Management-System/view_doctors.php">View Doctors</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php">Operations</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/pharmacy/prescriptions.php">Prescriptions</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/ward/doctor_admission_review.php">Admission Requests </a></li>
             </ul>
         </div>
 
@@ -46,7 +47,7 @@ $role = $_SESSION['role'] ?? 'guest';
             <ul class="sidebar-menu">
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/opd_walkin.php"><span class="icon">🚶</span> OPD Walk-in</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/patients/patients.php"><span class="icon">🧑‍⚕️</span> Patients</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/ward/admissions.php"><span class="icon">🏥</span> Admissions</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/ward/admission_request.php"><span class="icon">🏥</span> Admissions</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/billing/billing_check.php"><span class="icon">💳</span> Appointment Billing</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/billing/theatre_billing.php"><span class="icon">💳</span> Theater Billing</a></li>
             </ul>

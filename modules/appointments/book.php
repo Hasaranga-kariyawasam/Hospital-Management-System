@@ -100,7 +100,7 @@ include '../../includes/sidebar.php';
     background:<?= $msgType==='success'?'var(--success-light)':'var(--danger-light)'?>;
     color:<?= $msgType==='success'?'var(--success)':'var(--danger)'?>;
     border:1px solid <?= $msgType==='success'?'#a7f3d0':'#fca5a5'?>;">
-    <?= $msgType==='success'?'✅':'⚠️' ?> <?= $message ?>
+    <?= $msgType==='success'?'':'' ?> <?= $message ?>
     <?php if ($msgType==='success'): ?>
         &nbsp;<a href="my_appointments.php" style="color:var(--success);text-decoration:underline;">View My Appointments →</a>
     <?php endif; ?>
@@ -176,7 +176,7 @@ include '../../includes/sidebar.php';
         <div id="bookingSummary" style="font-size:13px;color:var(--muted);">Fill the form to see summary.</div>
     </div>
     <div style="background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:var(--radius);padding:20px;color:#fff;">
-        <h4 style="margin-bottom:8px;">💡 Tips</h4>
+        <h4 style="margin-bottom:8px;">Tips</h4>
         <ul style="font-size:13px;color:rgba(255,255,255,0.9);line-height:2;padding-left:16px;margin:0;">
             <li>Arrive 15 minutes early</li>
             <li>Bring NIC &amp; medical records</li>

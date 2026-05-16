@@ -144,7 +144,7 @@ include '../../includes/sidebar.php';
 
     <!-- Alerts -->
     <?php if ($success): ?>
-        <div class="alert alert-success">✅ <?php echo htmlspecialchars($success); ?></div>
+        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
     <?php endif; ?>
     <?php if (!empty($errors)): ?>
         <div class="alert alert-danger">

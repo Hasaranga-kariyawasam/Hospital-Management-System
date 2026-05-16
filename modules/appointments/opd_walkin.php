@@ -111,11 +111,11 @@ include '../../includes/sidebar.php';
 
 <div class="page-header">
     <div class="page-header-title">
-        <h2>🚶 OPD Walk-in Appointment</h2>
+        <h2>OPD Walk-in Appointment</h2>
         <p>Create a walk-in appointment for a patient at the reception counter.</p>
     </div>
     <span style="font-size:13px;color:var(--muted);background:var(--accent-light);padding:6px 14px;border-radius:20px;font-weight:600;">
-        📅 Today: <?= date('d M Y') ?>
+        Today: <?= date('d M Y') ?>
     </span>
 </div>
 
@@ -124,7 +124,7 @@ include '../../includes/sidebar.php';
     background:<?= $msgType==='success'?'var(--success-light)':'var(--danger-light)'?>;
     color:<?= $msgType==='success'?'var(--success)':'var(--danger)'?>;
     border:1px solid <?= $msgType==='success'?'#a7f3d0':'#fca5a5'?>;">
-    <?= $msgType==='success'?'✅':'⚠️' ?> <?= $message ?>
+    <?= $msgType==='success'?'':'' ?> <?= $message ?>
 </div>
 <?php endif; ?>
 
@@ -197,12 +197,12 @@ include '../../includes/sidebar.php';
     </div>
 
     <div style="background:var(--warning-light);border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--warning);">
-        ⚡ OPD walk-in appointments are auto-set to <strong>Confirmed</strong> status.
+        OPD walk-in appointments are auto-set to <strong>Confirmed</strong> status.
     </div>
 
     <button type="submit" class="btn btn-primary" id="opdSubmitBtn" disabled
             style="width:100%;padding:14px;font-size:15px;">
-        🚶 Create OPD Appointment
+        Create OPD Appointment
     </button>
 </form>
 </div>
@@ -300,7 +300,7 @@ function selectPatient(id, name, nic) {
     document.getElementById('patientIdHidden').value = id;
     document.getElementById('patientDropdown').style.display = 'none';
     document.getElementById('selectedPatient').innerHTML =
-        `✅ Selected: <strong>${name}</strong> — NIC: ${nic}`;
+        `Selected: <strong>${name}</strong> — NIC: ${nic}`;
 }
 
 document.addEventListener('click', e => {

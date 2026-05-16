@@ -18,21 +18,8 @@ $roomStats = $pdo->query("
     FROM rooms
 ")->fetch();
 
-$admissionStats = $pdo->query("
-    SELECT
-        COUNT(*)                            AS total_admitted,
-        SUM(status = 'admitted')            AS currently_admitted,
-        SUM(DATE(admission_date) = CURDATE()) AS admitted_today
-    FROM admissions
-")->fetch();
 
-$pendingRequests = $pdo->query("
-    SELECT COUNT(*) AS cnt FROM admission_requests WHERE status = 'pending'
-")->fetchColumn();
 
-$approvedRequests = $pdo->query("
-    SELECT COUNT(*) AS cnt FROM admission_requests WHERE status = 'approved'
-")->fetchColumn();
 
 // ── Room availability by type ──────────────────────────────────────────────
 $roomsByType = $pdo->query("
@@ -46,26 +33,7 @@ $roomsByType = $pdo->query("
     ORDER BY room_type
 ")->fetchAll();
 
-// ── Recent admissions ──────────────────────────────────────────────────────
-$recentAdmissions = $pdo->query("
-    SELECT
-        a.admission_id,
-        a.admission_date,
-        a.status,
-        a.priority_level,
-        pu.full_name AS patient_name,
-        du.full_name AS doctor_name,
-        r.room_number,
-        r.room_type
-    FROM admissions a
-    JOIN patients p  ON p.patient_id = a.patient_id
-    JOIN users pu    ON pu.user_id   = p.user_id
-    JOIN doctors d   ON d.doctor_id  = a.doctor_id
-    JOIN users du    ON du.user_id   = d.user_id
-    JOIN rooms r     ON r.room_id    = a.room_id
-    ORDER BY a.admission_date DESC
-    LIMIT 8
-")->fetchAll();
+
 
 $pageTitle  = 'Ward & Room Management';
 $useSidebar = true;

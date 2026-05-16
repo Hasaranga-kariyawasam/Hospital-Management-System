@@ -21,7 +21,8 @@ $role = $_SESSION['role'] ?? 'guest';
                 <li><a href="/Web/Hospital-Management-System/modules/ward/ward_management.php"><span class="icon">🏥</span> Ward & Rooms</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php"><span class="icon">🔬</span> Theatre</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/pharmacy/pharmacy.php"><span class="icon">💊</span> Pharmacy</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/billing/billing.php"><span class="icon">💳</span> Billing</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/billing/billing_check.php"><span class="icon">💳</span> Appointment Billing</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/billing/theatre_billing.php"><span class="icon">💳</span> Theater Billing</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/emergency/emergency.php"><span class="icon">🚑</span> Emergency</a></li>
             </ul>
         </div>

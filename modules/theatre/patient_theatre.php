@@ -216,15 +216,6 @@ include '../../includes/sidebar.php';
             <h4 style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Your Schedule Details</h4>
             <?php
 
-            if($theatre_operations[0]['scheduled_at'][8] == '0'){
-                $temp_date = $theatre_operations[0]['scheduled_at'][8];
-            }else{
-                $temp_date = $theatre_operations[0]['scheduled_at'][8] . $theatre_operations[0]['scheduled_at'][9];
-            }
-
-            
-
-
             if ($operation_count > 0) {
                 foreach ($theatre_operations as $op) {
                     Schedule_Details(

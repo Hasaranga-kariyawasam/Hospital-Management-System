@@ -55,25 +55,25 @@ CREATE TABLE IF NOT EXISTS doctors (
 ) ENGINE=InnoDB;
 
 -- ── appointments ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS appointments (
-    appointment_id   VARCHAR(10)   NOT NULL ,
-    patient_id       VARCHAR(10)   NOT NULL,
-    doctor_id        VARCHAR(10)   NOT NULL,
-    appt_date        DATE          NOT NULL,
-    appt_time        TIME          NOT NULL,
-    source           ENUM('online','opd') NOT NULL DEFAULT 'online',
-    status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
-    ref_number       VARCHAR(20)   NOT NULL UNIQUE,
-    notes            TEXT          NULL,
-    booked_by        VARCHAR(10) UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
-    created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (appointment_id),
-    INDEX idx_appt_date   (appt_date),
-    INDEX idx_appt_doctor (doctor_id),
-    INDEX idx_appt_patient(patient_id),
-    FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
-    FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
-) ENGINE=InnoDB;
+    CREATE TABLE IF NOT EXISTS appointments (
+        appointment_id   INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+        patient_id       INT UNSIGNED  NOT NULL,
+        doctor_id        INT UNSIGNED  NOT NULL,
+        appt_date        DATE          NOT NULL,
+        appt_time        TIME          NOT NULL,
+        source           ENUM('online','opd') NOT NULL DEFAULT 'online',
+        status           ENUM('pending','confirmed','completed','cancelled') NOT NULL DEFAULT 'pending',
+        ref_number       VARCHAR(20)   NOT NULL UNIQUE,
+        notes            TEXT          NULL,
+        booked_by        INT UNSIGNED  NULL COMMENT 'user_id of staff if OPD walk-in',
+        created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (appointment_id),
+        INDEX idx_appt_date   (appt_date),
+        INDEX idx_appt_doctor (doctor_id),
+        INDEX idx_appt_patient(patient_id),
+        FOREIGN KEY fk_appt_pat (patient_id) REFERENCES patients(patient_id),
+        FOREIGN KEY fk_appt_doc (doctor_id)  REFERENCES doctors(doctor_id)
+    ) ENGINE=InnoDB;
 
 -- ── rooms ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS rooms (
@@ -200,21 +200,32 @@ CREATE TABLE IF NOT EXISTS ambulances (
     is_available    TINYINT(1)    NOT NULL DEFAULT 1,
     PRIMARY KEY (ambulance_id)
 ) ENGINE=InnoDB;
-
--- ── theatre_operations ────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS theatre_operations (
-    operation_id      VARCHAR(10)   NOT NULL ,
-    patient_id        VARCHAR(10)   NOT NULL,
-    surgeon_id        VARCHAR(10)   NOT NULL COMMENT 'doctor user reference',
-    anaesthetist_id   VARCHAR(10)   NULL,
-    operation_type    VARCHAR(120)  NOT NULL,
-    theatre_number    TINYINT       NOT NULL,
-    scheduled_at      DATETIME      NOT NULL,
-    status            ENUM('scheduled','in_progress','completed','cancelled') NOT NULL DEFAULT 'scheduled',
-    pre_op_notes      TEXT          NULL,
-    post_op_notes     TEXT          NULL,
+DROP TABLE IF EXISTS theatre_operations;
+CREATE TABLE theatre_operations (
+    operation_id          INT UNSIGNED   NOT NULL AUTO_INCREMENT,
+    patient_id            INT UNSIGNED   NOT NULL,
+    surgeon_id            INT UNSIGNED   NOT NULL,
+    anaesthetist_id       INT UNSIGNED   NULL,
+    assistant_doctor_id   INT UNSIGNED   NULL,
+    operation_type        VARCHAR(120)   NOT NULL,
+    theatre_number        TINYINT        NOT NULL,
+    scheduled_date        DATE           NOT NULL,
+    scheduled_time        TIME           NOT NULL,
+    scheduled_at          TIMESTAMP      GENERATED ALWAYS AS (TIMESTAMP(scheduled_date, scheduled_time)) STORED,
+    status                ENUM('scheduled','confirmed','in_progress','completed','cancelled','transferred') NOT NULL DEFAULT 'scheduled',
+    pre_op_notes          TEXT           NULL,
+    post_op_notes         TEXT           NULL,
+    recovery_instructions TEXT           NULL,
+    post_op_room_type     VARCHAR(40)    NULL,
+    created_by            INT UNSIGNED   NULL,
+    created_at            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (operation_id),
-    INDEX idx_theatre_sched (scheduled_at, theatre_number)
+    INDEX idx_theatre_date (theatre_number, scheduled_date, scheduled_time),
+    FOREIGN KEY fk_th_patient   (patient_id)         REFERENCES patients(patient_id),
+    FOREIGN KEY fk_th_surgeon   (surgeon_id)          REFERENCES users(user_id),
+    FOREIGN KEY fk_th_anaes     (anaesthetist_id)     REFERENCES users(user_id),
+    FOREIGN KEY fk_th_assistant (assistant_doctor_id) REFERENCES users(user_id),
+    FOREIGN KEY fk_th_created   (created_by)          REFERENCES users(user_id)
 ) ENGINE=InnoDB;
 
 -- ── doctor_schedules ─────────────────────────────────────────
@@ -263,17 +274,159 @@ VALUES (
     'admin',
     'active'
 );
+======================================================================================================================================
+
+USE hospital_db;
+ 
+-- Add missing columns to theatre_operations
+-- (The base table from hospital_db.sql has fewer columns)
+ 
+-----sample data-------
+
+INSERT IGNORE INTO users (full_name, email, password_hash, role, status) VALUES
+('Dr. Nimal Silva', 'nimal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kamal Perera', 'kamal@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Kumari Jayawardena', 'kumari@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Anura Bandara', 'anura@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active'),
+('Dr. Shani Weerasinghe', 'shani@medicare.lk', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'doctor', 'active');
 
 
-i create all of the sql table i want only loging resigtaion parts only other partys done by other members remove all sql table and stecher and use siple tables strcher not complax laout only create loging and registaion parts and main web site
+INSERT IGNORE INTO doctors (user_id, specialization, license_number) VALUES
+((SELECT user_id FROM users WHERE email = 'nimal@medicare.lk'), 'General Surgery', 'DOC001'),
+((SELECT user_id FROM users WHERE email = 'kamal@medicare.lk'), 'Orthopedics', 'DOC002'),
+((SELECT user_id FROM users WHERE email = 'kumari@medicare.lk'), 'Gynecology', 'DOC003'),
+((SELECT user_id FROM users WHERE email = 'anura@medicare.lk'), 'Cardiology', 'DOC004'),
+((SELECT user_id FROM users WHERE email = 'shani@medicare.lk'), 'Anesthesiology', 'DOC005');
 
 
 
 
-=====================================================================================================================================================
+USE hospital_db;
+
+-- ── STEP 1: Drop the conflicting old admissions table ────────
+-- (safe to drop if you haven't used it yet)
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS `admissions`;
+DROP TABLE IF EXISTS `rooms`;         -- old rooms has no ward_id, replace it too
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ── STEP 2: Create wards first (admissions depends on it) ────
+CREATE TABLE IF NOT EXISTS `wards` (
+    `ward_id`     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `ward_name`   VARCHAR(100) NOT NULL,
+    `ward_type`   ENUM('general','icu','maternity','pediatric','surgical','emergency','private') NOT NULL DEFAULT 'general',
+    `floor`       VARCHAR(20)  DEFAULT NULL,
+    `total_rooms` INT          NOT NULL DEFAULT 0,
+    `description` TEXT         DEFAULT NULL,
+    `status`      ENUM('active','inactive') NOT NULL DEFAULT 'active',
+    `created_at`  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── STEP 3: New rooms table (replaces old one, adds ward_id) ─
+CREATE TABLE IF NOT EXISTS `rooms` (
+    `room_id`        INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `ward_id`        INT UNSIGNED NOT NULL,
+    `room_number`    VARCHAR(20)  NOT NULL,
+    `room_type`      ENUM('general','semi_private','private','icu','isolation','children') NOT NULL DEFAULT 'general',
+    `total_beds`     INT          NOT NULL DEFAULT 1,
+    `available_beds` INT          NOT NULL DEFAULT 1,
+    `floor`          TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    `daily_rate`     DECIMAL(8,2) NOT NULL DEFAULT 0.00,
+    `facilities`     TEXT         DEFAULT NULL,
+    `status`         ENUM('available','full','maintenance','reserved') NOT NULL DEFAULT 'available',
+    `created_at`     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`ward_id`) REFERENCES `wards`(`ward_id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_room` (`ward_id`, `room_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── STEP 4: Beds table ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `beds` (
+    `bed_id`     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `room_id`    INT UNSIGNED NOT NULL,
+    `bed_number` VARCHAR(20)  NOT NULL,
+    `bed_type`   ENUM('standard','electric','icu','pediatric') NOT NULL DEFAULT 'standard',
+    `status`     ENUM('available','occupied','maintenance','reserved') NOT NULL DEFAULT 'available',
+    `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`room_id`) REFERENCES `rooms`(`room_id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_bed` (`room_id`, `bed_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── STEP 5: Unified admissions table ─────────────────────────
+-- Links to patients.patient_id (your original FK style)
+-- AND to wards/rooms/beds (new ward module)
+CREATE TABLE IF NOT EXISTS `admissions` (
+    `admission_id`       INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `patient_id`         INT UNSIGNED NOT NULL,   -- → patients.patient_id
+    `bed_id`             INT UNSIGNED NOT NULL,   -- → beds.bed_id
+    `room_id`            INT UNSIGNED NOT NULL,   -- → rooms.room_id
+    `ward_id`            INT UNSIGNED NOT NULL,   -- → wards.ward_id
+    `doctor_id`          INT UNSIGNED NOT NULL,   -- → doctors.doctor_id
+    `admitted_by`        INT UNSIGNED NOT NULL,   -- reception/admin user_id → users.user_id
+    `admission_date`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `discharge_date`     DATETIME     DEFAULT NULL,
+    `expected_discharge` DATE         DEFAULT NULL,
+    `admission_type`     ENUM('elective','emergency','transfer') NOT NULL DEFAULT 'elective',
+    `diagnosis`          TEXT         DEFAULT NULL,
+    `dietary_notes`      TEXT         DEFAULT NULL,
+    `notes`              TEXT         DEFAULT NULL,
+    `status`             ENUM('admitted','discharged','transferred','absconded') NOT NULL DEFAULT 'admitted',
+    `total_charge`       DECIMAL(10,2) DEFAULT 0.00,
+    `created_at`         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- ── Foreign Keys ──
+    FOREIGN KEY `fk_adm_pat`   (`patient_id`)  REFERENCES `patients`(`patient_id`) ON DELETE CASCADE,
+    FOREIGN KEY `fk_adm_bed`   (`bed_id`)      REFERENCES `beds`(`bed_id`),
+    FOREIGN KEY `fk_adm_room`  (`room_id`)     REFERENCES `rooms`(`room_id`),
+    FOREIGN KEY `fk_adm_ward`  (`ward_id`)     REFERENCES `wards`(`ward_id`),
+    FOREIGN KEY `fk_adm_doc`   (`doctor_id`)   REFERENCES `doctors`(`doctor_id`),
+    FOREIGN KEY `fk_adm_by`    (`admitted_by`) REFERENCES `users`(`user_id`),
+
+    -- ── Indexes ──
+    INDEX `idx_adm_patient` (`patient_id`),
+    INDEX `idx_adm_status`  (`status`),
+    INDEX `idx_adm_date`    (`admission_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── STEP 6: Ward transfers ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `ward_transfers` (
+    `transfer_id`    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `admission_id`   INT UNSIGNED NOT NULL,
+    `patient_id`     INT UNSIGNED NOT NULL,
+    `from_bed_id`    INT UNSIGNED NOT NULL,
+    `to_bed_id`      INT UNSIGNED NOT NULL,
+    `from_ward_id`   INT UNSIGNED NOT NULL,
+    `to_ward_id`     INT UNSIGNED NOT NULL,
+    `transferred_by` INT UNSIGNED NOT NULL,
+    `transfer_date`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `reason`         TEXT         DEFAULT NULL,
+    `created_at`     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (`admission_id`)   REFERENCES `admissions`(`admission_id`),
+    FOREIGN KEY (`patient_id`)     REFERENCES `patients`(`patient_id`),
+    FOREIGN KEY (`from_bed_id`)    REFERENCES `beds`(`bed_id`),
+    FOREIGN KEY (`to_bed_id`)      REFERENCES `beds`(`bed_id`),
+    FOREIGN KEY (`transferred_by`) REFERENCES `users`(`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── STEP 7: Sample ward data ──────────────────────────────────
+INSERT IGNORE INTO `wards` (`ward_name`, `ward_type`, `floor`, `total_rooms`, `description`) VALUES
+('Male General Ward',   'general',   'Ground Floor', 10, 'General male patients ward'),
+('Female General Ward', 'general',   'Ground Floor', 10, 'General female patients ward'),
+('Intensive Care Unit', 'icu',       '1st Floor',     4, 'Critical care unit with 24hr monitoring'),
+('Maternity Ward',      'maternity', '2nd Floor',     8, 'Labour, delivery and postnatal care'),
+('Pediatric Ward',      'pediatric', '2nd Floor',     6, 'Children under 12 years'),
+('Surgical Ward',       'surgical',  '1st Floor',     6, 'Post-operative recovery'),
+('Private Ward',        'private',   '3rd Floor',    12, 'Private rooms with premium facilities'),
+('Emergency Ward',      'emergency', 'Ground Floor',  5, 'Emergency observation beds');
+
 
 Insert sample data for testing login and registration functionality
-======================================================================================================================================================
 INSERT INTO users (user_id, full_name, email, password_hash, role, status) 
 VALUES 
 ('USR-001', 'Aruna Perera', 'aruna@hospital.lk', 'hash_v1_1', 'admin', 'active'),
@@ -376,3 +529,7 @@ VALUES
 ('PRE-004', 'APT-004', 'DRG-005', '20mg', 'Before meal (AC)', 14, 'dispensed'),
 ('PRE-005', 'APT-005', 'DRG-032', '400mg', 'Twice a day (BD)', 7, 'pending');
 
+-- ── STEP 8: Performance indexes ───────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_beds_status   ON beds(status);
+CREATE INDEX IF NOT EXISTS idx_rooms_status  ON rooms(status);
+CREATE INDEX IF NOT EXISTS idx_rooms_ward    ON rooms(ward_id);

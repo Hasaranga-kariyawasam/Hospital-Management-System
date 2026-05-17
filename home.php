@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,8 +9,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <link rel="stylesheet" href="/Web/Hospital-Management-System/includes/layout.css">
     <link rel="stylesheet" href="/Web/Hospital-Management-System/includes/home.css">
+    
 </head>
 <body class="public-site">
 
@@ -33,14 +39,98 @@
             <li><a href="#services">Services</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
-
         <div class="pub-nav-actions">
+            <a href="emergency.php" class="emergency-nav-btn">
+                <span class="emergency-pulse-nav"></span>
+                Emergency
+            </a>
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-outline">Staff Login</a>
             <a href="/Web/Hospital-Management-System/login.php" class="btn-nav-solid">Patient Portal</a>
         </div>
     </div>
 </nav>
+<!-- Emergency Button Near Staff Login -->
 
+<style>
+    .pub-nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .emergency-nav-btn {
+        background: #ff2d2d;
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1;
+        animation: emergencyGlow 2s infinite;
+    }
+
+    .emergency-nav-btn:hover {
+        background: #d90000;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 45, 45, 0.5);
+    }
+
+    .emergency-nav-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(255, 45, 45, 0.3);
+    }
+
+    .emergency-pulse-nav {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border-radius: 50%;
+        animation: pulseDot 1.5s infinite;
+    }
+
+    @keyframes emergencyGlow {
+        0%, 100% {
+            box-shadow: 0 4px 15px rgba(255, 45, 45, 0.3);
+        }
+        50% {
+            box-shadow: 0 4px 25px rgba(255, 45, 45, 0.6);
+        }
+    }
+
+    @keyframes pulseDot {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.5);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .pub-nav-actions {
+            gap: 8px;
+        }
+        
+        .emergency-nav-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+    }
+</style>
 <!-- ═══════════════════════════════════════════
      HERO
 ════════════════════════════════════════════ -->
@@ -53,7 +143,7 @@
 
     <div class="hero-inner">
         <div class="hero-text">
-            <div class="hero-badge">🏥 Accredited Hospital — Est. 2008</div>
+            <div class="hero-badge"><i class="fas fa-hospital professional-icon"></i> Accredited Hospital — Est. 2008</div>
             <h1 class="hero-title display-font">
                 Your Health,<br>Our <em>Priority</em>
             </h1>
@@ -63,7 +153,7 @@
             </p>
             <div class="hero-cta">
                 <a href="/Web/Hospital-Management-System/register_patient.php" class="btn btn-primary btn-lg">Book an Appointment</a>
-                <a href="#departments" class="btn btn-hero-ghost btn-lg">Our Departments ↓</a>
+                <a href="#departments" class="btn btn-hero-ghost btn-lg">Our Departments <i class="fas fa-arrow-down" style="margin-left:6px;"></i></a>
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
@@ -90,24 +180,24 @@
                     <span>Appointments Today</span>
                 </div>
                 <div class="hcard-big">148</div>
-                <div class="hcard-sub">↑ 12% from yesterday</div>
+                <div class="hcard-sub"><i class="fas fa-arrow-trend-up"></i> 12% from yesterday</div>
             </div>
             <div class="hero-card-secondary top-right">
-                <div class="hcard2-icon">🩺</div>
+                <div class="hcard2-icon"><i class="fas fa-stethoscope"></i></div>
                 <div>
                     <div class="hcard2-label">Doctors On Duty</div>
                     <div class="hcard2-val">38</div>
                 </div>
             </div>
             <div class="hero-card-secondary bottom-left">
-                <div class="hcard2-icon">🏥</div>
+                <div class="hcard2-icon"><i class="fas fa-bed"></i></div>
                 <div>
                     <div class="hcard2-label">Beds Available</div>
                     <div class="hcard2-val">64 / 120</div>
                 </div>
             </div>
             <div class="hero-card-secondary bottom-right">
-                <div class="hcard2-icon">🚑</div>
+                <div class="hcard2-icon"><i class="fas fa-truck-medical"></i></div>
                 <div>
                     <div class="hcard2-label">Ambulances Ready</div>
                     <div class="hcard2-val">8</div>
@@ -136,22 +226,22 @@
     <div class="container">
         <div class="portals-grid">
             <a href="/Web/Hospital-Management-System/register_patient.php" class="portal-card portal-patient">
-                <div class="portal-icon">👤</div>
+                <div class="portal-icon"><i class="fas fa-user"></i></div>
                 <h3>Patient Portal</h3>
                 <p>Register, book appointments, view your medical history and bills online.</p>
-                <span class="portal-link">Get Started →</span>
+                <span class="portal-link">Get Started <i class="fas fa-arrow-right"></i></span>
             </a>
             <a href="/Web/Hospital-Management-System/login.php" class="portal-card portal-staff">
-                <div class="portal-icon">🏥</div>
+                <div class="portal-icon"><i class="fas fa-hospital-user"></i></div>
                 <h3>Staff Portal</h3>
                 <p>Access the Hospital Management System for clinical and administrative work.</p>
-                <span class="portal-link">Staff Login →</span>
+                <span class="portal-link">Staff Login <i class="fas fa-arrow-right"></i></span>
             </a>
             <a href="tel:+94112345678" class="portal-card portal-emergency">
-                <div class="portal-icon">🚑</div>
+                <div class="portal-icon"><i class="fas fa-phone-volume"></i></div>
                 <h3>Emergency</h3>
                 <p>Life-threatening emergency? Call us immediately or request an ambulance online.</p>
-                <span class="portal-link">Call Now →</span>
+                <span class="portal-link">Call Now <i class="fas fa-arrow-right"></i></span>
             </a>
         </div>
     </div>
@@ -172,7 +262,7 @@
                     <!-- Decorative hospital illustration -->
                     <div class="about-illustration">
                         <div class="illus-building">
-                            <div class="illus-cross">✚</div>
+                            <div class="illus-cross"><i class="fas fa-plus"></i></div>
                             <div class="illus-windows">
                                 <span></span><span></span><span></span>
                                 <span></span><span></span><span></span>
@@ -190,21 +280,21 @@
                 </p>
                 <div class="about-points">
                     <div class="about-point">
-                        <div class="about-point-icon">🎓</div>
+                        <div class="about-point-icon"><i class="fas fa-user-graduate"></i></div>
                         <div>
                             <strong>Expert Medical Team</strong>
                             <p>Over 120 specialists across 14 departments with local and international training.</p>
                         </div>
                     </div>
                     <div class="about-point">
-                        <div class="about-point-icon">🔬</div>
+                        <div class="about-point-icon"><i class="fas fa-microscope"></i></div>
                         <div>
                             <strong>Advanced Technology</strong>
                             <p>State-of-the-art diagnostic imaging, fully equipped operation theatres, and modern ICU.</p>
                         </div>
                     </div>
                     <div class="about-point">
-                        <div class="about-point-icon">❤️</div>
+                        <div class="about-point-icon"><i class="fas fa-heart"></i></div>
                         <div>
                             <strong>Patient-Centred Care</strong>
                             <p>Every care plan is tailored to the individual. Your comfort and dignity always come first.</p>
@@ -229,22 +319,22 @@
         <div class="depts-grid">
             <?php
             $departments = [
-                ['icon'=>'❤️',  'name'=>'Cardiology',         'desc'=>'Heart disease diagnosis, treatment, and preventive care.'],
-                ['icon'=>'🧠',  'name'=>'Neurology',           'desc'=>'Brain, spine, and nervous system disorders.'],
-                ['icon'=>'🦴',  'name'=>'Orthopaedics',        'desc'=>'Bone, joint, and musculoskeletal surgery.'],
-                ['icon'=>'👶',  'name'=>'Paediatrics',         'desc'=>'Specialised care for infants, children, and adolescents.'],
-                ['icon'=>'🤰',  'name'=>'Obstetrics & Gynaecology', 'desc'=>'Maternity care, childbirth, and women\'s health.'],
-                ['icon'=>'👁️', 'name'=>'Ophthalmology',        'desc'=>'Eye care, vision correction, and retinal treatment.'],
-                ['icon'=>'🦷',  'name'=>'Dental',              'desc'=>'General and specialist dental procedures.'],
-                ['icon'=>'🩻',  'name'=>'Radiology',           'desc'=>'MRI, CT scans, X-rays, and ultrasound imaging.'],
-                ['icon'=>'💊',  'name'=>'Pharmacy',            'desc'=>'In-hospital dispensary with full prescription services.'],
-                ['icon'=>'🔬',  'name'=>'Laboratory',          'desc'=>'Blood, urine, and pathology testing services.'],
-                ['icon'=>'🚑',  'name'=>'Emergency',           'desc'=>'24/7 critical care and trauma response.'],
-                ['icon'=>'🏥',  'name'=>'General Surgery',     'desc'=>'Elective and emergency surgical procedures.'],
+                ['icon'=>'fa-solid fa-heart-pulse',  'name'=>'Cardiology',         'desc'=>'Heart disease diagnosis, treatment, and preventive care.'],
+                ['icon'=>'fa-solid fa-brain',        'name'=>'Neurology',           'desc'=>'Brain, spine, and nervous system disorders.'],
+                ['icon'=>'fa-solid fa-bone',         'name'=>'Orthopaedics',        'desc'=>'Bone, joint, and musculoskeletal surgery.'],
+                ['icon'=>'fa-solid fa-child',        'name'=>'Paediatrics',         'desc'=>'Specialised care for infants, children, and adolescents.'],
+                ['icon'=>'fa-solid fa-person-pregnant', 'name'=>'Obstetrics & Gynaecology', 'desc'=>'Maternity care, childbirth, and women\'s health.'],
+                ['icon'=>'fa-solid fa-eye',          'name'=>'Ophthalmology',        'desc'=>'Eye care, vision correction, and retinal treatment.'],
+                ['icon'=>'fa-solid fa-tooth',        'name'=>'Dental',              'desc'=>'General and specialist dental procedures.'],
+                ['icon'=>'fa-solid fa-x-ray',        'name'=>'Radiology',           'desc'=>'MRI, CT scans, X-rays, and ultrasound imaging.'],
+                ['icon'=>'fa-solid fa-capsules',     'name'=>'Pharmacy',            'desc'=>'In-hospital dispensary with full prescription services.'],
+                ['icon'=>'fa-solid fa-flask',        'name'=>'Laboratory',          'desc'=>'Blood, urine, and pathology testing services.'],
+                ['icon'=>'fa-solid fa-truck-medical','name'=>'Emergency',           'desc'=>'24/7 critical care and trauma response.'],
+                ['icon'=>'fa-solid fa-scalpel',      'name'=>'General Surgery',     'desc'=>'Elective and emergency surgical procedures.'],
             ];
             foreach ($departments as $d): ?>
             <div class="dept-card">
-                <div class="dept-icon"><?php echo $d['icon']; ?></div>
+                <div class="dept-icon"><i class="<?php echo $d['icon']; ?>"></i></div>
                 <h4><?php echo htmlspecialchars($d['name']); ?></h4>
                 <p><?php echo htmlspecialchars($d['desc']); ?></p>
             </div>
@@ -280,8 +370,8 @@
                     <h4><?php echo htmlspecialchars($doc['name']); ?></h4>
                     <p class="doctor-spec"><?php echo htmlspecialchars($doc['spec']); ?></p>
                     <div class="doctor-meta">
-                        <span>🎓 <?php echo htmlspecialchars($doc['exp']); ?></span>
-                        <span>📅 <?php echo htmlspecialchars($doc['avail']); ?></span>
+                        <span><i class="fas fa-certificate"></i> <?php echo htmlspecialchars($doc['exp']); ?></span>
+                        <span><i class="fas fa-calendar-check"></i> <?php echo htmlspecialchars($doc['avail']); ?></span>
                     </div>
                 </div>
                 <a href="/Web/Hospital-Management-System/login.php" class="btn btn-sm btn-primary" style="margin-top:14px;width:100%;justify-content:center">Book Appointment</a>
@@ -306,16 +396,16 @@
                 <div class="services-list">
                     <?php
                     $services = [
-                        ['🏥', '24/7 Emergency Services', 'Round-the-clock emergency care with rapid response teams.'],
-                        ['📱', 'Online Appointment Booking', 'Book, reschedule, or cancel appointments from any device.'],
-                        ['💊', 'In-House Pharmacy', 'Full prescription dispensing with electronic records.'],
-                        ['🚑', 'Ambulance Dispatch', 'Modern fleet with GPS tracking for the fastest response.'],
-                        ['🔬', 'Advanced Diagnostics', 'On-site lab, radiology, and pathology for same-day results.'],
-                        ['💳', 'Flexible Billing', 'Transparent billing with advance and full payment options.'],
+                        ['fa-solid fa-clock', '24/7 Emergency Services', 'Round-the-clock emergency care with rapid response teams.'],
+                        ['fa-solid fa-mobile-screen', 'Online Appointment Booking', 'Book, reschedule, or cancel appointments from any device.'],
+                        ['fa-solid fa-prescription', 'In-House Pharmacy', 'Full prescription dispensing with electronic records.'],
+                        ['fa-solid fa-truck-medical', 'Ambulance Dispatch', 'Modern fleet with GPS tracking for the fastest response.'],
+                        ['fa-solid fa-vial-circle-check', 'Advanced Diagnostics', 'On-site lab, radiology, and pathology for same-day results.'],
+                        ['fa-solid fa-credit-card', 'Flexible Billing', 'Transparent billing with advance and full payment options.'],
                     ];
                     foreach ($services as [$icon, $title, $desc]): ?>
                     <div class="service-item">
-                        <div class="service-icon"><?php echo $icon; ?></div>
+                        <div class="service-icon"><i class="<?php echo $icon; ?>"></i></div>
                         <div>
                             <strong><?php echo htmlspecialchars($title); ?></strong>
                             <p><?php echo htmlspecialchars($desc); ?></p>
@@ -355,22 +445,22 @@
         </div>
         <div class="contact-grid">
             <div class="contact-card">
-                <div class="contact-icon">📍</div>
+                <div class="contact-icon"><i class="fas fa-location-dot"></i></div>
                 <h4>Address</h4>
                 <p>42 Medical Centre Road<br>Colombo 07, Sri Lanka</p>
             </div>
             <div class="contact-card">
-                <div class="contact-icon">📞</div>
+                <div class="contact-icon"><i class="fas fa-phone"></i></div>
                 <h4>Phone</h4>
                 <p>Reception: +94 11 234 5678<br>Emergency: +94 11 234 5000</p>
             </div>
             <div class="contact-card">
-                <div class="contact-icon">🕐</div>
+                <div class="contact-icon"><i class="fas fa-clock"></i></div>
                 <h4>OPD Hours</h4>
                 <p>Weekdays: 8:00 AM – 8:00 PM<br>Weekends: 9:00 AM – 5:00 PM</p>
             </div>
             <div class="contact-card">
-                <div class="contact-icon">✉️</div>
+                <div class="contact-icon"><i class="fas fa-envelope"></i></div>
                 <h4>Email</h4>
                 <p>info@medicare-hospital.lk<br>appointments@medicare-hospital.lk</p>
             </div>

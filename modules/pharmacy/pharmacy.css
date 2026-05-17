@@ -1,0 +1,93 @@
+/* pharmacy.css — shared styles for doctor_prescription, pharmacist_portal, drug_catalog */
+:root{
+  --p:#0C447C;--pl:#E6F1FB;--pm:#85B7EB;--ph:#B5D4F4;
+  --bg:#fff;--bg2:#F5F7FA;--bgp:#EEF1F6;
+  --bdr:#DDE3EC;--tx:#0F1924;--tx2:#5A6677;--r:8px;--rs:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bgp);color:var(--tx);font-size:14px}
+
+/* Layout */
+.ph-wrap{max-width:960px;margin:0 auto;padding:24px 16px 60px}
+.main-content{flex:1;overflow-y:auto;min-width:0}
+
+/* Top bar */
+.ph-topbar{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 16px;margin-bottom:14px}
+.ph-title{font-size:14px;font-weight:600}
+.ph-sub{font-size:11px;color:var(--tx2)}
+.ph-date{font-size:12px;color:var(--tx2)}
+
+/* Cards */
+.card{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 20px;margin-bottom:14px}
+.card-hd{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* Form */
+label{font-size:11px;font-weight:500;color:var(--tx2);display:block;margin-bottom:4px}
+input,select{font-family:inherit;font-size:13px;color:var(--tx);background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs);padding:0 10px;height:34px;outline:none;width:100%;transition:border-color .15s}
+input:focus,select:focus{border-color:var(--pm);box-shadow:0 0 0 3px rgba(12,68,124,.08)}
+input[readonly]{background:var(--bg2);color:var(--tx2)}
+.tiny{width:52px;text-align:center;padding:0 4px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.row-g{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:0 14px;height:34px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:background .15s}
+.btn-blue{background:var(--p);color:#fff}.btn-blue:hover{background:#0a375f}
+.btn-ghost{background:var(--bg2);color:var(--tx2);border-color:var(--bdr)}.btn-ghost:hover{background:#e8ecf2}
+.btn-green{background:#16a34a;color:#fff}.btn-green:hover{background:#15803d}
+.btn-red{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}.btn-red:hover{background:#fee2e2}
+.btn-sm{height:28px;padding:0 10px;font-size:12px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1.5px solid var(--bdr)}
+.tab{display:inline-flex;align-items:center;gap:5px;padding:8px 18px 10px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;border-bottom:2px solid transparent;border-radius:6px 6px 0 0;margin-bottom:-1.5px;color:var(--tx2);background:none;font-family:inherit;transition:all .15s}
+.tab:hover{color:var(--p);background:var(--pl)}
+.tab.active{color:var(--p);background:var(--bg);border-color:var(--bdr);border-bottom-color:var(--bg);font-weight:600}
+
+/* Filter pills */
+.pill{font-size:12px;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--bdr);background:var(--bg2);color:var(--tx2);transition:all .15s;white-space:nowrap;font-family:inherit}
+.pill:hover,.pill.active{background:var(--pl);color:var(--p);border-color:var(--pm)}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--bdr);background:var(--bg2);text-align:left}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg2)}
+.empty{text-align:center;padding:24px;color:var(--tx2);font-style:italic;font-size:13px}
+.muted{color:var(--tx2)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-pending  {background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.badge-dispensed{background:#f0fdf4;color:#15803d;border:1px solid #86efac}
+.badge-in       {background:#f0fdf4;color:#15803d;border:1px solid #86efac}
+.badge-low      {background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.badge-out      {background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5}
+
+/* Drug dropdown */
+.search-wrap{position:relative}
+.drop{position:absolute;z-index:50;top:100%;left:0;right:0;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--rs);box-shadow:0 4px 16px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;display:none}
+.drop-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);font-size:13px}
+.drop-item:last-child{border-bottom:none}
+.drop-item:hover{background:var(--pl)}
+.drop-item b{display:inline}
+.drop-item small{color:var(--tx2);font-size:11px;display:block;margin-top:2px}
+
+/* Alerts */
+.alert{font-size:12px;border-radius:var(--rs);padding:7px 12px;display:none;margin-top:8px}
+.alert-ok {background:#f0fdf4;color:#15803d;border:1px solid #86efac}
+.alert-err{background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5}
+
+/* Stats (drug catalog) */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-card{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px}
+.stat-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-val{font-size:26px;font-weight:700}
+.stat-val.blue{color:var(--p)}.stat-val.green{color:#16a34a}
+.stat-val.yellow{color:#d97706}.stat-val.red{color:#dc2626}
+
+/* Print */
+@media print{.no-print,.topbar,.sidebar{display:none!important}.main-content{overflow:visible}}
+@media(max-width:640px){.grid4{grid-template-columns:1fr 1fr}.stats-row{grid-template-columns:1fr 1fr}}

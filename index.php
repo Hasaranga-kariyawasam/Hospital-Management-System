@@ -12,7 +12,7 @@ if (isset($_SESSION['user_id'])) {
                 'pharmacist' => "$base/modules/pharmacy/pharmacist_portal.php",
                 'patient'    => "$base/modules/appointments/my_appointments.php",
                 'dispatcher' => "$base/modules/emergency/dispatcher_dashboard.php",
-                'driver'     => "$base/modules/emergency/driver_job.php",
+                'driver'     => "$base/modules/emergency/driver_job.php"
     ];
     $dest = $map[$_SESSION['role']] ?? "$base/home.php";
     header("Location: $dest");

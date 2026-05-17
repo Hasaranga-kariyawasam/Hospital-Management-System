@@ -521,15 +521,36 @@ VALUES
 
 
 
-INSERT INTO prescriptions (prescription_id, appointment_id, drug_id, dosage, frequency, duration_days, status) 
-VALUES 
-('PRE-001', 'APT-001', 'DRG-001', '500mg', 'Three times a day (TDS)', 5, 'dispensed'),
-('PRE-002', 'APT-002', 'DRG-007', '10mg', 'Night (Nocte)', 10, 'pending'),
-('PRE-003', 'APT-003', 'DRG-010', '500mg', 'Once a day (OD)', 3, 'pending'),
-('PRE-004', 'APT-004', 'DRG-005', '20mg', 'Before meal (AC)', 14, 'dispensed'),
-('PRE-005', 'APT-005', 'DRG-032', '400mg', 'Twice a day (BD)', 7, 'pending');
+-- Ambulance fleet table
+CREATE TABLE IF NOT EXISTS ambulances (
+    ambulance_id   INT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_no     VARCHAR(20)  NOT NULL,
+    driver_name    VARCHAR(100) NOT NULL,
+    driver_phone   VARCHAR(15)  NOT NULL,
+    status         ENUM('available', 'dispatched', 'maintenance') DEFAULT 'available',
+    last_location  VARCHAR(255)
+) ENGINE=InnoDB;
 
--- ── STEP 8: Performance indexes ───────────────────────────────
-CREATE INDEX IF NOT EXISTS idx_beds_status   ON beds(status);
-CREATE INDEX IF NOT EXISTS idx_rooms_status  ON rooms(status);
-CREATE INDEX IF NOT EXISTS idx_rooms_ward    ON rooms(ward_id);
+-- Emergency requests table (no foreign keys - safe standalone version)
+CREATE TABLE IF NOT EXISTS emergency_requests (
+    request_id      INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_no       VARCHAR(20)  NOT NULL UNIQUE,
+    patient_id      INT          DEFAULT NULL,
+    requester_name  VARCHAR(100) NOT NULL,
+    phone           VARCHAR(15)  NOT NULL,
+    gps_lat         DECIMAL(10,8) DEFAULT NULL,
+    gps_lng         DECIMAL(11,8) DEFAULT NULL,
+    description     TEXT,
+    status          ENUM('pending','dispatched','en_route','arrived','closed') DEFAULT 'pending',
+    ambulance_id    INT          DEFAULT NULL,
+    dispatcher_id   INT          DEFAULT NULL,
+    dispatched_at   DATETIME     DEFAULT NULL,
+    created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Sample ambulance data
+INSERT INTO ambulances (vehicle_no, driver_name, driver_phone, status) VALUES
+('AMB-001', 'Kamal Perera',   '0771234567', 'available'),
+('AMB-002', 'Sunil Fernando', '0779876543', 'available'),
+('AMB-003', 'Nimal Silva',    '0761122334', 'maintenance');
+

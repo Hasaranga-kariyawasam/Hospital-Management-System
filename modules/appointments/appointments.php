@@ -124,7 +124,7 @@ include '../../includes/sidebar.php';
                &mdash; <?= date('l, d F Y') ?></p>
         </div>
         <a href="doctor_potal.php" class="btn btn-secondary">
-            <span class="icon">📋</span> My Portal
+            My Portal
         </a>
     </div>
 

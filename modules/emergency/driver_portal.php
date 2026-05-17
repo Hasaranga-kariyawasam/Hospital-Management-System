@@ -1,519 +1,271 @@
 <?php
+/**
+ * dispatcher.php — Dispatcher Portal
+ * Auth: role = 'dispatcher'
+ */
 declare(strict_types=1);
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/../../config/db_config.php';
 
-// ── Auth guard — uses same session vars as login.php ──────────
-if (empty($_SESSION['user_id']) || $_SESSION['role'] !== 'driver') {
+if (empty($_SESSION['user_id']) || $_SESSION['role'] !== 'dispatcher') {
     header('Location: /Web/Hospital-Management-System/login.php');
-    exit();
-}
-
-$userId = (int)$_SESSION['user_id'];
-
-// ── AJAX status update ────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    header('Content-Type: application/json');
-
-    if ($_POST['action'] === 'finish_duty') {
-        // Driver is on_duty but emergency link is missing — just reset driver to available
-        try {
-            $pdo->beginTransaction();
-            // Resolve any lingering emergency assigned to this driver
-            $pdo->prepare("
-                UPDATE emergency_requests SET status = 'resolved'
-                WHERE assigned_driver_id = ? AND status IN ('dispatched','en_route','arrived','pending')
-            ")->execute([$userId]);
-            $pdo->prepare("
-                UPDATE drivers SET status = 'available', assigned_emergency_id = NULL
-                WHERE user_id = ?
-            ")->execute([$userId]);
-            $pdo->commit();
-            echo json_encode(['ok' => true]);
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            echo json_encode(['ok' => false, 'msg' => $e->getMessage()]);
-        }
-        exit;
-    }
-
-    if ($_POST['action'] === 'update_status') {
-        $newStatus = $_POST['status'];
-        $reqId     = (int)$_POST['request_id'];
-        $allowed   = ['dispatched', 'en_route', 'arrived', 'resolved'];
-
-        if (!in_array($newStatus, $allowed, true)) {
-            echo json_encode(['ok' => false, 'msg' => 'Invalid status']); exit;
-        }
-
-        try {
-            $pdo->beginTransaction();
-
-            $pdo->prepare("
-                UPDATE emergency_requests
-                SET status = ?
-                WHERE emergency_id = ? AND assigned_driver_id = ?
-            ")->execute([$newStatus, $reqId, $userId]);
-
-            if ($newStatus === 'resolved') {
-                $pdo->prepare("
-                    UPDATE drivers SET status = 'available', assigned_emergency_id = NULL
-                    WHERE user_id = ?
-                ")->execute([$userId]);
-            }
-
-            $pdo->commit();
-            echo json_encode(['ok' => true]);
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            echo json_encode(['ok' => false, 'msg' => $e->getMessage()]);
-        }
-    }
     exit;
 }
 
-// ── Fetch driver (joined with users table like driver.php) ────
-$dStmt = $pdo->prepare("
-    SELECT d.*, u.full_name, u.email
-    FROM drivers d
-    JOIN users u ON d.user_id = u.user_id
-    WHERE d.user_id = ?
-");
-$dStmt->execute([$userId]);
-$driver = $dStmt->fetch();
+$me = htmlspecialchars($_SESSION['full_name'] ?? 'Dispatcher');
 
-if (!$driver) {
-    session_destroy();
-    header('Location: /Web/Hospital-Management-System/login.php');
-    exit();
-}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $act = trim($_POST['action'] ?? '');
 
-
-// ── Active request ────────────────────────────────────────────
-// Try matching by assigned_driver_id (user_id) first
-$aStmt = $pdo->prepare("
-    SELECT * FROM emergency_requests
-    WHERE assigned_driver_id = ? AND status IN ('dispatched','en_route','arrived')
-    ORDER BY dispatch_time DESC LIMIT 1
-");
-$aStmt->execute([$userId]);
-$req = $aStmt->fetch();
-
-// Fallback: if driver is on_duty but no request found via user_id,
-// try finding via the driver's assigned_emergency_id (handles driver_id vs user_id mismatch)
-if (!$req && $driver['status'] === 'on_duty' && !empty($driver['assigned_emergency_id'])) {
-    $aStmt2 = $pdo->prepare("
-        SELECT * FROM emergency_requests
-        WHERE emergency_id = ? AND status IN ('dispatched','en_route','arrived','pending')
-    ");
-    $aStmt2->execute([$driver['assigned_emergency_id']]);
-    $req = $aStmt2->fetch();
-}
-
-// ── Completed history ─────────────────────────────────────────
-$hStmt = $pdo->prepare("
-    SELECT * FROM emergency_requests
-    WHERE assigned_driver_id = ? AND status = 'resolved'
-    ORDER BY dispatch_time DESC LIMIT 10
-");
-$hStmt->execute([$userId]);
-$history = $hStmt->fetchAll();
-
-// ── Total resolved count ──────────────────────────────────────
-$cStmt = $pdo->prepare("
-    SELECT COUNT(*) FROM emergency_requests
-    WHERE assigned_driver_id = ? AND status = 'resolved'
-");
-$cStmt->execute([$userId]);
-$totalResolved = (int)$cStmt->fetchColumn();
-
-// ── Status flow ───────────────────────────────────────────────
-$flow       = ['dispatched','en_route','arrived','resolved'];
-$nextLabel  = [
-    'dispatched' => ['status'=>'en_route', 'label'=>'🚦 Mark En Route',   'color'=>'#e07000'],
-    'en_route'   => ['status'=>'arrived',  'label'=>'📍 Mark Arrived',    'color'=>'#1a6dff'],
-    'arrived'    => ['status'=>'resolved', 'label'=>'✅ Mark as Resolved', 'color'=>'#1a9e4a'],
-];
-$stepIcons  = ['📋','🚦','📍','✅'];
-$stepLabels = ['Dispatched','En Route','Arrived','Resolved'];
-
-// ── Human-readable maps ───────────────────────────────────────
-$typeMap = [
-    'cardiac'   => 'Cardiac Arrest / Chest Pain',
-    'accident'  => 'Accident / Trauma',
-    'breathing' => 'Breathing Difficulty',
-    'stroke'    => 'Stroke / Sudden Paralysis',
-    'burn'      => 'Severe Burns',
-    'poisoning' => 'Poisoning / Overdose',
-    'fracture'  => 'Fracture / Bone Injury',
-    'other'     => 'Other Critical Condition',
-];
-$consciousMap = ['yes'=>'Fully Conscious','semi'=>'Semi-Conscious','no'=>'Unconscious'];
-$assistMap    = ['yes'=>'Someone is helping','no'=>'Person is alone','medical'=>'Medical professional present'];
-
-$pageTitle  = 'Driver Dashboard';
-$useSidebar = false;
-$isPublic   = false;
-include __DIR__ . '/../../includes/header.php';
-?>
-
-<style>
-    body { background: #f0f2f8; }
-    .page { padding: 28px; max-width: 960px; margin: 0 auto; }
-
-    /* Info row */
-    .info-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
-    .info-card { background: #fff; border-radius: 14px; padding: 18px 22px;
-        box-shadow: 0 2px 10px rgba(0,0,0,.06); border-left: 4px solid var(--c); }
-    .info-label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase;
-        letter-spacing: .05em; margin-bottom: 4px; }
-    .info-val { font-size: 22px; font-weight: 700; color: var(--c); }
-
-    /* Active request card */
-    .req-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,.08);
-        overflow: hidden; margin-bottom: 24px; }
-    .req-head { background: linear-gradient(135deg,#e02020,#a50000); color: #fff;
-        padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; }
-    .req-head-title { font-size: 16px; font-weight: 700; }
-    .req-head-time  { font-size: 12px; opacity: .8; }
-    .req-body { padding: 24px 26px; }
-
-    /* Progress */
-    .progress { display: flex; align-items: flex-start; margin-bottom: 26px; }
-    .p-step { flex: 1; text-align: center; position: relative; }
-    .p-step::after { content: ''; position: absolute; top: 16px; left: 50%; right: -50%;
-        height: 3px; background: #e0e4ef; z-index: 0; }
-    .p-step:last-child::after { display: none; }
-    .p-step.done::after { background: #1a9e4a; }
-    .p-dot { width: 34px; height: 34px; border-radius: 50%; background: #e0e4ef; color: #aaa;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 14px; font-weight: 700; margin: 0 auto 6px; position: relative; z-index: 1; transition: .3s; }
-    .p-step.done   .p-dot { background: #1a9e4a; color: #fff; }
-    .p-step.active .p-dot { background: #1a6dff; color: #fff; box-shadow: 0 0 0 5px rgba(26,109,255,.2); }
-    .p-label { font-size: 11px; color: #888; font-weight: 500; }
-    .p-step.done   .p-label { color: #1a9e4a; font-weight: 600; }
-    .p-step.active .p-label { color: #1a6dff; font-weight: 700; }
-
-    /* Detail grid */
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px; margin-bottom: 24px; }
-    .d-label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase;
-        letter-spacing: .05em; margin-bottom: 3px; }
-    .d-val { font-size: 14px; font-weight: 600; color: #1a1a2e; }
-
-    /* Critical banner */
-    .critical-banner { background: #fff0f0; border: 2px solid #ff2d2d; border-radius: 10px;
-        padding: 10px 16px; font-size: 13px; font-weight: 600; color: #cc0000;
-        margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-
-    /* Action buttons */
-    .action-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .btn-action { padding: 13px 26px; border-radius: 10px; border: none;
-        font-family: 'DM Sans',sans-serif; font-size: 14px; font-weight: 700;
-        color: #fff; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.2); transition: .2s; }
-    .btn-action:hover { opacity: .88; transform: translateY(-1px); }
-    .btn-call { padding: 13px 22px; border-radius: 10px; background: #0f1b3d; color: #fff; border: none;
-        font-family: 'DM Sans',sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: .2s; }
-    .btn-call:hover { background: #1a3a7a; }
-
-    /* No request */
-    .no-req { background: #fff; border-radius: 16px; padding: 60px 40px; text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,.06); margin-bottom: 24px; }
-    .no-req-icon  { font-size: 56px; margin-bottom: 16px; }
-    .no-req-title { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
-    .no-req-sub   { font-size: 14px; color: #888; }
-
-    /* History table */
-    .hist-card { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.06); overflow: hidden; }
-    .hist-head { padding: 16px 22px; border-bottom: 1px solid #eef0f6; font-size: 15px; font-weight: 700; }
-    .hist-card table { width: 100%; border-collapse: collapse; }
-    .hist-card th { background: #f7f8fc; text-align: left; padding: 10px 16px;
-        font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; }
-    .hist-card td { padding: 12px 16px; font-size: 13px; border-top: 1px solid #f0f2f8; }
-    .badge-resolved { display: inline-block; padding: 3px 10px; border-radius: 20px;
-        font-size: 11px; font-weight: 600; background: #e8f9ee; color: #1a9e4a; }
-
-    /* Toast */
-    .toast { position: fixed; bottom: 28px; right: 28px; background: #1a1a2e; color: #fff;
-        padding: 13px 22px; border-radius: 10px; font-size: 14px; font-weight: 500;
-        box-shadow: 0 8px 24px rgba(0,0,0,.3); display: none; z-index: 999; }
-
-    @media (max-width: 600px) {
-        .info-row { grid-template-columns: 1fr; }
-        .detail-grid { grid-template-columns: 1fr; }
+    if ($act === 'assign') {
+        $eid = (int)($_POST['emergency_id'] ?? 0);
+        $did = (int)($_POST['driver_id']    ?? 0);
+        if (!$eid || !$did) { echo json_encode(['ok'=>false,'msg'=>'Missing ID']); exit; }
+        try {
+            $pdo->beginTransaction();
+            $pdo->prepare("UPDATE emergency_requests SET status='dispatched',assigned_driver_id=?,dispatch_time=NOW() WHERE emergency_id=? AND status='pending'")->execute([$did,$eid]);
+            $pdo->prepare("UPDATE drivers SET status='on_duty',assigned_emergency_id=? WHERE driver_id=? AND status='available'")->execute([$eid,$did]);
+            $pdo->commit();
+            echo json_encode(['ok'=>true]);
+        } catch(Throwable $e) { $pdo->rollBack(); echo json_encode(['ok'=>false,'msg'=>$e->getMessage()]); }
+        exit;
     }
+
+    if ($act === 'cancel') {
+        $eid = (int)($_POST['emergency_id'] ?? 0);
+        try {
+            $pdo->prepare("UPDATE emergency_requests SET status='cancelled' WHERE emergency_id=? AND status='pending'")->execute([$eid]);
+            echo json_encode(['ok'=>true]);
+        } catch(Throwable $e) { echo json_encode(['ok'=>false,'msg'=>$e->getMessage()]); }
+        exit;
+    }
+
+    echo json_encode(['ok'=>false,'msg'=>'Unknown action']); exit;
+}
+
+$pending    = $pdo->query("SELECT e.*,d.driver_id AS adr_id,u2.full_name AS driver_name FROM emergency_requests e LEFT JOIN drivers d ON d.driver_id=e.assigned_driver_id LEFT JOIN users u2 ON u2.user_id=d.user_id WHERE e.status='pending' ORDER BY e.submitted_at ASC")->fetchAll();
+$active     = $pdo->query("SELECT e.*,u2.full_name AS driver_name,d.ambulance_number FROM emergency_requests e LEFT JOIN drivers d ON d.driver_id=e.assigned_driver_id LEFT JOIN users u2 ON u2.user_id=d.user_id WHERE e.status IN('dispatched','en_route','arrived') ORDER BY e.dispatch_time DESC")->fetchAll();
+$drivers    = $pdo->query("SELECT d.driver_id,u.full_name,d.ambulance_number,d.ambulance_type,d.status FROM drivers d JOIN users u ON u.user_id=d.user_id WHERE d.status='available' ORDER BY u.full_name")->fetchAll();
+$history    = $pdo->query("SELECT e.*,u2.full_name AS driver_name FROM emergency_requests e LEFT JOIN drivers d ON d.driver_id=e.assigned_driver_id LEFT JOIN users u2 ON u2.user_id=d.user_id WHERE e.status IN('resolved','cancelled') ORDER BY e.resolved_at DESC,e.submitted_at DESC LIMIT 20")->fetchAll();
+$stats      = $pdo->query("SELECT SUM(status='pending') pending,SUM(status IN('dispatched','en_route','arrived')) active,SUM(status='resolved') resolved,SUM(status='cancelled') cancelled FROM emergency_requests")->fetch();
+$allDrivers = $pdo->query("SELECT d.driver_id,u.full_name,d.ambulance_number,d.ambulance_type,d.status FROM drivers d JOIN users u ON u.user_id=d.user_id ORDER BY d.status,u.full_name")->fetchAll();
+
+$typeMap = [
+    'cardiac'  =>'<i class="ti ti-heart-rate-monitor"></i> Cardiac Arrest',
+    'accident' =>'<i class="ti ti-car-crash"></i> Accident / Trauma',
+    'breathing'=>'<i class="ti ti-lungs"></i> Breathing Difficulty',
+    'stroke'   =>'<i class="ti ti-brain"></i> Stroke',
+    'burn'     =>'<i class="ti ti-flame"></i> Severe Burns',
+    'poisoning'=>'<i class="ti ti-pill"></i> Poisoning / Overdose',
+    'fracture' =>'<i class="ti ti-bone"></i> Fracture',
+    'other'    =>'<i class="ti ti-alert-triangle"></i> Other Critical',
+];
+$consMap = [
+    'yes' =>'<i class="ti ti-circle-check" style="color:var(--grn)"></i> Conscious',
+    'semi'=>'<i class="ti ti-alert-circle"  style="color:var(--org)"></i> Semi-Conscious',
+    'no'  =>'<i class="ti ti-circle-x"      style="color:var(--red)"></i> Unconscious',
+];
+$asstMap = ['yes'=>'Someone helping','no'=>'Person alone','medical'=>'Medical professional'];
+
+$pageTitle='Dispatcher Console'; $useSidebar=true; $isPublic=false;
+include __DIR__.'/../../includes/header.php';
+?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
+<style>
+:root{--red:#dc2626;--grn:#16a34a;--blu:#1d4ed8;--org:#d97706;--bg:#f1f5f9;--bg2:#fff;--bdr:#e2e8f0;--tx:#0f172a;--tx2:#64748b}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.topbar h1{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px}
+.topbar small{color:var(--tx2);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;text-align:center}
+.stat-n{font-size:26px;font-weight:700}
+.stat-l{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.section{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:18px;overflow:hidden}
+.section-hd{padding:14px 18px;border-bottom:1px solid var(--bdr);font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px;background:var(--bg)}
+.req{border:1px solid var(--bdr);border-radius:10px;padding:16px;margin:12px 16px;transition:box-shadow .2s}
+.req:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.req.critical{border-left:4px solid var(--red);background:#fff8f8}
+.req-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.req-type{font-size:15px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px}
+.req-time{font-size:11px;color:var(--tx2)}
+.req-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.req-field small{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:2px}
+.req-field b{font-size:13px;color:var(--tx);display:flex;align-items:center;gap:4px}
+.assign-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--bdr);border-radius:7px;outline:none;background:#fff;color:var(--tx)}
+select:focus{border-color:#93c5fd}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-red{background:var(--red);color:#fff}
+.btn-grn{background:var(--grn);color:#fff}
+.btn-blu{background:var(--blu);color:#fff}
+.btn-ghost{background:var(--bg);color:var(--tx2);border:1px solid var(--bdr)}
+.drv-table,.hist-table{width:100%;border-collapse:collapse;font-size:13px}
+.drv-table th,.hist-table th{background:var(--bg);font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;padding:9px 16px;border-bottom:1px solid var(--bdr);text-align:left}
+.drv-table td,.hist-table td{padding:10px 16px;border-bottom:1px solid var(--bdr)}
+.drv-table tr:last-child td,.hist-table tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-available{background:#f0fdf4;color:var(--grn);border:1px solid #86efac}
+.badge-on_duty{background:#fffbeb;color:var(--org);border:1px solid #fcd34d}
+.badge-off_duty,.badge-on_leave{background:#f8fafc;color:var(--tx2);border:1px solid var(--bdr)}
+.badge-pending{background:#fff7ed;color:var(--org);border:1px solid #fed7aa}
+.badge-dispatched,.badge-en_route,.badge-arrived{background:#eff6ff;color:var(--blu);border:1px solid #bfdbfe}
+.badge-resolved{background:#f0fdf4;color:var(--grn);border:1px solid #86efac}
+.badge-cancelled{background:#fef2f2;color:var(--red);border:1px solid #fca5a5}
+.active-card{border-left:4px solid var(--blu)}
+.crit-warn{background:#fef2f2;border:1px solid #fca5a5;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.no-drivers{background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--org);display:flex;align-items:center;gap:6px}
+.toast{position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;z-index:999}
+.empty{padding:28px;text-align:center;color:var(--tx2);font-style:italic}
+@media(max-width:640px){.stats{grid-template-columns:1fr 1fr}.req-grid{grid-template-columns:1fr}}
 </style>
 
-<div class="page">
+<main class="main-content"><div class="wrap">
 
-    <!-- Page heading -->
-    <div style="margin-bottom:24px">
-        <h1 style="font-size:24px;font-weight:700;color:#0f1b3d">🚑 Driver Dashboard</h1>
-        <p style="color:#888;font-size:14px;margin-top:4px">
-            Welcome, <?= htmlspecialchars($driver['full_name']) ?> &nbsp;·&nbsp;
-            <?= htmlspecialchars($driver['ambulance_number'] ?? 'N/A') ?> &nbsp;·&nbsp;
-            License: <?= htmlspecialchars($driver['license_number'] ?? 'N/A') ?>
-        </p>
-    </div>
-
-    <!-- Info row -->
-    <div class="info-row">
-        <div class="info-card" style="--c:#1a6dff">
-            <div class="info-label">Ambulance</div>
-            <div class="info-val"><?= htmlspecialchars($driver['ambulance_number'] ?? 'N/A') ?></div>
-        </div>
-        <div class="info-card" style="--c:<?= $driver['status']==='available'?'#1a9e4a':'#e07000' ?>">
-            <div class="info-label">My Status</div>
-            <div class="info-val"><?= ucfirst(str_replace('_',' ',$driver['status'])) ?></div>
-        </div>
-        <div class="info-card" style="--c:#888">
-            <div class="info-label">Trips Resolved</div>
-            <div class="info-val"><?= $totalResolved ?></div>
-        </div>
-    </div>
-
-    <?php if ($req): ?>
-    <!-- Active Request -->
-    <?php
-        $curIdx = array_search($req['status'], $flow);
-        $isUnconscious = ($req['is_conscious'] === 'no');
-    ?>
-    <div class="req-card">
-        <div class="req-head">
-            <div>
-                <div class="req-head-title">
-                    🆘 Active Emergency — <?= htmlspecialchars($typeMap[$req['emergency_type']] ?? ucfirst($req['emergency_type'])) ?>
-                </div>
-                <div class="req-head-time">
-                    Dispatched: <?= $req['dispatch_time'] ? date('d M Y, H:i', strtotime($req['dispatch_time'])) : '—' ?>
-                </div>
-            </div>
-            <span style="background:rgba(255,255,255,.2);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700">
-                <?= ucfirst(str_replace('_',' ',$req['status'])) ?>
-            </span>
-        </div>
-
-        <div class="req-body">
-            <?php if ($isUnconscious): ?>
-            <div class="critical-banner">🚨 CRITICAL — Patient is UNCONSCIOUS. Respond immediately.</div>
-            <?php endif; ?>
-
-            <!-- Progress steps -->
-            <div class="progress">
-                <?php foreach ($flow as $i => $s): ?>
-                <div class="p-step <?= $i < $curIdx ? 'done' : ($i === $curIdx ? 'active' : '') ?>">
-                    <div class="p-dot"><?= $i < $curIdx ? '✓' : $stepIcons[$i] ?></div>
-                    <div class="p-label"><?= $stepLabels[$i] ?></div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Patient details -->
-            <div class="detail-grid">
-                <div>
-                    <div class="d-label">👤 Patient Name</div>
-                    <div class="d-val"><?= htmlspecialchars($req['patient_name'] ?? '—') ?></div>
-                </div>
-                <div>
-                    <div class="d-label">🆘 Emergency Type</div>
-                    <div class="d-val"><?= htmlspecialchars($typeMap[$req['emergency_type']] ?? ucfirst($req['emergency_type'])) ?></div>
-                </div>
-                <div>
-                    <div class="d-label">📍 Address</div>
-                    <div class="d-val"><?= htmlspecialchars($req['patient_address'] ?? '—') ?></div>
-                </div>
-                <div>
-                    <div class="d-label">🧠 Consciousness</div>
-                    <div class="d-val"><?= htmlspecialchars($consciousMap[$req['is_conscious']] ?? '—') ?></div>
-                </div>
-                <div>
-                    <div class="d-label">📞 Contact Number</div>
-                    <div class="d-val"><?= htmlspecialchars($req['contact_number'] ?? '—') ?></div>
-                </div>
-                <div>
-                    <div class="d-label">👥 Assistance on Site</div>
-                    <div class="d-val"><?= htmlspecialchars($assistMap[$req['assistance_on_site'] ?? ''] ?? '—') ?></div>
-                </div>
-            </div>
-
-            <!-- Action buttons -->
-            <div class="action-row">
-                <button class="btn-action" style="background:#1a9e4a;font-size:16px;padding:16px 36px;"
-                    onclick="confirmFinish(<?= (int)$req['emergency_id'] ?>)">
-                    ✅ Finish
-                </button>
-                <a href="tel:<?= preg_replace('/[^\d+]/','',$req['contact_number'] ?? '') ?>" class="btn-call">
-                    📞 Call Patient
-                </a>
-                <?php if (!empty($req['patient_address'])): ?>
-                <a href="https://maps.google.com/?q=<?= urlencode($req['patient_address']) ?>"
-                   target="_blank" class="btn-call" style="background:#1a6dff">
-                    🗺 Navigate
-                </a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sticky Finish Bar (always visible at bottom when active emergency) -->
-    <div style="position:fixed;bottom:0;left:0;right:0;background:#0f1b3d;padding:14px 24px;
-                display:flex;align-items:center;justify-content:space-between;z-index:100;
-                box-shadow:0 -4px 20px rgba(0,0,0,.3);">
-        <div style="color:#fff;font-size:13px;font-weight:600;">
-            🚨 Active Emergency in Progress
-        </div>
-        <button class="btn-action" style="background:#1a9e4a;font-size:15px;padding:12px 32px;"
-            onclick="confirmFinish(<?= (int)$req['emergency_id'] ?>)">
-            ✅ Finish Task
-        </button>
-    </div>
-    <div style="height:68px;"></div><!-- spacer -->
-
-    <?php else: ?>
-    <?php if ($driver['status'] === 'on_duty'): ?>
-    <!-- On duty but request not linked — show manual finish option -->
-    <div class="no-req" style="border:2px solid #f59e0b;">
-        <div class="no-req-icon">🚑</div>
-        <div class="no-req-title" style="color:#b07800;">You are currently On Duty</div>
-        <div class="no-req-sub">Your assignment details could not be loaded. If you have completed your task, click Finish below.</div>
-        <div style="margin-top:24px;">
-            <button class="btn-action" style="background:#1a9e4a;font-size:16px;padding:14px 40px;"
-                onclick="confirmFinishNoId()">
-                ✅ Finish Task
-            </button>
-        </div>
-    </div>
-    <!-- Sticky bar for on_duty with no req -->
-    <div style="position:fixed;bottom:0;left:0;right:0;background:#0f1b3d;padding:14px 24px;
-                display:flex;align-items:center;justify-content:space-between;z-index:100;
-                box-shadow:0 -4px 20px rgba(0,0,0,.3);">
-        <div style="color:#fff;font-size:13px;font-weight:600;">🚑 You are On Duty</div>
-        <button class="btn-action" style="background:#1a9e4a;font-size:15px;padding:12px 32px;"
-            onclick="confirmFinishNoId()">
-            ✅ Finish Task
-        </button>
-    </div>
-    <div style="height:68px;"></div>
-    <?php else: ?>
-    <!-- No active request, available -->
-    <div class="no-req">
-        <div class="no-req-icon">🟢</div>
-        <div class="no-req-title">No Active Assignment</div>
-        <div class="no-req-sub">You are marked as available. The dispatcher will assign you when an emergency comes in.</div>
-    </div>
-    <?php endif; ?>
-    <?php endif; ?>
-
-    <!-- Trip History -->
-    <?php if (!empty($history)): ?>
-    <div class="hist-card">
-        <div class="hist-head">📋 Resolved Trips</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Patient</th>
-                    <th>Emergency</th>
-                    <th>Address</th>
-                    <th>Resolved At</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($history as $h): ?>
-                <tr>
-                    <td><strong><?= htmlspecialchars($h['patient_name'] ?? '—') ?></strong></td>
-                    <td><?= htmlspecialchars($typeMap[$h['emergency_type']] ?? ucfirst($h['emergency_type'])) ?></td>
-                    <td><?= htmlspecialchars($h['patient_address'] ?? '—') ?></td>
-                    <td style="white-space:nowrap;color:#888;font-size:12px">
-                        <?= !empty($h['dispatch_time']) ? date('d M Y, H:i', strtotime($h['dispatch_time'])) : '—' ?>
-                    </td>
-                    <td><span class="badge-resolved">Resolved</span></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php endif; ?>
-
+<div class="topbar">
+  <div>
+    <h1><i class="ti ti-tower-broadcast"></i> Dispatcher Console</h1>
+    <small>Welcome, <?= $me ?> &nbsp;&middot;&nbsp; <?= date('d M Y, H:i') ?></small>
+  </div>
+  <button class="btn btn-ghost" onclick="location.reload()"><i class="ti ti-refresh"></i> Refresh</button>
 </div>
 
-<div class="toast" id="toast"></div>
-
-<!-- Finish Confirmation Modal -->
-<div id="finishOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:16px;width:100%;max-width:400px;padding:32px 28px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);">
-        <div style="font-size:48px;margin-bottom:12px;">✅</div>
-        <h2 style="font-size:18px;font-weight:700;color:#0f1b3d;margin-bottom:8px;">Finish Task?</h2>
-        <p style="font-size:14px;color:#6b7280;margin-bottom:24px;">Are you sure you have completed this emergency response? This will mark the task as resolved and set you as available.</p>
-        <div style="display:flex;gap:12px;justify-content:center;">
-            <button onclick="closeFinishModal()" style="padding:11px 28px;border-radius:9px;border:1.5px solid #d0d5e8;background:#fff;font-family:inherit;font-size:14px;font-weight:600;color:#555;cursor:pointer;">Cancel</button>
-            <button id="finishConfirmBtn" onclick="doFinish()" style="padding:11px 28px;border-radius:9px;border:none;background:#1a9e4a;color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(26,158,74,.3);">Yes, Finish</button>
-        </div>
-    </div>
+<div class="stats">
+  <div class="stat"><div class="stat-n" style="color:var(--org)"><?= intval($stats['pending'])  ?></div><div class="stat-l">Pending</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--blu)"><?= intval($stats['active'])   ?></div><div class="stat-l">Active</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--grn)"><?= intval($stats['resolved']) ?></div><div class="stat-l">Resolved</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--tx2)"><?= count($drivers) ?></div><div class="stat-l">Available Drivers</div></div>
 </div>
 
-<!-- Auto-refresh every 30 seconds when no active request -->
-<?php if (!$req): ?>
-<script>setTimeout(() => location.reload(), 30000);</script>
+<!-- PENDING -->
+<div class="section">
+  <div class="section-hd">
+    <i class="ti ti-alert-circle" style="color:var(--org)"></i> Pending Requests
+    <span class="badge badge-pending" style="margin-left:auto"><?= count($pending) ?></span>
+  </div>
+  <?php if (!$pending): ?>
+  <div class="empty">No pending emergency requests.</div>
+  <?php else: foreach($pending as $r): $crit=$r['is_conscious']==='no'; ?>
+  <div class="req <?= $crit?'critical':'' ?>">
+    <?php if ($crit): ?><div class="crit-warn"><i class="ti ti-alert-triangle"></i> CRITICAL — Patient is UNCONSCIOUS</div><?php endif; ?>
+    <div class="req-top">
+      <div class="req-type"><?= $typeMap[$r['emergency_type']] ?? htmlspecialchars($r['emergency_type']) ?></div>
+      <div class="req-time"><?= date('d M Y, H:i',strtotime($r['submitted_at'])) ?> &nbsp;&middot;&nbsp; <strong><?= round((time()-strtotime($r['submitted_at']))/60) ?> min ago</strong></div>
+    </div>
+    <div class="req-grid">
+      <div class="req-field"><small>Patient</small><b><i class="ti ti-user"></i><?= htmlspecialchars($r['patient_name']?:'—') ?></b></div>
+      <div class="req-field"><small>Contact</small><b><i class="ti ti-phone"></i><a href="tel:<?= $r['contact_number'] ?>"><?= htmlspecialchars($r['contact_number']) ?></a></b></div>
+      <div class="req-field"><small>Consciousness</small><b><?= $consMap[$r['is_conscious']] ?? '—' ?></b></div>
+      <div class="req-field" style="grid-column:1/-1"><small>Address</small><b><i class="ti ti-map-pin"></i><?= htmlspecialchars($r['patient_address']?:'—') ?></b></div>
+    </div>
+    <div class="assign-row">
+      <?php if ($drivers): ?>
+      <select id="drv_<?= $r['emergency_id'] ?>">
+        <option value="">— Select Driver —</option>
+        <?php foreach($drivers as $d): ?>
+        <option value="<?= $d['driver_id'] ?>"><?= htmlspecialchars($d['full_name']) ?> — <?= htmlspecialchars($d['ambulance_number']??'N/A') ?></option>
+        <?php endforeach; ?>
+      </select>
+      <button class="btn btn-grn" onclick="assign(<?= $r['emergency_id'] ?>)"><i class="ti ti-send"></i> Dispatch</button>
+      <?php else: ?>
+      <span class="no-drivers"><i class="ti ti-alert-triangle"></i> No available drivers</span>
+      <?php endif; ?>
+      <button class="btn btn-ghost" onclick="cancel(<?= $r['emergency_id'] ?>)"><i class="ti ti-x"></i> Cancel</button>
+    </div>
+  </div>
+  <?php endforeach; endif; ?>
+</div>
+
+<!-- ACTIVE -->
+<div class="section">
+  <div class="section-hd">
+    <i class="ti ti-ambulance" style="color:var(--blu)"></i> Active Responses
+    <span class="badge badge-dispatched" style="margin-left:auto"><?= count($active) ?></span>
+  </div>
+  <?php if (!$active): ?>
+  <div class="empty">No active responses.</div>
+  <?php else: foreach($active as $r): ?>
+  <div class="req active-card">
+    <div class="req-top">
+      <div class="req-type"><?= $typeMap[$r['emergency_type']] ?? htmlspecialchars($r['emergency_type']) ?></div>
+      <span class="badge badge-<?= $r['status'] ?>"><?= ucfirst(str_replace('_',' ',$r['status'])) ?></span>
+    </div>
+    <div class="req-grid">
+      <div class="req-field"><small>Patient</small><b><i class="ti ti-user"></i><?= htmlspecialchars($r['patient_name']??'—') ?></b></div>
+      <div class="req-field"><small>Driver</small><b><i class="ti ti-ambulance"></i><?= htmlspecialchars($r['driver_name']??'—') ?> (<?= htmlspecialchars($r['ambulance_number']??'N/A') ?>)</b></div>
+      <div class="req-field"><small>Dispatched</small><b><i class="ti ti-clock"></i><?= $r['dispatch_time']?date('H:i',strtotime($r['dispatch_time'])):'—' ?></b></div>
+      <div class="req-field" style="grid-column:1/-1"><small>Address</small><b><i class="ti ti-map-pin"></i><?= htmlspecialchars($r['patient_address']??'—') ?></b></div>
+    </div>
+  </div>
+  <?php endforeach; endif; ?>
+</div>
+
+<!-- DRIVERS -->
+<div class="section">
+  <div class="section-hd"><i class="ti ti-users"></i> All Drivers</div>
+  <table class="drv-table">
+    <thead><tr><th>Name</th><th>Ambulance</th><th>Type</th><th>Status</th></tr></thead>
+    <tbody>
+    <?php foreach($allDrivers as $d): ?>
+    <tr>
+      <td><b><?= htmlspecialchars($d['full_name']) ?></b></td>
+      <td><?= htmlspecialchars($d['ambulance_number']??'—') ?></td>
+      <td style="color:var(--tx2);font-size:12px;text-transform:capitalize"><?= htmlspecialchars($d['ambulance_type']??'—') ?></td>
+      <td><span class="badge badge-<?= $d['status'] ?>"><?= ucfirst(str_replace('_',' ',$d['status'])) ?></span></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+
+<!-- HISTORY -->
+<?php if ($history): ?>
+<div class="section">
+  <div class="section-hd"><i class="ti ti-history"></i> Recent History</div>
+  <div style="overflow-x:auto">
+    <table class="hist-table">
+      <thead><tr><th>Time</th><th>Emergency</th><th>Patient</th><th>Address</th><th>Driver</th><th>Status</th></tr></thead>
+      <tbody>
+      <?php foreach($history as $h): ?>
+      <tr>
+        <td style="white-space:nowrap;color:var(--tx2);font-size:12px"><?= date('d M, H:i',strtotime($h['submitted_at'])) ?></td>
+        <td><?= $typeMap[$h['emergency_type']] ?? htmlspecialchars($h['emergency_type']) ?></td>
+        <td><?= htmlspecialchars($h['patient_name']??'—') ?></td>
+        <td style="font-size:12px;color:var(--tx2)"><?= htmlspecialchars(substr($h['patient_address']??'—',0,35)) ?></td>
+        <td><?= htmlspecialchars($h['driver_name']??'—') ?></td>
+        <td><span class="badge badge-<?= $h['status'] ?>"><?= ucfirst($h['status']) ?></span></td>
+      </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
 <?php endif; ?>
 
+</div></main>
+<div class="toast" id="toast"></div>
 <script>
-let _finishReqId = null;
-
-function confirmFinish(requestId) {
-    _finishReqId = requestId;
-    const overlay = document.getElementById('finishOverlay');
-    overlay.style.display = 'flex';
+async function assign(eid){
+  const sel=document.getElementById('drv_'+eid),did=sel?.value;
+  if(!did){toast('Select a driver first','#dc2626');return;}
+  const fd=new FormData();fd.append('action','assign');fd.append('emergency_id',eid);fd.append('driver_id',did);
+  const r=await post(fd);
+  if(r.ok){toast('Driver dispatched successfully','#16a34a');setTimeout(()=>location.reload(),1200);}
+  else toast('Error: '+(r.msg||'Failed'),'#dc2626');
 }
-function closeFinishModal() {
-    document.getElementById('finishOverlay').style.display = 'none';
-    _finishReqId = null;
+async function cancel(eid){
+  if(!confirm('Cancel this emergency request?'))return;
+  const fd=new FormData();fd.append('action','cancel');fd.append('emergency_id',eid);
+  const r=await post(fd);
+  if(r.ok){toast('Request cancelled','#64748b');setTimeout(()=>location.reload(),1000);}
+  else toast('Error: '+(r.msg||'Failed'),'#dc2626');
 }
-
-// Close modal on overlay click
-document.getElementById('finishOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeFinishModal();
-});
-
-function confirmFinishNoId() {
-    _finishReqId = 0; // 0 signals finish_duty action
-    const overlay = document.getElementById('finishOverlay');
-    overlay.style.display = 'flex';
-}
-
-async function doFinish() {
-    const overlay_btn = document.getElementById('finishConfirmBtn');
-    overlay_btn.textContent = 'Finishing…';
-    overlay_btn.disabled = true;
-
-    let body = new FormData();
-    if (_finishReqId && _finishReqId > 0) {
-        body.append('action',     'update_status');
-        body.append('status',     'resolved');
-        body.append('request_id', _finishReqId);
-    } else {
-        body.append('action', 'finish_duty');
-    }
-
-    const r = await fetch('driver_portal.php', { method: 'POST', body });
-    const j = await r.json();
-    if (j.ok) {
-        closeFinishModal();
-        showToast('Task finished — you are now available.');
-        setTimeout(() => location.reload(), 1400);
-    } else {
-        overlay_btn.textContent = 'Yes, Finish';
-        overlay_btn.disabled = false;
-        alert('Failed to finish: ' + (j.msg || 'Please try again.'));
-    }
-}
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
-}
+async function post(fd){try{const r=await fetch('dispatcher.php',{method:'POST',body:fd});return await r.json();}catch{return{ok:false,msg:'Network error'};}}
+function toast(msg,bg='#0f172a'){const t=document.getElementById('toast');t.textContent=msg;t.style.background=bg;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+setTimeout(()=>location.reload(),30000);
 </script>
-
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__.'/../../includes/footer.php'; ?>

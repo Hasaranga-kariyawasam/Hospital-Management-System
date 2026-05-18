@@ -215,9 +215,7 @@ include '../../includes/sidebar.php';
                         <td><span class="ref-num">#<?php echo htmlspecialchars($b['ref_number']); ?></span></td>
                         <td>
                             <div class="doc-cell">
-                                <div class="doc-avatar-sm">
-                                    <?php echo strtoupper(substr($b['doctor_name'], 0, 1)); ?>
-                                </div>
+                              
                                 <div>
                                     <div class="doc-name">Dr. <?php echo htmlspecialchars($b['doctor_name']); ?></div>
                                     <div class="doc-spec"><?php echo htmlspecialchars($b['specialization']); ?></div>
@@ -305,19 +303,7 @@ include '../../includes/sidebar.php';
     align-items: center;
     gap: 10px;
 }
-.doc-avatar-sm {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
+
 .doc-name { font-weight: 600; font-size: 13.5px; }
 .doc-spec  { font-size: 11px; color: var(--muted); }
 

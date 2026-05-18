@@ -90,20 +90,7 @@ include __DIR__ . '/../../includes/header.php';
                 <div class="stat-value"><?= $stats['today'] ?? 0 ?></div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div>
-                <div class="stat-label">Scheduled</div>
-                <div class="stat-value"><?= $stats['scheduled'] ?? 0 ?></div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div>
-                <div class="stat-label">Completed</div>
-                <div class="stat-value"><?= $stats['completed'] ?? 0 ?></div>
-            </div>
-        </div>
+      
     </div>
 
     
@@ -132,7 +119,7 @@ include __DIR__ . '/../../includes/header.php';
                         <th>Date & Time</th>
                         <th>Lead Surgeon</th>
                         <th>Anaesthetist</th>
-                        <th>Status</th>
+                      
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -159,19 +146,7 @@ include __DIR__ . '/../../includes/header.php';
                         </td>
                         <td><?= htmlspecialchars($op['surgeon_name']) ?></td>
                         <td><?= $op['anaesthetist_name'] ? htmlspecialchars($op['anaesthetist_name']) : '<span style="color:var(--muted)">–</span>' ?></td>
-                        <td><?php
-                            $badgeMap = [
-                                'scheduled'   => 'badge-info',
-                                'confirmed'   => 'badge-success',
-                                'in_progress' => 'badge-warning',
-                                'completed'   => 'badge-success',
-                                'cancelled'   => 'badge-danger',
-                                'transferred' => 'badge-neutral',
-                            ];
-                            $cls = $badgeMap[$op['status']] ?? 'badge-neutral';
-                            ?>
-                            <span class="badge <?= $cls ?>"><?= ucfirst(str_replace('_', ' ', $op['status'])) ?></span>
-                        </td>
+                      
                         <td>
                             <div style="display:flex;gap:6px;flex-wrap:wrap">
                                 <a href="operation_details.php?id=<?= $op['operation_id'] ?>" class="btn btn-sm btn-secondary">View</a>

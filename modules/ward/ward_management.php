@@ -51,27 +51,24 @@ include __DIR__ . '/../../includes/sidebar.php';
             <p>Overview of all rooms, admissions, and patient stays</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <?php if ($role === 'reception'): ?>
-               
-                <a href="admission_request.php" class="btn btn-primary">New Admission Request</a>
-            <?php else: ?>
+           
                
                 <a href="room_management.php" class="btn btn-primary">Manage Rooms</a>
-            <?php endif; ?>
+          
         </div>
     </div>
 
     <!-- Stat Cards -->
     <div class="stat-grid">
         <div class="stat-card">
-            <div class="stat-icon blue">🛏️</div>
+            <div class="stat-icon blue"></div>
             <div>
                 <div class="stat-label">Total Rooms</div>
                 <div class="stat-value"><?= $roomStats['total_rooms'] ?? 0 ?></div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon green">✅</div>
+            <div class="stat-icon green"></div>
             <div>
                 <div class="stat-label">Available</div>
                 <div class="stat-value"><?= $roomStats['available_rooms'] ?? 0 ?></div>
@@ -81,19 +78,7 @@ include __DIR__ . '/../../includes/sidebar.php';
        
     </div>
 
-    <!-- Quick Actions -->
-    <?php if ($role === 'reception'): ?>
-    <div class="card" style="margin-bottom:24px">
-        <div class="card-header"><h3 class="card-title">⚡ Quick Actions</h3></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;padding:16px">
-            <a href="admission_request.php" class="btn btn-primary">New Admission Request</a>
-            <a href="approved_admissions.php" class="btn btn-secondary">Assign Room to Approved</a>
-            <a href="admissions.php" class="btn btn-secondary">Current Inpatients</a>
-            <a href="discharge.php" class="btn btn-secondary" style="background:var(--warning);color:#fff;border-color:var(--warning)">Discharge Patient</a>
-            <a href="newborn.php" class="btn btn-secondary" style="background:#8b5cf6;color:#fff;border-color:#8b5cf6">Newborn Records</a>
-        </div>
-    </div>
-    <?php endif; ?>
+   
 
     <!-- Room Availability by Type -->
     <div class="card" style="margin-bottom:24px">

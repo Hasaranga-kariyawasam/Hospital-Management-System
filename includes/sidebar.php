@@ -22,7 +22,7 @@ $role = $_SESSION['role'] ?? 'guest';
                 <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php">Theatre</a></li>
                
                 <li><a href="/Web/Hospital-Management-System/modules/billing/billing_check.php">Appointment Billing</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/billing/theatre_billing.php">Theater Billing</a></li>
+       
                 
             </ul>
         </div>
@@ -50,7 +50,7 @@ $role = $_SESSION['role'] ?? 'guest';
               
                 <li><a href="/Web/Hospital-Management-System/modules/ward/admission_request.php">Admissions</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/billing/billing_check.php">Appointment Billing</a></li>
-                <li><a href="/Web/Hospital-Management-System/modules/billing/theatre_billing.php">Theater Billing</a></li>
+               
             </ul>
         </div>
 

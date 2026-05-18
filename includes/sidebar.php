@@ -58,7 +58,7 @@ $role = $_SESSION['role'] ?? 'guest';
         <div class="sidebar-section">
             <div class="sidebar-heading">Pharmacy</div>
             <ul class="sidebar-menu">
-                <li><a href="/Web/Hospital-Management-System/modules/pharmacy/pharmacy_queue.php">Dispensing Queue</a></li>
+                <li><a href="/Web/Hospital-Management-System/modules/pharmacy/pharmacist_portal.php">Dispensing Queue</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/pharmacy/drug_catalog.php">Drug Catalogue</a></li>
             </ul>
         </div>

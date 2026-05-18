@@ -316,7 +316,7 @@ include __DIR__ . '/../../includes/header.php';
     <!-- Header -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
-            <h1 style="font-size: 28px; font-weight: 700;">🚑 Driver Dashboard</h1>
+            <h1 style="font-size: 28px; font-weight: 700;">Driver Dashboard</h1>
             <p style="color: #6b7280; margin-top: 4px;">
                 Welcome back, <?= htmlspecialchars($driver['full_name']) ?>
             </p>
@@ -350,13 +350,13 @@ include __DIR__ . '/../../includes/header.php';
 
     <!-- Update Status -->
     <div class="status-card">
-        <h3 style="margin-bottom: 16px;">📋 Update Your Status</h3>
+        <h3 style="margin-bottom: 16px;">Update Your Status</h3>
         <form method="POST" style="display: flex; gap: 12px; align-items: center;">
             <select name="status" style="padding: 10px 16px; border-radius: 8px; border: none; font-family: inherit;">
-                <option value="available" <?= $driver['status'] == 'available' ? 'selected' : '' ?>>✅ Available for Dispatch</option>
-                <option value="on_duty" <?= $driver['status'] == 'on_duty' ? 'selected' : '' ?>>🚑 On Duty / Responding</option>
-                <option value="off_duty" <?= $driver['status'] == 'off_duty' ? 'selected' : '' ?>>⏸️ Off Duty</option>
-                <option value="on_leave" <?= $driver['status'] == 'on_leave' ? 'selected' : '' ?>>🌴 On Leave</option>
+                <option value="available" <?= $driver['status'] == 'available' ? 'selected' : '' ?>>Available for Dispatch</option>
+                <option value="on_duty" <?= $driver['status'] == 'on_duty' ? 'selected' : '' ?>>On Duty / Responding</option>
+                <option value="off_duty" <?= $driver['status'] == 'off_duty' ? 'selected' : '' ?>>Off Duty</option>
+                <option value="on_leave" <?= $driver['status'] == 'on_leave' ? 'selected' : '' ?>>On Leave</option>
             </select>
             <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
         </form>
@@ -366,7 +366,7 @@ include __DIR__ . '/../../includes/header.php';
     <?php if ($active): ?>
     <div class="emergency-card emergency-critical">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h2 style="color: #dc2626;">🚨 ACTIVE EMERGENCY RESPONSE</h2>
+            <h2 style="color: #dc2626;">ACTIVE EMERGENCY RESPONSE</h2>
             <span class="status-badge status-on_duty">In Progress</span>
         </div>
         <div class="info-grid">
@@ -380,11 +380,11 @@ include __DIR__ . '/../../includes/header.php';
             </div>
             <div class="info-item">
                 <div class="info-label">Location / Address</div>
-                <div class="info-value">📍 <?= htmlspecialchars($active['patient_address'] ?: 'Address provided on dispatch') ?></div>
+                <div class="info-value"><?= htmlspecialchars($active['patient_address'] ?: 'Address provided on dispatch') ?></div>
             </div>
             <div class="info-item">
                 <div class="info-label">Contact Number</div>
-                <div class="info-value">📞 <a href="tel:<?= $active['contact_number'] ?>"><?= htmlspecialchars($active['contact_number']) ?></a></div>
+                <div class="info-value"><a href="tel:<?= $active['contact_number'] ?>"><?= htmlspecialchars($active['contact_number']) ?></a></div>
             </div>
             <div class="info-item">
                 <div class="info-label">Conscious Status</div>
@@ -397,7 +397,7 @@ include __DIR__ . '/../../includes/header.php';
         </div>
         <form method="POST">
             <input type="hidden" name="emergency_id" value="<?= $active['emergency_id'] ?>">
-            <button type="submit" name="complete_emergency" class="btn btn-success">✅ Mark as Completed / Patient Delivered</button>
+            <button type="submit" name="complete_emergency" class="btn btn-success">Mark as Completed / Patient Delivered</button>
         </form>
     </div>
     <?php endif; ?>
@@ -405,7 +405,7 @@ include __DIR__ . '/../../includes/header.php';
     <!-- Pending Requests -->
     <?php if ($driver['status'] === 'available' && !$active && !empty($pendingRequests)): ?>
     <div style="margin-top: 24px;">
-        <h2 style="margin-bottom: 16px;">📢 New Emergency Requests</h2>
+        <h2 style="margin-bottom: 16px;">New Emergency Requests</h2>
         <div class="request-list">
             <?php foreach ($pendingRequests as $req): ?>
             <div class="request-item">
@@ -413,8 +413,8 @@ include __DIR__ . '/../../includes/header.php';
                     <div>
                         <span style="font-size: 24px; margin-right: 8px;">
                             <?php
-                            $icons = ['cardiac'=>'❤️', 'accident'=>'🚗', 'breathing'=>'🫁', 'stroke'=>'🧠', 'burn'=>'🔥', 'poisoning'=>'☠️', 'fracture'=>'🦴', 'other'=>'🚨'];
-                            echo $icons[$req['emergency_type']] ?? '🚨';
+                            $icons = ['cardiac'=>'', 'accident'=>'', 'breathing'=>'', 'stroke'=>'', 'burn'=>'', 'poisoning'=>'', 'fracture'=>'', 'other'=>''];
+                            echo $icons[$req['emergency_type']] ?? '';
                             ?>
                         </span>
                         <strong style="font-size: 18px; color: #dc2626;"><?= $typeLabels[$req['emergency_type']] ?? $req['emergency_type'] ?></strong>
@@ -437,7 +437,7 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
                 <form method="POST" style="margin-top: 16px;">
                     <input type="hidden" name="emergency_id" value="<?= $req['emergency_id'] ?>">
-                    <button type="submit" name="accept_emergency" class="btn btn-primary">✅ Accept & Respond</button>
+                    <button type="submit" name="accept_emergency" class="btn btn-primary">Accept & Respond</button>
                 </form>
             </div>
             <?php endforeach; ?>
@@ -445,7 +445,7 @@ include __DIR__ . '/../../includes/header.php';
     </div>
     <?php elseif ($driver['status'] === 'available' && !$active && empty($pendingRequests)): ?>
     <div class="emergency-card" style="text-align: center;">
-        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+        <div style="font-size: 48px; margin-bottom: 16px;"></div>
         <h3>No Pending Requests</h3>
         <p style="color: #6b7280; margin-top: 8px;">You're available. New emergency requests will appear here.</p>
     </div>
@@ -454,7 +454,7 @@ include __DIR__ . '/../../includes/header.php';
     <!-- History -->
     <?php if (!empty($historyList)): ?>
     <div style="margin-top: 32px;">
-        <h2 style="margin-bottom: 16px;">📜 Recent Dispatch History</h2>
+        <h2 style="margin-bottom: 16px;">Recent Dispatch History</h2>
         <div class="history-table">
             <table>
                 <thead>

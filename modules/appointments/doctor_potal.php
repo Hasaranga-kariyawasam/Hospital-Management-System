@@ -93,7 +93,7 @@ include '../../includes/sidebar.php';
             <p>Welcome back, Dr. <?php echo htmlspecialchars($doctorName); ?> &mdash; <?php echo htmlspecialchars($specialization); ?> &bull; <?php echo date('l, d F Y'); ?></p>
         </div>
         <div class="flex gap-12 items-center">
-            <a href="appointments.php" class="btn btn-secondary"><span class="icon">📋</span> All Appointments</a>
+            <a href="appointments.php" class="btn btn-secondary"><span class="icon"></span> All Appointments</a>
         </div>
     </div>
 

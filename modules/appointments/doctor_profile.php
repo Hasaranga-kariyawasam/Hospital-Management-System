@@ -149,7 +149,7 @@ include '../../includes/sidebar.php';
     <?php if (!empty($errors)): ?>
         <div class="alert alert-danger">
             <?php foreach ($errors as $e): ?>
-                <div>⚠️ <?php echo htmlspecialchars($e); ?></div>
+                <div> <?php echo htmlspecialchars($e); ?></div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>

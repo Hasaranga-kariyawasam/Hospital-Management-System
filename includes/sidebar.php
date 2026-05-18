@@ -34,11 +34,11 @@ $role = $_SESSION['role'] ?? 'guest';
                
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/doctor_appointments.php">My Schedule</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/appointments/appointments.php">Appointments</a></li>
-                 <li><a href="/Web/Hospital-Management-System/view_doctors.php">View Doctors</a></li>
+              
                 <li><a href="/Web/Hospital-Management-System/modules/theatre/theatre.php">Operations</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/pharmacy/doctor_prescription.php">Prescriptions</a></li>
                 <li><a href="/Web/Hospital-Management-System/modules/ward/doctor_admission_review.php">Admission Requests </a></li>
-                <li><a href="/Web/Hospital-Management-System/view_doctors.php">View Doctors</a></li>
+                
             </ul>
         </div>
 
@@ -77,11 +77,7 @@ $role = $_SESSION['role'] ?? 'guest';
                 Book Appointment
                 </a>
             </li>
-            <li>
-                <a href="/Web/Hospital-Management-System/modules/emergency/request_ambulance.php">
-                Ambulance
-                </a>
-            </li>
+            
             <li>
                 <a href="/Web/Hospital-Management-System/modules/Theatre/patient_theatre.php">
                 Operations

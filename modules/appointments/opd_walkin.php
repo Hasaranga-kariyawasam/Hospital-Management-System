@@ -340,7 +340,7 @@ function opdLoadSlots() {
         return;
     }
     document.getElementById('opdSlotsContainer').innerHTML =
-        '<p style="color:var(--muted);font-size:13px;">⏳ Loading slots…</p>';
+        '<p style="color:var(--muted);font-size:13px;">Loading slots…</p>';
 
     fetch(`get_slots.php?doctor_id=${did}&date=${date}`)
         .then(r => r.json())
@@ -361,7 +361,7 @@ function opdRenderSlots(data) {
         return;
     }
     if (!data.slots || data.slots.length === 0) {
-        container.innerHTML = '<p style="color:var(--muted);font-size:13px;">😔 No schedule for this day.</p>';
+        container.innerHTML = '<p style="color:var(--muted);font-size:13px;">No schedule for this day.</p>';
         return;
     }
 

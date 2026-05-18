@@ -144,17 +144,17 @@ include '../../includes/sidebar.php';
     background:<?= $flashType==='success'?'var(--success-light)':($flashType==='warning'?'var(--warning-light)':'var(--danger-light)') ?>;
     color:<?= $flashType==='success'?'var(--success)':($flashType==='warning'?'var(--warning)':'var(--danger)') ?>;
     border:1px solid <?= $flashType==='success'?'#a7f3d0':($flashType==='warning'?'#fcd34d':'#fca5a5') ?>;">
-    <?= $flashType==='success'?'✅':($flashType==='warning'?'⚠️':'❌') ?> <?= htmlspecialchars($flashMsg) ?>
+    <?= $flashType==='success'?'':($flashType==='warning'?'':'') ?> <?= htmlspecialchars($flashMsg) ?>
 </div>
 <?php endif; ?>
 
 <!-- Stats -->
 <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
     <?php foreach ([
-        ['📅','Total',     (int)$stats['total'],     'blue'],
-        ['⏳','Pending',   (int)$stats['pending'],   'yellow'],
-        ['✅','Confirmed', (int)$stats['confirmed'], 'green'],
-        ['🏁','Completed', (int)$stats['completed'], 'blue'],
+        ['','Total',     (int)$stats['total'],     'blue'],
+        ['','Pending',   (int)$stats['pending'],   'yellow'],
+        ['','Confirmed', (int)$stats['confirmed'], 'green'],
+        ['','Completed', (int)$stats['completed'], 'blue'],
     ] as [$icon,$label,$val,$cls]): ?>
     <div class="stat-card">
         <div class="stat-icon <?= $cls ?>"><?= $icon ?></div>

@@ -12,26 +12,12 @@ require_once __DIR__ . '/../../includes/role_check.php';
 $pageTitle  = 'Theatre Schedule';
 $useSidebar = true;
 
-// ── Filters ──────────────────────────────────────────────────
-$filterDate    = $_GET['date']    ?? '';
-$filterTheatre = $_GET['theatre'] ?? '';
-$filterStatus  = $_GET['status']  ?? '';
+
 
 $where  = ['1=1'];
 $params = [];
 
-if ($filterDate !== '') {
-    $where[]  = 'DATE(o.scheduled_at) = ?';
-    $params[] = $filterDate;
-}
-if ($filterTheatre !== '') {
-    $where[]  = 'o.theatre_number = ?';
-    $params[] = (int)$filterTheatre;
-}
-if ($filterStatus !== '') {
-    $where[]  = 'o.status = ?';
-    $params[] = $filterStatus;
-}
+
 
 $sql = "
     SELECT
@@ -83,7 +69,7 @@ include __DIR__ . '/../../includes/header.php';
             <p>Manage and view all scheduled operations</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <a href="calendar.php" class="btn btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendar View</a>
+            
             <a href="create_operation.php" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Schedule Operation</a>
         </div>
     </div>
@@ -120,41 +106,7 @@ include __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card" style="margin-bottom:24px">
-        <form method="GET" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
-            <div class="form-group" style="margin:0;flex:1;min-width:150px">
-                <label class="form-label">Date</label>
-                <input type="date" name="date" class="form-control"
-                       value="<?= htmlspecialchars($filterDate) ?>">
-            </div>
-            <div class="form-group" style="margin:0;flex:1;min-width:150px">
-                <label class="form-label">Theatre</label>
-                <select name="theatre" class="form-control">
-                    <option value="">All Theatres</option>
-                    <option value="1" <?= $filterTheatre === '1' ? 'selected' : '' ?>>Theatre 1 – General</option>
-                    <option value="2" <?= $filterTheatre === '2' ? 'selected' : '' ?>>Theatre 2 – Emergency</option>
-                    <option value="3" <?= $filterTheatre === '3' ? 'selected' : '' ?>>Theatre 3 – Labour</option>
-                    <option value="4" <?= $filterTheatre === '4' ? 'selected' : '' ?>>Theatre 4 – Minor</option>
-                </select>
-            </div>
-            <div class="form-group" style="margin:0;flex:1;min-width:150px">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-control">
-                    <option value="">All Statuses</option>
-                    <option value="scheduled"   <?= $filterStatus === 'scheduled'   ? 'selected' : '' ?>>Scheduled</option>
-                    <option value="confirmed"   <?= $filterStatus === 'confirmed'   ? 'selected' : '' ?>>Confirmed</option>
-                    <option value="in_progress" <?= $filterStatus === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                    <option value="completed"   <?= $filterStatus === 'completed'   ? 'selected' : '' ?>>Completed</option>
-                    <option value="cancelled"   <?= $filterStatus === 'cancelled'   ? 'selected' : '' ?>>Cancelled</option>
-                </select>
-            </div>
-            <div style="display:flex;gap:8px">
-                <button type="submit" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Filter</button>
-                <a href="theatre.php" class="btn btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Clear</a>
-            </div>
-        </form>
-    </div>
+    
 
     <!-- Operations Table -->
     <div class="card">
@@ -223,9 +175,7 @@ include __DIR__ . '/../../includes/header.php';
                         <td>
                             <div style="display:flex;gap:6px;flex-wrap:wrap">
                                 <a href="operation_details.php?id=<?= $op['operation_id'] ?>" class="btn btn-sm btn-secondary">View</a>
-                                <?php if (in_array($op['status'], ['scheduled', 'confirmed', 'in_progress'])): ?>
-                                    <a href="post_op_update.php?id=<?= $op['operation_id'] ?>" class="btn btn-sm btn-success">Update</a>
-                                <?php endif; ?>
+                               
                             </div>
                         </td>
                     </tr>

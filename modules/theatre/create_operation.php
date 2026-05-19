@@ -15,16 +15,13 @@ $useSidebar = true;
 $error   = '';
 $success = '';
 
-// ── Load patients ─────────────────────────────────────────────
 $patients = $pdo->query("
     SELECT p.patient_id, u.full_name, p.nic
     FROM patients p JOIN users u ON u.user_id = p.user_id
     ORDER BY u.full_name
 ")->fetchAll();
 
-// ── Load doctors ──────────────────────────────────────────────
-// surgeon_id / anaesthetist_id / assistant_doctor_id in theatre_operations
-// all store users.user_id — so we select u.user_id here, not d.doctor_id
+
 $doctors = $pdo->query("
     SELECT u.user_id, u.full_name, d.specialization
     FROM doctors d JOIN users u ON u.user_id = d.user_id
@@ -32,7 +29,7 @@ $doctors = $pdo->query("
     ORDER BY u.full_name
 ")->fetchAll();
 
-// ── Handle POST ───────────────────────────────────────────────
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $patientId       = (int)($_POST['patient_id']       ?? 0);
     $operationType   = trim($_POST['operation_type']    ?? '');
@@ -256,28 +253,7 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
 
-            <!-- Status Flow -->
-            <div class="card">
-                <div class="card-header" style="margin-bottom:14px;padding-bottom:12px">
-                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Status Flow</h3>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-                    <?php
-                    $statuses = [
-                        ['Scheduled','badge-info','Operation booked'],
-                        ['Confirmed','badge-success','Ready and approved'],
-                        ['In Progress','badge-warning','Surgery running'],
-                        ['Completed','badge-success','Surgery finished'],
-                        ['Transferred','badge-neutral','Patient moved to ward'],
-                    ];
-                    foreach ($statuses as [$s, $cls, $desc]): ?>
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <span class="badge <?= $cls ?>" style="width:90px;justify-content:center"><?= $s ?></span>
-                        <span style="color:var(--muted)"><?= $desc ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+          
         </div>
 
     </div><!-- end grid -->

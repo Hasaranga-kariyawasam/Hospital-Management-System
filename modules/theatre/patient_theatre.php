@@ -175,7 +175,7 @@ include '../../includes/sidebar.php';
     </div>
 
     <div class="calendar-card">
-        <h3 style="color: var(--primary); margin-top: 0;">Surgery Calendar - May 2026</h3>
+        <h3 style="color: var(--primary); margin-top: 0;">Surgery Calendar - June 2026</h3>
         <div class="calendar-grid">
             <div style="font-weight:600; color:#888;">MON</div>
             <div style="font-weight:600; color:#888;">TUE</div>
@@ -205,7 +205,7 @@ include '../../includes/sidebar.php';
 
             for ($day = 1; $day <= 31; $day++) {
                 $class = 'day';
-                if ($day == 14) $class .= ' active';
+                if ($day == 19) $class .= ' active';
                 if (in_array($day, [5, 13, 20])) $class .= ' has-event';
                 echo "<div class='$class " .(in_array($day,$date_arr)? 'scheduled' :'') ." ' id='$day'>$day</div>";
             }

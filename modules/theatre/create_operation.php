@@ -15,16 +15,13 @@ $useSidebar = true;
 $error   = '';
 $success = '';
 
-// ── Load patients ─────────────────────────────────────────────
 $patients = $pdo->query("
     SELECT p.patient_id, u.full_name, p.nic
     FROM patients p JOIN users u ON u.user_id = p.user_id
     ORDER BY u.full_name
 ")->fetchAll();
 
-// ── Load doctors ──────────────────────────────────────────────
-// surgeon_id / anaesthetist_id / assistant_doctor_id in theatre_operations
-// all store users.user_id — so we select u.user_id here, not d.doctor_id
+
 $doctors = $pdo->query("
     SELECT u.user_id, u.full_name, d.specialization
     FROM doctors d JOIN users u ON u.user_id = d.user_id
@@ -32,7 +29,7 @@ $doctors = $pdo->query("
     ORDER BY u.full_name
 ")->fetchAll();
 
-// ── Handle POST ───────────────────────────────────────────────
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $patientId       = (int)($_POST['patient_id']       ?? 0);
     $operationType   = trim($_POST['operation_type']    ?? '');

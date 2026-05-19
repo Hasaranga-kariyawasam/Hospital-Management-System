@@ -42,6 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isConscious    = $consciousMap[trim($_POST['is_conscious'] ?? '')] ?? null;
     $assistance     = $assistMap[trim($_POST['assistance_on_site'] ?? '')] ?? null;
 
+    // Basic validation
+    if (!$patientName || !$patientAddress || !$contactNumber) {
+        echo json_encode(['ok' => false, 'msg' => 'Please fill in all required fields']);
+        exit;
+    }
+
     if (!$contactNumber || !$emergencyType || !$isConscious || !$assistance) {
         echo json_encode(['ok' => false, 'msg' => 'Missing or invalid fields']);
         exit;

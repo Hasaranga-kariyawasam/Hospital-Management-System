@@ -8,7 +8,7 @@ require_once '../../includes/session_check.php';
 require_once '../../config/db_config.php';
 
 $message     = '';
-$messageType = 'success'; // 'success' | 'error'
+$messageType = 'success'; 
 
 // ── Resolve logged-in doctor ──────────────────────────────────────────────────
 $user_id = (int)$_SESSION['user_id'];
@@ -81,15 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $doctor_id > 0) {
     }
 }
 
-// ── Fetch existing weekly schedule for this doctor ────────────────────────────
-$schedStmt = $pdo->prepare(
-    "SELECT day_of_week, start_time, end_time, slot_duration
-     FROM doctor_schedules
-     WHERE doctor_id = :did
-     ORDER BY day_of_week, start_time"
-);
-$schedStmt->execute([':did' => $doctor_id]);
-$existingSchedule = $schedStmt->fetchAll();
+
 
 $dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -107,10 +99,8 @@ include '../../includes/sidebar.php';
     <!-- ── Flash message ── -->
     <?php if ($message !== ''): ?>
         <div class="mb-6 flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-medium
-            <?= $messageType === 'success'
-                ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                : 'bg-red-50 border border-red-200 text-red-700' ?>">
-            <i class="fas <?= $messageType === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle' ?>"></i>
+            <?= $messageType === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-red-50 border border-red-200 text-red-700' ?>">
+          
             <?= htmlspecialchars($message) ?>
         </div>
     <?php endif; ?>
@@ -119,13 +109,10 @@ include '../../includes/sidebar.php';
     <div class="page-header">
         <div class="page-header-title">
             <h2>Plan Your Availability</h2>
-            <p>Dr. <?= htmlspecialchars($doctor_name) ?>
-               <?php if ($specialization): ?>&bull; <?= htmlspecialchars($specialization) ?><?php endif; ?>
-               &mdash; <?= date('l, d F Y') ?></p>
+            <p>Dr. <?= htmlspecialchars($doctor_name) ?></P>
+              
         </div>
-        <a href="doctor_potal.php" class="btn btn-secondary">
-            My Portal
-        </a>
+       
     </div>
 
     <!-- ── Main grid ── -->
@@ -185,7 +172,7 @@ include '../../includes/sidebar.php';
                 <input type="hidden" name="total_slots_input" id="hidden_slots">
 
                 <button type="submit" class="btn btn-primary" style="width:100%; padding:14px; font-size:15px;">
-                    <i class="fas fa-save" style="margin-right:8px;"></i>
+                    
                     Confirm Schedule
                 </button>
 
@@ -198,47 +185,14 @@ include '../../includes/sidebar.php';
             <!-- Slot counter -->
             <div class="card" style="padding:28px; text-align:center;">
                 <p style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 10px;">Available Slots</p>
-                <div id="display" style="font-size:72px;font-weight:800;color:#4f46e5;line-height:1;">16</div>
+                <div id="display" style="font-size:72px;font-weight:800;color:#4f46e5;line-height:1;">15</div>
                 <p style="font-size:13px;color:var(--muted);margin:10px 0 0;">Patients can book for this session</p>
             </div>
 
-            <!-- Pro tip -->
-            <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:var(--radius);padding:24px;color:#fff;position:relative;overflow:hidden;">
-                <i class="fas fa-user-md" style="position:absolute;bottom:-16px;right:-16px;font-size:90px;color:rgba(255,255,255,0.1);"></i>
-                <div style="position:relative;">
-                    <h4 style="font-size:1.1rem;font-weight:700;font-style:italic;margin:0 0 8px;">Pro Tip</h4>
-                    <p style="font-size:13px;color:rgba(255,255,255,0.9);line-height:1.7;margin:0;">
-                        Add 5 extra minutes between patients for cleaning &amp; notes to stay on schedule safely.
-                    </p>
-                </div>
-            </div>
+           
 
-            <!-- Existing schedule summary -->
-            <?php if ($existingSchedule): ?>
-            <div class="card" style="padding:22px;">
-                <p style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin:0 0 14px;">Current Weekly Schedule</p>
-                <?php foreach ($existingSchedule as $row): ?>
-                    <?php
-                        $s = substr($row['start_time'], 0, 5);
-                        $e = substr($row['end_time'],   0, 5);
-                        $d = (int)$row['slot_duration'];
-                        $mins = (strtotime("1970-01-01 $e") - strtotime("1970-01-01 $s")) / 60;
-                        $slots = $mins > 0 ? floor($mins / $d) : 0;
-                    ?>
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-light);">
-                        <span style="font-weight:600;font-size:13px;color:var(--text-dark);">
-                            <?= $dayNames[(int)$row['day_of_week']] ?>
-                        </span>
-                        <span style="font-size:12px;color:var(--muted);">
-                            <?= $s ?> – <?= $e ?>
-                        </span>
-                        <span style="font-size:12px;font-weight:700;color:#4f46e5;">
-                            <?= $slots ?> slots
-                        </span>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+        
+            
 
         </div>
     </div>
